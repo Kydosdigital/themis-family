@@ -1,6 +1,6 @@
 # 34. Open Questions
 
-**Status:** Phase 2 draft (amended). Every question here blocks a specific downstream document until resolved. Questions are not listed in priority order within their category; Section 5 gives the priority list for Phase 2 readiness. A new §"Questions raised during Phase 2" is appended at the end.
+**Status:** Phase 2 amendments applied, Phase 3 starting. Every question here blocks a specific downstream document until resolved. Questions are not listed in priority order within their category.
 
 Format: ID | Question | Why it matters | Recommended default | Blocks
 
@@ -103,22 +103,35 @@ Remaining open items and their status:
 
 ## Questions raised during Phase 2
 
-**OQ-13.** Should V1's App Store listing target UK only, or a wider English-speaking region from day one?
-- *Why it matters:* Affects launch/marketing planning; no functional difference is anticipated.
-- *Recommended default:* UK-only listing initially, to keep support scope narrow; revisit post-validation.
-- *Blocks:* None for Phase 2/3; relevant to launch planning (Phase 7 / go-to-market, outside this spec's scope).
+**OQ-13. [RESOLVED — see DEC-23]** Should V1's App Store listing target UK only, or a wider English-speaking region from day one?
+- *Resolution:* UK-first launch: UK English, GBP, UK-focused onboarding/research/support assumptions. This is a launch/validation decision, not a permanent restriction; architecture must not unnecessarily block later international expansion.
+- *Blocks:* None — resolved.
 
-**OQ-14.** Should a single-child, single-guardian household be documented as its own distinct persona/journey, given it is plausibly a large share of the real customer base, versus the richer two-child, two-guardian household used as the primary example?
-- *Why it matters:* If Phase 3–4 requirements are only exercised against the richer household, simpler-household edge cases (e.g., "what does the Guardian invite screen look like when there's no Guardian yet") could be under-specified.
-- *Resolution applied:* `04_USER_JOURNEYS.md` §4.1 now uses the single-child, single-guardian household as the onboarding journey specifically to cover this. No further action needed unless Phase 3 finds gaps.
-- *Blocks:* None currently — resolved by document structure.
+**OQ-14. [CLOSED]** Should a single-child, single-guardian household be documented as its own distinct persona/journey?
+- *Resolution:* No additional persona required. The single-child, single-guardian household remains explicitly represented in the onboarding journey (`04_USER_JOURNEYS.md` §4.1). Closed by founder confirmation, 2026-09-28.
+- *Blocks:* None.
 
-**OQ-15.** Does the app infer a child's UX segment (Child vs. Teen) from a stored date of birth, or does the parent explicitly select the segment label?
-- *Why it matters:* Affects the User data model (whether a precise child DOB is collected at all) and interacts with data-minimisation privacy principles (brief §"Privacy Principles").
-- *Recommended default:* Parent explicitly selects Child or Teen at setup, rather than the app deriving it from a stored DOB. A DOB is not required for V1's segment logic. Age band remains provisional per DEC-12, so parents can also change the segment later (e.g. moving a child from Child to Teen UX as they grow) without needing account deletion/recreation.
-- *Blocks:* `19_DATA_MODEL.md` (Phase 5) — the User entity's age/DOB-band field.
+**OQ-15. [RESOLVED — see DEC-24]** Does the app infer a child's UX segment from a stored date of birth, or does the parent explicitly select it?
+- *Resolution:* Parent explicitly selects "Child experience" or "Teen experience" during setup (no precise child DOB is collected for this purpose). Suggested copy: *"Choose the experience that best fits your child. You can change this later."* Bands (Child ~8–12, Teen ~13–15) are guidance only, changeable later without account deletion/recreation.
+- *Blocks (now unblocked):* `19_DATA_MODEL.md` (Phase 5) — the User entity does not require a precise DOB field for segment assignment.
 
-**OQ-16.** `05_HIGH_LEVEL_REQUIREMENTS.md` HLR-020 (onboarding must demonstrate one working rule before completion) is marked "Should," but the Risk Register (RISK-08) treats onboarding abandonment as high-likelihood/high-impact — is "Should" the right priority, or should this be elevated to "Must"?
-- *Why it matters:* A "Should" can be quietly deprioritised under schedule pressure; if this is really release-blocking, it should be visible as such.
-- *Recommended default:* Keep the formal priority as "Should" (it is a UX quality bar, not a strict functional gate — the app must work without it, just less well), but explicitly carry it into Phase 7's Definition of Done as a release-blocking acceptance item. Document this dual status rather than resolving it as a single flat priority.
-- *Blocks:* `38_DEFINITION_OF_DONE.md` (Phase 7) — needs to reflect this explicitly when written.
+**OQ-16. [RESOLVED — see DEC-25]** Should HLR-020 (onboarding demonstrates a working rule) be "Should" or "Must"?
+- *Resolution:* Elevated to **Must**, with an explicit two-stage completion model: **Account Creation Complete** (household/members created) is distinct from **Themis Protection Activated** (child-device authorisation valid, a rule target selected, a real test shield applied and successfully removed, and the resulting state verified). The parent sees an incomplete-setup state until Protection Activated is achieved.
+- *Blocks (now unblocked):* `05_HIGH_LEVEL_REQUIREMENTS.md` (HLR-020 updated), `38_DEFINITION_OF_DONE.md` (Phase 7 — should still reflect this as release-blocking).
+
+## Questions raised by the Phase 2 amendment round (2026-09-28)
+
+**OQ-17 [NEW].** What exactly is required to support shared-device scenarios (one iPad shared by siblings; parent and child sharing a device; a device signed into a parent's Apple Account; a device signed into one child's account but used by multiple children) — and is any of this feasible under Apple's Family Controls model, which is scoped per child Apple Account?
+- *Why it matters:* The original Child persona silently assumed shared-device usage, which may not be technically supportable the way parents expect (e.g. two children sharing one iPad might not get independently enforced rules). This is a real UK household pattern (siblings sharing a tablet is common) and a false assumption here could undermine the reliability positioning as badly as an enforcement bug.
+- *Recommended default:* Treat as OUT of V1 entirely. Canonical V1 assumption: each child has their own device signed into their own Child Apple Account within the family's Family Sharing group (DEC-26). Research and technical-spike shared-device scenarios separately, before any commitment, marketing claim, or UI affordance implying support.
+- *Blocks:* `03_PERSONAS.md` (already corrected), `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` and `16_DEVICE_ENFORCEMENT.md` (later phases) must state this limitation explicitly wherever device setup is described.
+
+**OQ-18 [NEW].** What is the simplest viable structure for the request-clarification mechanism (DEC-29) that stays clearly bounded and doesn't become messaging?
+- *Why it matters:* "Ask a follow-up question" needs a concrete, narrow interaction model before Phase 3's Requests and Exceptions Specification can be written.
+- *Recommended default:* A single structured clarification prompt from the approver (free-text, but capped in length, attached only to that specific pending request) and a single structured reply from the child/teen; once a reply is given, the approver must then approve/decline/grant a duration — the thread does not continue indefinitely. To be formalised in `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` (Phase 3).
+- *Blocks:* `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`
+
+**OQ-19 [NEW].** What are the exact staleness thresholds before a "Protected" status must downgrade to "Sync Pending" or "Device Offline"?
+- *Why it matters:* DEC-27 establishes the principle (no implied real-time state, must show last-verified time, stale state must not display as Protected indefinitely) but not the specific time thresholds.
+- *Recommended default:* Defer exact thresholds to `16_DEVICE_ENFORCEMENT.md` (Phase 5), informed by the technical spike's findings on realistic sync frequency. Do not guess a number in Phase 3.
+- *Blocks:* `16_DEVICE_ENFORCEMENT.md` (Phase 5)

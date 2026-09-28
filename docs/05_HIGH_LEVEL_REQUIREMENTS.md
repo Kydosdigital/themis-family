@@ -1,6 +1,6 @@
 # 05. High-Level Requirements
 
-**Status:** Phase 2 draft
+**Status:** Phase 2, amended 2026-09-28 per founder review (DEC-25, DEC-27, DEC-28, DEC-29, DEC-30)
 **Depends on:** `00_PRODUCT_OVERVIEW.md`, `02_SCOPE_AND_RELEASE_STRATEGY.md`, `03_PERSONAS.md`, `04_USER_JOURNEYS.md`
 
 Each requirement has an ID (HLR-###), is traceable to a decision or brief section, and will be decomposed into functional requirements (FR-###) in Phase 3. This is deliberately high-level; implementation detail belongs in later documents.
@@ -33,8 +33,8 @@ The system shall support, at minimum, Scheduled Rule, Deadline Lock, and Earn Fi
 - **Priority:** Must
 
 ## HLR-006. Verification Type
-The system shall require every task/condition to declare a Verification Type of either Parent Approval or Automatic Verification, and shall only permit Automatic Verification for system-verifiable conditions (timers, focus sessions).
-- **Source:** DEC-16
+The system shall require every task/condition to declare a Verification Type of either Parent Approval or Automatic Verification. Automatic Verification means Themis has deterministic system evidence that the configured condition completed (e.g. an in-app timer or in-app focus session successfully completing) — it must never be described or implied as proof that a real-world activity itself occurred (e.g. "15-minute reading timer completed" is verifiable; "the child read for 15 minutes" is not).
+- **Source:** DEC-16, narrowed by DEC-28
 - **Priority:** Must
 
 ## HLR-007. Approval workflow
@@ -48,8 +48,8 @@ The system shall never automatically unlock a restriction solely due to elapsed 
 - **Priority:** Must
 
 ## HLR-009. Requests and negotiation
-The system shall allow a child/teen to submit a request for extra time, a deadline extension, temporary app/website access, or an exception, with a stated reason, and shall allow an approver to approve (with a specific duration), partially approve, decline, or ask a follow-up question.
-- **Source:** Brief §"Requests and Negotiation System"
+The system shall allow a child/teen to submit a request for extra time, a deadline extension, temporary app/website access, or an exception, with a stated reason, and shall allow an approver to approve (with a specific duration), partially approve, decline, or request clarification. Clarification is a single structured, request-scoped exchange (one clarification prompt from the approver, one reply from the child/teen) and must not become unrestricted or open-ended parent/child messaging.
+- **Source:** Brief §"Requests and Negotiation System", constrained by DEC-29
 - **Priority:** Must
 
 ## HLR-010. Always Allowed / essential access
@@ -68,13 +68,13 @@ The system shall support blocking specific domains and website categories, in co
 - **Priority:** Must
 
 ## HLR-013. Protection status
-The system shall continuously assess and display enforcement health per child device, distinguishing at minimum: Protected, Needs Attention, and Protection Unavailable, and shall never display a reassuring status without a verified basis for it.
-- **Source:** Brief AC4, DEC-08
+The system shall display the most recently confirmed enforcement health per child device and shall never imply real-time or continuous assessment when the device has not recently checked in. Minimum V1 states: **Protected, Sync Pending, Device Offline, Needs Attention, Protection Unavailable**, each shown with a "Last verified: [time]" indicator where appropriate. A stale last-known-good state must not continue to display as Protected indefinitely; exact staleness thresholds are defined in the Device Enforcement specification (Phase 5, tracked as OQ-19). The system shall never display a reassuring status without a verified, sufficiently recent basis for it.
+- **Source:** Brief AC4, DEC-08, corrected by DEC-27
 - **Priority:** Must
 
 ## HLR-014. Offline-first enforcement
-The system shall cache active rules locally on each child device such that enforcement continues during a backend outage, and shall never silently remove a restriction due to loss of connectivity.
-- **Source:** Brief §"Local-first enforcement", DEC-15 (analogous safety principle)
+The system shall cache active rules and any temporary access grants (temporary access, extra time, Free Pass) locally on each child device, such that both initial enforcement and scheduled expiry/re-locking occur correctly during a backend outage, parent-device offline period, or push-notification failure. Re-locking at expiry must never depend on a second server-sent instruction arriving at the expiry moment. The system shall never silently remove a restriction due to loss of connectivity.
+- **Source:** Brief §"Local-first enforcement", DEC-15 (analogous safety principle), extended by DEC-30
 - **Priority:** Must
 
 ## HLR-015. Reporting
@@ -102,17 +102,33 @@ The system shall present a materially simpler, more visual interface to Child-se
 - **Source:** DEC-12
 - **Priority:** Must
 
-## HLR-020. Onboarding time-to-value
-The system shall demonstrate at least one working, tested rule to the parent before the end of onboarding.
-- **Source:** Brief §"Parent onboarding" Screen 10, RISK-08
-- **Priority:** Should (strong Should — directly tied to the onboarding-abandonment risk)
+## HLR-020. Onboarding time-to-value, with a two-stage completion model
+The system shall distinguish **Account Creation Complete** (household and member records created) from **Themis Protection Activated** (child-device authorisation is valid, at least one rule target has been selected, a real test shield has been applied, the test shield has been successfully removed, and the resulting state has been verified by the application). The parent shall see an explicit incomplete-setup state until Themis Protection Activated is achieved; the product must never describe protection as active before all five conditions are met.
+- **Source:** Brief §"Parent onboarding" Screen 10, RISK-08, elevated and refined by DEC-25
+- **Priority:** Must (elevated from Should — see DEC-25 and OQ-16, now resolved)
+
+## HLR-021. Launch region [NEW]
+The system shall launch UK-first: UK English, GBP pricing, and UK-focused onboarding, research and support assumptions. This is a launch/validation scope decision; the underlying architecture shall not unnecessarily prevent later international expansion.
+- **Source:** DEC-23
+- **Priority:** Must
+
+## HLR-022. Age-segment selection [NEW]
+The system shall let the parent explicitly select "Child experience" or "Teen experience" for each child during setup, without requiring a precise date of birth for this purpose. The parent shall be able to change this selection later without deleting or recreating the child's account.
+- **Source:** DEC-24
+- **Priority:** Must
+
+## HLR-023. Shared-device scenarios excluded from V1 [NEW]
+The system's V1 scope assumes one device per child, each signed into its own Child Apple Account within the family's Family Sharing group. The system shall not claim or imply support for shared-device scenarios (siblings sharing one iPad, a parent and child sharing a device, or a device signed into a different family member's Apple Account) until such scenarios are separately researched and technically validated.
+- **Source:** DEC-26
+- **Priority:** Must (as a scope/claims constraint)
+
+## HLR-024. No unverified platform-behaviour claims [NEW]
+The system's documentation, in-product copy, and error messaging shall describe Themis Family's own response to a failure or system event (e.g. loss of authorisation, sync failure) without asserting a specific unverified cause (e.g. "an iOS update caused this") unless that exact behaviour is explicitly documented and guaranteed by Apple.
+- **Source:** DEC-31
+- **Priority:** Must
 
 ---
 
 ## Traceability note
 
 This is a high-level list; the full Traceability Matrix (business goal → HLR → FR → user story → acceptance criteria → test scenario) is a Phase 7 deliverable (`32_TRACEABILITY_MATRIX.md`). Each HLR above already cites its originating decision or brief section so that later phases can build the matrix without re-deriving rationale.
-
-## Open items surfaced by this document
-
-**OQ-16 [NEW].** HLR-020 uses "Should" rather than "Must" because it is a UX quality bar, not a hard functional requirement — but the Risk Register (RISK-08) treats onboarding abandonment as a high-likelihood, high-impact risk. *Recommendation:* treat HLR-020 as a release-blocking acceptance criterion in practice (i.e., tested and signed off before launch) even though it is technically a "Should" in this document, since a technically "optional" but launch-blocking requirement should be visible as a Should here and enforced via Definition of Done in Phase 7. No further action needed now; flagged for Phase 7 consistency.

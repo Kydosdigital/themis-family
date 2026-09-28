@@ -1,7 +1,7 @@
 # 02. Scope and Release Strategy
 
-**Status:** Phase 2 draft
-**Depends on:** `00_PRODUCT_OVERVIEW.md`, `35_DECISION_LOG.md` (DEC-01, DEC-11 through DEC-20)
+**Status:** Phase 2, amended 2026-09-28 (UK-first launch confirmed — DEC-23)
+**Depends on:** `00_PRODUCT_OVERVIEW.md`, `35_DECISION_LOG.md` (DEC-01, DEC-11 through DEC-31)
 
 ---
 
@@ -62,7 +62,7 @@ This is not a Phase 2 deliverable; it is listed here because release sequencing 
 
 **RECOMMENDATION**, not yet founder-approved as a roadmap commitment:
 
-- **V1:** As defined in §2.2. Single market: UK.
+- **V1:** As defined in §2.2. Single market: UK (CONFIRMED, DEC-23 — UK English, GBP, UK-focused onboarding/research/support; a launch/validation choice, not a permanent restriction, and the architecture must not unnecessarily block later international expansion).
 - **V1.1 (candidate, not committed):** Second-guardian conflict refinements if V1 usage shows the "first valid decision wins" rule causing friction; reminder-cadence tuning based on real approval-delay data; expanded School Mode always-allowed presets based on OQ-07 research.
 - **V2 (candidate, not committed):** Personal Mode (only if V1 validates the core hypothesis and there is demonstrated demand); Android; expanded reporting if the Apple usage-entitlement spike (OQ-09/OQ-10) proves feasible and worth the added privacy surface.
 
@@ -78,4 +78,4 @@ Per the brief's own instruction, no feature is ready for engineering until: requ
 
 ## 2.6 Open items this document surfaces
 
-- **OQ-13 [NEW].** Should V1 explicitly commit to a UK-only launch in the App Store listing, or list more broadly (e.g. Ireland) from day one given no functional difference is anticipated? *Recommended default:* UK-only listing initially, to keep support scope and marketing narrow; revisit post-validation. *Blocks:* none for Phase 2; relevant to launch/marketing planning only.
+OQ-13 (launch region) was resolved by founder decision — see DEC-23 in `35_DECISION_LOG.md`. No open items remain from this document as of the 2026-09-28 amendment round.

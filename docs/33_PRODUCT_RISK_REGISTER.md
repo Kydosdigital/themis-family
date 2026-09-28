@@ -118,6 +118,20 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Technical lead
 - **Validation method:** Concurrency test simulating both guardians responding within the same second
 
+## RISK-17: Shared-device assumption mismatch (siblings/parent sharing one iPad)
+- **Likelihood:** Medium (a common UK household pattern, not yet validated against Apple's per-child-account model)
+- **Impact:** High — if parents expect shared-device enforcement to work and it doesn't, this directly damages the reliability positioning
+- **Mitigation:** V1 canonical assumption is one device per child Apple Account (DEC-26); explicitly exclude shared-device scenarios from V1 marketing and onboarding claims; research/spike separately per OQ-17 before any commitment.
+- **Owner:** Product/Technical lead
+- **Validation method:** Technical spike against Apple's Family Controls documentation and real multi-child households; App Store review/support ticket monitoring post-launch for shared-device complaints
+
+## RISK-18: Protection status implies more certainty than the system actually has
+- **Likelihood:** Medium
+- **Impact:** High — directly undermines the reliability/trust brand positioning (DEC-08) if a stale state is shown as "Protected"
+- **Mitigation:** DEC-27's expanded status set (Protected / Sync Pending / Device Offline / Needs Attention / Protection Unavailable) plus a "Last verified" timestamp; exact staleness thresholds to be defined in Phase 5 (`16_DEVICE_ENFORCEMENT.md`, tracked as OQ-19).
+- **Owner:** Product/Technical lead
+- **Validation method:** Explicit test scenarios forcing a device to go quiet and confirming the UI downgrades from Protected within the defined threshold
+
 ---
 
 ## Register maintenance note

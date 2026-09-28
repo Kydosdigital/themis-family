@@ -1,7 +1,7 @@
 # 03. Personas
 
-**Status:** Phase 2 draft
-**Depends on:** `00_PRODUCT_OVERVIEW.md` §1.3, `35_DECISION_LOG.md` DEC-12, DEC-14
+**Status:** Phase 2, amended 2026-09-28 (Aisha's device description corrected per DEC-26)
+**Depends on:** `00_PRODUCT_OVERVIEW.md` §1.3, `35_DECISION_LOG.md` DEC-12, DEC-14, DEC-26
 
 All personas below are ASSUMPTION-level composites built from the brief's own stated research (Ofcom, Pew, GOV.UK) and the founder's decisions, not from primary user interviews. **RECOMMENDATION:** validate with real UK parents and children/teens before Phase 3 requirements are treated as final (see `33_PRODUCT_RISK_REGISTER.md` RISK-06, RISK-08).
 
@@ -38,7 +38,7 @@ All personas below are ASSUMPTION-level composites built from the brief's own st
 ## 3.4 Child — "Aisha, 10"
 
 - **Role:** Child user, in the 8–12 UX segment.
-- **Context:** Uses a shared family iPad more than her own device. Motivated by simple, visual rewards; doesn't read long text.
+- **Context:** Uses an iPad signed into her own Child Apple Account within the family's Family Sharing group (corrected 2026-09-28, DEC-26 — the original draft described a shared family iPad, which is not a validated V1 configuration; see `34_OPEN_QUESTIONS.md` OQ-17 for shared-device scenarios, explicitly out of V1). Motivated by simple, visual rewards; doesn't read long text.
 - **Goals:** Know clearly what she needs to do to get her games back. Not be confused or scared by a locked screen.
 - **Frustrations:** Not understanding why something suddenly stopped working; forgetting what task was required.
 - **What she needs from Themis Family:** Large, simple visuals; a single clear next step; a tone that's encouraging, not punitive.

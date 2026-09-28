@@ -1,7 +1,7 @@
 # Themis Family — Product Documentation
 
 **Repository:** [Kydosdigital/themis-family](https://github.com/Kydosdigital/themis-family)
-**Status: PHASE 1 OF 7 COMPLETE (as amended 2026-09-28).** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
+**Status: PHASE 2 OF 7 COMPLETE AND FOUNDER-APPROVED (amended 2026-09-28); PHASE 3 IN PROGRESS.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
 
 ---
 
@@ -24,20 +24,20 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 |---|---|
 | 00_PRODUCT_OVERVIEW.md | Complete (Phase 1, amended 2026-09-28) |
 | 01_PRODUCT_VISION_AND_GOALS.md | Complete (Phase 1, amended 2026-09-28) |
-| 02_SCOPE_AND_RELEASE_STRATEGY.md | Complete (Phase 2) |
-| 03_PERSONAS.md | Complete (Phase 2) |
-| 04_USER_JOURNEYS.md | Complete (Phase 2) |
-| 05_HIGH_LEVEL_REQUIREMENTS.md | Complete (Phase 2) |
-| 33_PRODUCT_RISK_REGISTER.md | Complete (Phase 1, amended 2026-09-28) — will grow in later phases |
+| 02_SCOPE_AND_RELEASE_STRATEGY.md | Complete (Phase 2, amended 2026-09-28 — approved) |
+| 03_PERSONAS.md | Complete (Phase 2, amended 2026-09-28 — approved) |
+| 04_USER_JOURNEYS.md | Complete (Phase 2, amended 2026-09-28 — approved) |
+| 05_HIGH_LEVEL_REQUIREMENTS.md | Complete (Phase 2, amended 2026-09-28 — approved) |
+| 33_PRODUCT_RISK_REGISTER.md | Complete (Phase 1+2, amended 2026-09-28) — will grow in later phases |
 | 34_OPEN_QUESTIONS.md | Complete (Phase 1+2, amended 2026-09-28) — will grow in later phases |
 | 35_DECISION_LOG.md | Complete (Phase 1+2, amended 2026-09-28) — will grow in later phases |
-| All other documents (06–32, 36–38) | Not yet started — awaiting founder review before Phase 3 |
+| All other documents (06–32, 36–38) | Phase 3 in progress |
 
 ## Phase plan
 
 1. **Phase 1 (complete, amended 2026-09-28):** Product Overview, Vision, Risks, Open Questions, Decision Log.
-2. **Phase 2 (complete, awaiting founder review):** Personas, User Journeys, Scope and Release Strategy, High-Level Requirements.
-3. **Phase 3:** Functional Requirements, Business Rules, Rule Engine Specification, Roles and Permissions.
+2. **Phase 2 (complete and founder-approved, amended 2026-09-28):** Personas, User Journeys, Scope and Release Strategy, High-Level Requirements.
+3. **Phase 3 (in progress):** Functional Requirements, Business Rules, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions.
 4. **Phase 4:** User Stories and Acceptance Criteria.
 5. **Phase 5:** Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour.
 6. **Phase 6:** Privacy and Child Safety, Security, Reporting and Analytics, Subscriptions and Billing, Admin and Support.
@@ -55,11 +55,11 @@ All five decisions that were blocking Phase 2 have been resolved by the founder 
 4. Parent non-response: no auto-unlock; honest "Waiting for approval" state, reminder, one child nudge.
 5. Task verification: formalised as a Verification Type field (Parent Approval or Automatic Verification).
 
-Phase 2 (Personas, User Journeys, Scope and Release Strategy, High-Level Requirements) is now **complete**. Per the founder's own process instruction, work stops here for review — Phase 3 does not begin automatically.
+Phase 2 was reviewed by the founder and approved subject to nine amendments (DEC-23 through DEC-31): launch region confirmed UK-first; age-segment selection is explicit (no child DOB collected) and changeable later; the onboarding working-rule requirement (HLR-020) is elevated from Should to Must, with a two-stage Account Creation Complete / Themis Protection Activated model; the Child persona's device assumption corrected (no shared-device support in V1); protection status corrected to avoid implying real-time certainty (expanded to five states with a "Last verified" indicator); Automatic Verification narrowed to what the system can actually prove; request "follow-up questions" constrained to a single bounded clarification exchange, not messaging; temporary access must expire locally, independent of backend/network availability; and documentation must not assert unverified Apple platform behaviour as fact. All nine are applied to the affected Phase 2 documents. **Phase 3 is now in progress.**
 
 ## Known contradictions / things to watch
 
-See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, and verification type. Still open going into Phase 3: rule conflict precedence (OQ-05), the definitive UK school-platform list (OQ-07), technical feasibility of cross-device usage reporting (OQ-09), the App and Website Usage entitlement decision (OQ-10), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12), and four new items raised during Phase 2 (OQ-13 through OQ-16 — App Store region, single-guardian household coverage, age-segment selection method, and the priority level of the onboarding-demonstrates-a-working-rule requirement). None of OQ-05 through OQ-16 block Phase 3 from starting, but the founder may want to weigh in first.
+See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, verification type, launch region, age-segment selection method, and the onboarding-must-verify-protection requirement. New from the amendment round: OQ-17 (shared-device scenarios — explicitly out of V1, needs separate research), OQ-18 (exact structure of the request-clarification mechanism — for Phase 3), OQ-19 (exact protection-status staleness thresholds — for Phase 5). Still open from earlier: rule conflict precedence (OQ-05), the definitive UK school-platform list (OQ-07), technical feasibility of cross-device usage reporting (OQ-09), the App and Website Usage entitlement decision (OQ-10), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12). None of these block Phase 3.
 
 ## Process note
 

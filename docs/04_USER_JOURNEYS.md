@@ -1,6 +1,6 @@
 # 04. User Journeys
 
-**Status:** Phase 2 draft
+**Status:** Phase 2, amended 2026-09-28 per founder review (DEC-24, DEC-25, DEC-28, DEC-31)
 **Depends on:** `03_PERSONAS.md`, `35_DECISION_LOG.md`
 
 Each journey states its persona(s), preconditions, steps, and the decisions/requirements it exercises. These are narrative walkthroughs, not acceptance criteria (those come in Phase 4) — but every step here must be traceable to a requirement in `05_HIGH_LEVEL_REQUIREMENTS.md` or a later functional requirement.
@@ -11,20 +11,18 @@ Each journey states its persona(s), preconditions, steps, and the decisions/requ
 
 **Persona:** A Household Owner with one child, no second guardian invited yet. (Addresses OQ-14: the simplest-case household.)
 
-1. Owner downloads Themis Family, creates an account.
+1. Owner downloads Themis Family, creates an account. **Account Creation Complete** is reached once the household and the Owner's own record exist — the app does not yet describe anything as protected.
 2. Onboarding asks: "What are you struggling with?" — Owner selects Homework.
-3. Owner is prompted to create the household and add their child (name, age segment inferred or selected: Child or Teen).
+3. Owner is prompted to create the household and add their child (name, and an explicit segment choice: "Choose the experience that best fits your child. You can change this later." — Child experience or Teen experience; no date of birth is collected for this purpose, per DEC-24).
 4. Owner is guided through Apple Family Sharing / Family Controls authorisation on the child's device, with plain-English explanation at each step.
 5. Owner selects apps/sites to control (e.g., Roblox, TikTok) via Apple's picker.
 6. Owner is offered a starter pattern: "Homework deadline" — selects it.
 7. Owner sets homework deadline (6:00 PM), selects Games as the controlled category, confirms School apps (auto-suggested) stay Always Allowed.
 8. Owner sets Verification Type for this rule: Parent Approval (default, shown as recommended for homework).
-9. App runs a test shield so the Owner sees the rule actually working before finishing onboarding.
+9. App runs a test shield, confirms the shield was successfully applied, then successfully removes it and verifies the resulting state. Only once all of this succeeds does the app show **Themis Protection Activated** — before this point, the household exists but is explicitly shown as not yet protected (DEC-25).
 10. Onboarding completes. Owner is not prompted to invite a second guardian at this stage (optional, deferred to Settings).
 
-**Requirements exercised:** DEC-12 (age segment selection), DEC-16 (Verification Type set at rule creation), DEC-18 (School apps auto-suggested as Always Allowed), brief's "test a shield" onboarding step.
-
-**Open point (OQ-15, new):** Does the app infer Child vs. Teen from date of birth, or does the parent explicitly pick the segment? *Recommended default:* Parent explicitly picks the segment label (Child/Teen) rather than the app inferring from DOB, since the brief prioritises data minimisation and this avoids collecting a precise child DOB unnecessarily (see brief's privacy principles). *Blocks:* `19_DATA_MODEL.md` (User entity's date-of-birth-band field).
+**Requirements exercised:** DEC-24 (explicit segment selection, no DOB collected), DEC-16/DEC-28 (Verification Type set at rule creation), DEC-18 (School apps auto-suggested as Always Allowed), DEC-25 (two-stage Account Creation Complete vs. Themis Protection Activated model).
 
 ---
 
@@ -87,29 +85,31 @@ Each journey states its persona(s), preconditions, steps, and the decisions/requ
 
 **Persona:** Priya, Aisha (Child).
 
-1. Aisha's iPad receives a major iOS update overnight.
-2. Post-update, the Family Controls authorisation is invalidated (a known class of iOS-update risk — RISK-04).
-3. Themis Family detects the loss of authorisation on next sync attempt.
-4. Priya's dashboard shows Aisha's status as "Protection Unavailable" with a clear explanation and a "Fix this" action — not a false "Protected" state.
+1. Aisha's device stops confirming its enforcement state at the expected check-in interval — for example, if authorisation becomes unavailable following an OS update or other system event (the exact cause is not asserted; this is a scenario Themis Family must handle, not a documented guarantee of iOS behaviour — see DEC-31).
+2. Themis Family detects the missed check-in / loss of authorisation on its next sync attempt.
+3. Aisha's status moves through the defined states honestly: if the device simply hasn't checked in recently, it shows "Sync Pending" or "Device Offline" with a "Last verified: [time]" indicator; only once authorisation is confirmed actually revoked or invalid does it show "Protection Unavailable." At no point is a stale last-known-good state shown as "Protected."
+4. Priya's dashboard surfaces the relevant status with a clear explanation and, where applicable, a "Fix this" action — never a reassuring status without a verified, sufficiently recent basis (DEC-27).
 5. Priya taps "Fix this," is walked back through re-authorisation.
-6. Status returns to "Protected" once confirmed.
+6. Status returns to "Protected," with an updated "Last verified" time, once confirmed.
 
-**Requirements exercised:** Brief's AC4 (device enforcement health), DEC-08 (reliability as a brand attribute), RISK-04.
+**Requirements exercised:** Brief's AC4 (device enforcement health), DEC-08 (reliability as a brand attribute), DEC-27 (expanded, honest status set), DEC-31 (no unverified platform-behaviour claims), RISK-04, RISK-18.
 
 ## 4.7 Journey: Aisha (Child) hits a blocked app — simplified UX
 
 **Persona:** Aisha.
 
-1. Aisha's reading-first rule is active: entertainment apps locked until a 15-minute in-app reading timer completes. Verification Type: Automatic Verification (per DEC-16, since this is a system-verifiable timer).
+1. Aisha's reading-first rule is active: entertainment apps locked until a 15-minute in-app reading timer completes. Verification Type: Automatic Verification (per DEC-16/DEC-28 — the system has deterministic evidence the in-app timer ran to completion; this is evidence the timer completed, not proof that Aisha read for the full 15 minutes).
 2. Aisha opens a game app, sees a simple, visual screen: "Not yet! Read for 15 minutes to unlock 30 minutes of games," with a big "Start reading" button and no dense text.
-3. Aisha completes the 15-minute timer inside the app.
-4. Because this is Automatic Verification, the game unlocks immediately — no parent approval step, no waiting screen.
+3. Aisha completes the 15-minute in-app timer.
+4. Because this is Automatic Verification of the timer's completion, the game unlocks immediately — no parent approval step, no waiting screen.
 5. Aisha sees: "Done! +30 minutes."
 
-**Requirements exercised:** DEC-16's Automatic Verification path (the one case in the whole spec where no human approval is required), DEC-12's simpler Child UX.
+**Requirements exercised:** DEC-16/DEC-28's narrowed Automatic Verification path (the one case in the whole spec where no human approval is required, and one that must not overstate what the system actually verified), DEC-12's simpler Child UX.
 
 ---
 
 ## 4.8 Journeys deliberately not covered in V1 (traceability note)
 
 Per `00_PRODUCT_OVERVIEW.md` §1.6, no journey exists for: an adult managing their own personal rules (Personal Mode), a household-wide dinner rule that restricts parents (Household Mode), a child earning a wallet balance across multiple categories, or any Android device. These are correctly absent, not omissions.
+
+Also absent, per DEC-26/OQ-17: any journey involving two children sharing one device, a parent and child sharing a device, or a device signed into the "wrong" family member's Apple Account. The canonical V1 assumption (exercised in every journey above involving Aisha or Marcus) is one device per child, each signed into its own Child Apple Account.

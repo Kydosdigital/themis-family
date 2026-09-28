@@ -162,6 +162,75 @@ None outstanding from the original priority list — OQ-01 through OQ-04 and OQ-
 - **Date:** 2026-09-28
 - **Supersedes:** N/A — reinforces DEC-21.
 
+---
+
+## Founder decisions received 2026-09-28 (Phase 2 review — amendments before Phase 3)
+
+**DEC-23. Launch region — resolves OQ-13.**
+- **Status:** Confirmed
+- **Decision:** V1 launches UK-first: UK English, GBP, UK-focused onboarding/research/support assumptions. This is a launch/validation decision, not a permanent geographic restriction — the architecture must not unnecessarily prevent later international expansion.
+- **Rationale:** Founder decision.
+- **Date:** 2026-09-28
+- **Supersedes:** OQ-13's "Recommended default" is now Confirmed, with the explicit instruction that this is a launch choice, not an architectural constraint.
+
+**DEC-24. Child vs. Teen assignment method — resolves OQ-15.**
+- **Status:** Confirmed
+- **Decision:** The app does NOT collect a precise child date of birth to determine UX segment. During child setup, the parent explicitly selects "Child experience" or "Teen experience," with copy along the lines of: *"Choose the experience that best fits your child. You can change this later."* The approximate bands (Child ~8–12, Teen ~13–15) remain guidance, not enforced legal or scientific classifications. The parent can change the segment later without account deletion/recreation.
+- **Rationale:** Founder decision; matches data-minimisation privacy principle already adopted.
+- **Date:** 2026-09-28
+- **Supersedes:** Confirms OQ-15's recommended default; formalises the "changeable later" property and the exact suggested copy.
+
+**DEC-25. Onboarding working-rule requirement elevated to Must, with a two-stage completion model — resolves OQ-16.**
+- **Status:** Confirmed
+- **Decision:** HLR-020 is changed from "Should" to "Must." The product must distinguish **Account Creation Complete** (household and members created) from **Themis Protection Activated** (child-device authorisation valid, at least one rule target selected, a real test shield applied, the test shield successfully removed, and the resulting state verified by the app). The parent sees an explicit incomplete-setup state until Protection Activated is achieved — the product must never imply protection is active before all five conditions are met.
+- **Rationale:** Founder decision. If working-rule verification is genuinely release-blocking (per RISK-08), it must not be documented as optional.
+- **Date:** 2026-09-28
+- **Supersedes:** HLR-020 in `05_HIGH_LEVEL_REQUIREMENTS.md` (Should → Must); closes OQ-16.
+
+**DEC-26. Canonical Child persona device assumption corrected — shared-device support out of V1 without validation.**
+- **Status:** Confirmed
+- **Decision:** The Child persona (Aisha) is corrected from "uses a shared family iPad" to "uses an iPad signed into her own Child Apple Account within the family's Family Sharing group." Shared-device scenarios (one iPad shared by siblings; parent and child sharing one iPad; a device signed into a parent's Apple Account; a device signed into one child's account but used by multiple children) are NOT established as V1 requirements and require separate technical research/spike before any commitment. Per-child enforcement on a shared Apple Account/device must not be promised until proven possible.
+- **Rationale:** Founder correction — the original persona silently assumed device-sharing behaviour that has not been technically validated against Apple's Family Controls model, which is scoped per child Apple Account.
+- **Date:** 2026-09-28
+- **Supersedes:** `03_PERSONAS.md` §3.4 (Aisha's device description).
+
+**DEC-27. Protection status must reflect confirmation recency, not implied real-time state.**
+- **Status:** Confirmed
+- **Decision:** HLR-013 is corrected: the system does not "continuously assess" enforcement health in a real-time sense; it reports the most recently confirmed state and must never imply real-time protection when the device has not recently checked in. Minimum V1 states are expanded to: **Protected, Sync Pending, Device Offline, Needs Attention, Protection Unavailable**, with a "Last verified: [time]" indicator shown where appropriate. A stale last-known-good state must not continue to display as Protected indefinitely. Exact staleness thresholds are deferred to the Device Enforcement specification (Phase 5).
+- **Rationale:** Founder decision. Central to the reliability positioning (DEC-08); an implied-real-time status that is actually stale would directly contradict that positioning.
+- **Date:** 2026-09-28
+- **Supersedes:** HLR-013 in `05_HIGH_LEVEL_REQUIREMENTS.md`; extends the status set first described in the Phase 1 brief and `00_PRODUCT_OVERVIEW.md`.
+
+**DEC-28. Automatic Verification narrowed to deterministic system evidence only.**
+- **Status:** Confirmed
+- **Decision:** Automatic Verification is redefined as: *"Themis has deterministic system evidence that the configured condition completed"* — e.g. an in-app timer or in-app focus session successfully completing. It must not be described or implied to prove a real-world activity occurred (e.g. "a 15-minute reading timer completed" is verifiable; "the child read for 15 minutes" is not). This distinction carries into Phase 3's rule engine and task/approval specifications.
+- **Rationale:** Founder correction — the original wording risked overstating what the system actually knows.
+- **Date:** 2026-09-28
+- **Supersedes:** Narrows DEC-16's definition of Automatic Verification; affects HLR-006 and the wording of `04_USER_JOURNEYS.md` §4.7.
+
+**DEC-29. Request "ask a follow-up question" constrained — not a messaging feature.**
+- **Status:** Confirmed
+- **Decision:** HLR-009's approver action "ask a follow-up question" is constrained to a lightweight, request-scoped clarification mechanism (attached to the specific pending request), not unrestricted parent/child messaging or a chat system. Phase 3 must define the simplest viable interaction (e.g. a single structured clarification prompt and a single structured reply, not a free-form open-ended thread).
+- **Rationale:** Founder decision, forestalling scope creep into a messaging feature the brief explicitly does not want (privacy principles rule out building message-content features).
+- **Date:** 2026-09-28
+- **Supersedes:** Narrows HLR-009's phrasing in `05_HIGH_LEVEL_REQUIREMENTS.md`.
+
+**DEC-30. Temporary access must expire locally, independent of backend/network availability.**
+- **Status:** Confirmed
+- **Decision:** All temporary access grants (temporary access, extra time, Free Pass) must expire on the child device using locally cached expiry data and automatically reapply the appropriate restriction, even if the backend is unavailable, the parent device is offline, or push notifications fail. Re-locking must never depend on a second server-sent instruction arriving at expiry time.
+- **Rationale:** Founder decision, extending the existing local-first enforcement principle (brief §"Local-first enforcement") to explicitly cover the expiry direction, not just the initial-lock direction.
+- **Date:** 2026-09-28
+- **Supersedes:** Extends HLR-014 in `05_HIGH_LEVEL_REQUIREMENTS.md`.
+
+**DEC-31. Documentation language must not assert unverified Apple platform behaviour as fact.**
+- **Status:** Confirmed
+- **Decision:** Wherever a document describes a specific Apple/iOS behaviour as if it were confirmed fact (e.g. "an iOS update invalidated Family Controls authorisation"), it must instead be phrased as a scenario the product responds to (e.g. "if authorisation becomes unavailable following an OS update or other system event..."), unless Apple's own documentation explicitly guarantees that exact behaviour. Requirements describe Themis Family's response to a failure state, without asserting an unverified cause.
+- **Rationale:** Founder correction — avoids the documentation quietly overstating certainty about third-party platform behaviour that has not been verified via the technical spike.
+- **Date:** 2026-09-28
+- **Supersedes:** Corrects wording in `04_USER_JOURNEYS.md` §4.6 and any similarly-phrased passages found elsewhere.
+
+---
+
 ## Decisions still required from the founder before Phase 3 begins
 
-Phase 2 (Personas, User Journeys, Scope and Release Strategy, High-Level Requirements) is complete as of this commit. Per the founder's own process instruction, work stops here for review. No decisions are strictly blocking, but the founder may wish to weigh in on the new open questions raised during Phase 2 (OQ-13 through OQ-16 in `34_OPEN_QUESTIONS.md`) before Phase 3 (Functional Requirements, Business Rules, Rule Engine Specification, Roles and Permissions) begins.
+None. Phase 2 is approved subject to the amendments above (DEC-23 through DEC-31), which are being applied to the affected documents in this same commit round. Phase 3 (Functional Requirements, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions) proceeds next.
