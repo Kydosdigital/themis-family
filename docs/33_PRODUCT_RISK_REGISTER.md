@@ -191,6 +191,14 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Engineering/Security (pending real-device spike; no control owner assigned until findings exist)
 - **Validation method:** Real-device spike on a jailbroken/compromised test device attempting to falsify monotonic-clock readings during an offline gap, assessing whether the trusted-time reconciliation can be tricked into crediting a late submission as on-time
 
+## RISK-27: Device re-pairing to a new household could silently remove the original household's access — NEW, Phase 7, 2026-09-28
+- **Likelihood:** Low — requires a device to be physically available for re-pairing (e.g. a shared or second-hand device, or a family arrangement change), a narrower scenario than most other risks in this register
+- **Impact:** Medium — an original household unexpectedly losing enforcement visibility/control over a device it believes is still protected is a fail-open-shaped outcome, in tension with the fail-safe principle applied everywhere else in this specification (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.2)
+- **Source:** Identified in `26_ERROR_AND_EDGE_CASE_CATALOGUE.md` §26.8 while cross-checking the Phase 6 device-pairing/credential model (DEC-54) against re-pairing scenarios not originally considered; tracked as **OQ-42**.
+- **Mitigation (RECOMMENDATION, not yet founder-confirmed):** re-pairing a device already paired to another household should require de-authorising it from the prior household first, with that household explicitly notified, mirroring the immediate-loss-of-access principle already confirmed for device removal (SEC-002).
+- **Owner:** Product/Engineering (pending founder confirmation of the recommended mitigation before Stage 3 pairing implementation)
+- **Validation method:** Scenario test attempting to pair a device already paired elsewhere, confirming the prior household is de-authorised and notified rather than silently orphaned
+
 ---
 
 ## Register maintenance note

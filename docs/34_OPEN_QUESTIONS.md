@@ -260,3 +260,12 @@ Remaining open items and their status:
 **OQ-41 [RESOLVED AS A PRODUCT REQUIREMENT — see DEC-58's "Also confirmed" note, Phase 6 founder review round, 2026-09-28; detailed policy content remains a separate operational task].** What is the detailed safeguarding escalation process for child-safety concerns raised through support channels (`30_ADMIN_AND_SUPPORT.md` §30.5)?
 - *Resolution:* **Not a FUTURE FEATURE** (the original Phase 6 draft's characterisation is withdrawn). Confirmed as a launch-readiness requirement: before public launch, Themis Family must have a named safeguarding owner, a documented escalation procedure, staff guidance for child-safety disclosures, clear separation between ordinary support and safeguarding cases, minimum-necessary data-access rules, emergency/immediate-risk handling guidance reviewed by appropriate legal/safeguarding expertise, documented record-keeping and access controls, and role-appropriate staff training. **This specification does not author the substantive safeguarding policy itself** — that remains an operational/legal task requiring expertise beyond this BA/architecture engagement — but the requirement that it exist before launch is now confirmed product scope, not a deferred nice-to-have.
 - *Blocks:* Tracked as a launch-readiness gate in `38_DEFINITION_OF_DONE.md` ("Safeguarding process approved for launch"), Phase 7. Does not block Phase 6 document sign-off; does block public launch.
+
+---
+
+## Questions raised during Phase 7 (2026-09-28)
+
+**OQ-42 [NEW].** Can a child device already paired to one household be paired to a second household, and if so, what happens to the original household's access?
+- *Why it matters:* The device-pairing/credential model was introduced in Phase 6 (DEC-54) without considering device re-pairing; a naive implementation could silently move a device away from its original household's control without that household being informed, undermining SEC-002's immediate-loss-of-access principle in the opposite direction (the *original* household unexpectedly losing access, not a removed party retaining it).
+- *Recommended default:* RECOMMENDATION — re-pairing a device already paired elsewhere should require de-authorising it from the prior household first, with that household notified, mirroring SEC-002. Not founder-confirmed.
+- *Blocks:* `37_BUILD_SEQUENCE.md` Stage 3 (child-device pairing implementation). Does not block Phase 7 document sign-off.

@@ -598,6 +598,34 @@ Applies DEC-52 through DEC-59 across `23_PRIVACY_AND_CHILD_SAFETY.md`, `24_SECUR
 
 ---
 
-## Decisions still required from the founder before Phase 7 begins
+## Phase 7 completion note (2026-09-28)
 
-None outstanding that block Phase 7 from starting. All sixteen amendment items from this review round are confirmed (DEC-52 through DEC-59, plus the unnumbered confirmations above). Phase 7 (Parent Experience, Child and Teen Experience, Notifications, Error/Edge Case Catalogue, Test Strategy, Traceability Matrix, MVP vs. Later Feature Matrix, Build Sequence, Definition of Done) proceeds next, carrying forward: the child-transparency requirement (DEC-53) into `15_CHILD_AND_TEEN_EXPERIENCE.md`; the safeguarding launch-readiness requirement into `38_DEFINITION_OF_DONE.md`; and the confirmed spike-before-build sequencing requirement into `37_BUILD_SEQUENCE.md`. Phase 7 must end with a GO/NO-GO readiness report per the founder's explicit ten-point structure, and must not mark the project READY TO BUILD merely because the documents are complete.
+Phase 7 produced nine documents: `14_PARENT_EXPERIENCE.md`, `15_CHILD_AND_TEEN_EXPERIENCE.md`, `21_NOTIFICATIONS.md`, `26_ERROR_AND_EDGE_CASE_CATALOGUE.md`, `31_TEST_STRATEGY.md`, `32_TRACEABILITY_MATRIX.md`, `36_MVP_VS_LATER_FEATURE_MATRIX.md`, `37_BUILD_SEQUENCE.md`, `38_DEFINITION_OF_DONE.md`. No production code was written.
+
+**End-of-Phase-7 findings, per the founder's explicit instructions:**
+
+1. **Every unresolved requirement:** none identified at the specification level — `32_TRACEABILITY_MATRIX.md` §32.7 confirms no orphan HLR/FR. Unresolved items are technical (real-device spikes) or non-technical (legal/safeguarding), not specification gaps.
+2. **Every open technical dependency:** the nine-item real-device spike priority list (`27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.8), consolidated against the requirements they gate in `32_TRACEABILITY_MATRIX.md` §32.6 and `36_MVP_VS_LATER_FEATURE_MATRIX.md`.
+3. **Every policy/legal dependency:** the Lawful Basis Matrix/DPIA/legal review (DEC-52) and the safeguarding process approval (DEC-58/OQ-41), both tracked as launch gates in `38_DEFINITION_OF_DONE.md` §38.4, independent of engineering progress.
+4. **Every acceptance criterion with no test:** none found (`32_TRACEABILITY_MATRIX.md` §32.4).
+5. **Every test with no traced requirement:** none found (`32_TRACEABILITY_MATRIX.md` §32.5).
+6. **Every feature marked MVP that depends on an unverified Apple capability:** eight of twenty-four HLRs, enumerated in `32_TRACEABILITY_MATRIX.md` §32.6 and `36_MVP_VS_LATER_FEATURE_MATRIX.md` §36.2 — device authorisation/pairing, rule-engine limit behaviour, essential-access shielding (the safety-critical OQ-30 UNKNOWN), protection-status staleness, offline enforcement/Local Enforcement Plan reliability, remote-unlock propagation, reporting cross-device rendering, and the trusted-time model's tamper resilience.
+
+**New open item raised this phase:** **OQ-42** (`26_ERROR_AND_EDGE_CASE_CATALOGUE.md` §26.8) — can a child device already paired to one household be re-paired to another, and if so, what happens to the original household's access? Not addressed by the Phase 6 pairing model (DEC-54), since pairing was introduced without considering this specific re-pairing scenario. RECOMMENDATION only (de-authorise from the prior household first, notify that household), not founder-confirmed. Does not block Phase 7 document sign-off; flagged for resolution before `37_BUILD_SEQUENCE.md`'s pairing implementation (Stage 3).
+
+**GO/NO-GO verdict:** **NO-GO for full production implementation as of 2026-09-28**, per `38_DEFINITION_OF_DONE.md` §38.5/§38.6's full ten-point assessment. Requirements documentation is complete (GO at the specification level), but the Apple entitlement dependency and the real-device spike programme are hard blockers on the enforcement core, and privacy/DPIA and safeguarding readiness are hard blockers on public launch, independent of documentation completeness or engineering progress. The founder may authorise Stages 0, 1, 2 (partially), 5, and the non-spike-dependent parts of Stage 4 of `37_BUILD_SEQUENCE.md` to begin on their own authority once implementation is explicitly approved; Stage 3 (child-device enforcement) and Category B reporting remain gated on the spike programme regardless.
+
+**Date:** 2026-09-28
+**Supersedes:** N/A — phase-completion record.
+
+---
+
+## Decisions still required from the founder before implementation may begin in full
+
+1. Explicit authorisation to begin implementation ("Requirements approved. Begin implementation.") — the standing gate on all production code, unaffected by this specification being complete.
+2. Commission the real-device technical spike programme (`27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.8, all nine priorities) — an engineering/resourcing decision, not a specification one.
+3. Commission the Lawful Basis Matrix/DPIA and specialist legal review (DEC-52) — a legal-engagement decision.
+4. Commission the safeguarding process (named owner, documented procedure — DEC-58/OQ-41) — an operations/legal-engagement decision.
+5. Resolve OQ-42 (device re-pairing across households) before Stage 3 pairing implementation begins.
+
+None of the above are specification gaps; all are resourcing/commissioning decisions or real-world dependencies (Apple's entitlement review process) outside this BA/product-architecture engagement's authority to resolve directly. Per the founder's standing instruction, no production code is written until "Requirements approved. Begin implementation." is explicitly given.
