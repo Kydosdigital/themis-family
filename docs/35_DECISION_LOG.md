@@ -445,3 +445,58 @@ No Phase 3 or Phase 4 document was edited during Phase 5 beyond the tracking doc
 4. Commission the real-device technical spike covering, at minimum and in priority order: (a) whether Phone/Messages/Maps can be excluded from a `ManagedSettingsStore` shield at all (OQ-30); (b) the ~50-token shield limit; (c) shield persistence across force-quit/restart/uninstall; (d) `DeviceActivityMonitor` callback timing precision; (e) device-clock-tampering resilience (OQ-32); (f) extension memory-constraint behaviour under load.
 
 None of the above block Phase 6 from starting on the founder's authority, per the same working-unattended principle applied in earlier phases, but each should be resolved before the Phase 5 architecture they touch is treated as final for build sequencing (Phase 7).
+
+---
+
+## DEC-46 through DEC-50 — Phase 5 founder review round (2026-09-28)
+
+The founder independently re-checked current Apple documentation following the Phase 5 baseline and directed the following corrections and confirmations before Phase 6 begins.
+
+**DEC-46 — FR-010 / 50-item shield limit correction (supersedes the Phase 5 completion note's proposed correction above, item 1).**
+- **Status:** Confirmed and applied.
+- **Decision:** The Phase 5 completion note's proposed correction (recharacterising the ~50-item limit as wholly undocumented) is itself withdrawn as incorrect. Direct re-verification against Apple's current developer documentation found four separate, exactly-documented per-property limits: `ShieldSettings.applications` (50 application tokens), `ShieldSettings.webDomains` (50 web-domain tokens), `ShieldSettings.applicationCategories` (50 category tokens + 50 exceptions), `ShieldSettings.webDomainCategories` (50 category tokens + 50 exceptions) — each VERIFIED FROM APPLE DOCUMENTATION with direct citation. Only the *failure behaviour when a limit is exceeded* remains NEEDS REAL-DEVICE TECHNICAL SPIKE. `10_RULE_ENGINE_SPECIFICATION.md` FR-010 is corrected accordingly (§10.8 amendment note), and `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.3/§27.6/§27.7 and `16_DEVICE_ENFORCEMENT.md` §16.5 are updated to match.
+- **Rationale:** A community forum report's framing ("undocumented") was taken at face value in the original Phase 5 pass without a fresh direct check of Apple's current published API reference; the founder's own re-check found the documentation does exist. This is exactly the kind of correction the standing DEC-31 discipline exists to catch, applied against the documentation itself rather than against a secondary characterisation of it.
+- **Date:** 2026-09-28. **Supersedes:** the FR-010 correction proposed in the Phase 5 completion note above (item 1).
+
+**DEC-47 — Shield-resolution authority model, closes OQ-31.**
+- **Status:** Confirmed.
+- **Decision:** Backend is authoritative for shared business state (rules, approvals, requests, grants, membership, subscription); the child device is authoritative for immediate device-enforcement execution and generates its own Local Enforcement Plan (renamed from "Resolved Shield List," and materially extended — see below) from the latest synced business-state snapshot. The backend never attempts to become a runtime shield engine. Push notifications are a latency optimisation only, never the sole correctness mechanism.
+- **Also confirmed, same review:** the "Resolved Shield List" concept is replaced by the richer **Local Enforcement Plan**, which precomputes not just the current shield state but every currently-knowable upcoming transition and its resulting shield operation, so the `DeviceActivityMonitor` extension can execute a scheduled transition correctly without the main app open or the network reachable at that moment. Applied throughout `16_DEVICE_ENFORCEMENT.md`, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md`, `19_DATA_MODEL.md`, `20_STATE_MACHINES.md`, `27_APPLE_INTEGRATION_REQUIREMENTS.md`, `29_API_AND_BACKEND_REQUIREMENTS.md`.
+- **Also confirmed, same review:** end-to-end remote approval → child-device unlock propagation is elevated to **Priority 1** on the real-device spike list (second only to entitlement approval itself), and the parent-facing UI must distinguish "Approved" (backend-committed) from "Applied on [child]'s device" (confirmed in effect) wherever those are not guaranteed simultaneous — this is now a confirmed UI-copy requirement, not a caveat (`16_DEVICE_ENFORCEMENT.md` §16.6a).
+- **Date:** 2026-09-28. **Supersedes:** OQ-31's open status in `34_OPEN_QUESTIONS.md`.
+
+**DEC-48 — Early Temporary Access Grant (Free Pass) revocation, closes OQ-35.**
+- **Status:** Confirmed.
+- **Decision:** An Owner or Guardian may revoke an active Free Pass/Temporary Access Grant early. The grant moves to `Revoked` via the same atomic approval-handling mechanism as any other approval-type action; the backend increments `resolution_version`; the revocation is pushed/synchronised to the child device; the child device recomputes its Local Enforcement Plan and the original rule state resumes. Parent UI must not claim "Access revoked on device" until the child device has acknowledged/applied the new resolution — it shows "Revocation sent" then "Access revoked" once confirmed.
+- **Date:** 2026-09-28. **Supersedes:** OQ-35's open status.
+
+**DEC-49 — Abandoned Active Engagement Session handling, closes OQ-36.**
+- **Status:** Confirmed.
+- **Decision:** A session in `TerminatedPendingResume` remains resumable until the earlier of the linked task/context's own expiry or 24 hours from the last trustworthy session checkpoint. If not resumed by then, the session becomes `Abandoned`: no completion credit is awarded, persisted partial time is retained only as historical/debug information per Phase 6's retention policy, and the child may start a fresh session if the underlying task/context remains valid. No indefinite `InSession` state exists in V1.
+- **Date:** 2026-09-28. **Supersedes:** OQ-36's open status.
+
+**DEC-50 — Child-side API abuse protection, closes OQ-37 at the policy level.**
+- **Status:** Confirmed at the product-policy level; exact controls deferred to Phase 6.
+- **Decision:** Yes, the backend must treat the child client as potentially adversarial for enforcement-related endpoints — framed as ordinary defensive system design, not an accusation of malicious intent. Phase 6's `24_SECURITY_REQUIREMENTS.md` must specify rate limiting, idempotency/duplicate suppression, one-active-request-per-context limits, server-side role/ownership validation, request-size limits, replay protection, audit logging, and notification-flooding protection.
+- **Date:** 2026-09-28. **Supersedes:** OQ-37's open status (policy question); exact controls remain to be specified in Phase 6.
+
+**Also confirmed in this review round, not requiring a standalone numbered decision (each already reflected in the amended documents):**
+- The Family Controls "App and Website Usage" capability is identified as `AuthorizationStatus.approvedWithDataAccess`, confirmed EU-device/EU-Apple-Account-only for customer installations, and therefore confirmed **not usable in UK V1** — closes OQ-10 (see `34_OPEN_QUESTIONS.md`).
+- The Themis-owned vs. Apple-owned reporting-data separation is restated precisely and made binding on Phase 6's `22_REPORTING_AND_ANALYTICS.md` (`27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.5).
+- The device-staleness threshold (OQ-19) is explicitly **not** fixed at this stage — the founder withdrew the originally-proposed 72-hour figure and requires it to be server-configurable, set only after real-device heartbeat/background-sync measurement.
+- Subscription-lapse enforcement behaviour (OQ-33) is explicitly carried forward into Phase 6 rather than finalised in Phase 5, subject to the confirmed safety principle that no lapse may leave a child indefinitely locked.
+- A trusted-time model (monotonic-clock-anchored, reconciled against server-received time) replaces the original "server-received-time-only" mechanic for evaluating offline, time-sensitive submissions (RISK-25 revised; addresses OQ-34 by analogy) — `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a.
+- The real-device technical spike priority list is revised to: Priority 0 entitlement approval; Priority 1 remote-approval/unlock propagation; Priority 2 Phone/Messages/Maps shielding (OQ-30); Priority 3 `DeviceActivityMonitor` scheduled-transition reliability while terminated/locked; Priority 4 exceeded-limit behaviour for the now-documented 50-item caps; Priority 5 shield persistence across termination/reboot/uninstall; Priority 6 device clock/timezone tampering; Priority 7 extension memory behaviour with realistic Local Enforcement Plan sizes; Priority 8 cross-device `DeviceActivityReport` rendering (`27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.8).
+
+## Phase 5 amendment completion note (2026-09-28)
+
+Applies DEC-46 through DEC-50 across `27_APPLE_INTEGRATION_REQUIREMENTS.md`, `16_DEVICE_ENFORCEMENT.md`, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md`, `19_DATA_MODEL.md`, `20_STATE_MACHINES.md`, `29_API_AND_BACKEND_REQUIREMENTS.md`, and `10_RULE_ENGINE_SPECIFICATION.md` (FR-010 correction, applied directly per DEC-46, superseding the "flag but don't apply" approach of the original Phase 5 completion note). The re-run architecture/state/data cross-check found: no new orphan requirements; the three previously-flagged unconfirmed state transitions (OQ-31, OQ-35, OQ-36) are now all confirmed; OQ-33 remains explicitly deferred to Phase 6 by founder instruction, not by oversight; OQ-09/OQ-10's reporting-model findings are now precisely restated and bound on Phase 6's reporting document; and RISK-25's mitigation is materially strengthened via the trusted-time model. OQ-19, OQ-30, OQ-32, and OQ-34 (pending spike validation) remain genuinely open and are carried forward with clear ownership (real-device spike, in priority order) rather than left ambiguous.
+
+**Date:** 2026-09-28
+**Supersedes:** The original Phase 5 completion note's item 1 (FR-010 correction proposal) and its framing of OQ-31/OQ-35/OQ-36/OQ-10 as unresolved.
+
+---
+
+## Decisions still required from the founder before Phase 6 begins (updated)
+
+None outstanding that block Phase 6 from starting. The founder has confirmed all amendment items from this review round (DEC-46 through DEC-50). Phase 6 (Non-Functional Requirements, Reporting and Analytics, Privacy and Child Safety, Security Requirements, Subscriptions and Billing, Admin and Support) proceeds next, carrying forward: the UK-only App and Website Usage limitation (into `22_REPORTING_AND_ANALYTICS.md`); the never-indefinitely-locked subscription-lapse principle (into `25_SUBSCRIPTIONS_AND_BILLING.md`); and the child-as-potentially-adversarial API design principle (into `24_SECURITY_REQUIREMENTS.md`).

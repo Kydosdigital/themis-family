@@ -191,58 +191,52 @@ Remaining open items and their status:
 
 ---
 
-## Questions raised or updated during Phase 5 (2026-09-28)
+## Questions raised or updated during Phase 5 (2026-09-28), amended following founder re-check of Apple documentation (2026-09-28)
 
 **OQ-09 [UPDATED — materially advanced, not fully closed].** What level of usage reporting is Apple's current API actually capable of delivering to a parent's separate device?
 - *Phase 5 finding:* `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.5 confirms, from official Apple documentation, that cross-device reporting IS natively supported (`DeviceActivityFilter` with `users: .children`/`devices:`), but the report-rendering extension is sandboxed and cannot make network requests — meaning the underlying usage figures can never reach or be stored by Themis Family's own backend, only displayed live via Apple's own on-device report view. This resolves the architectural feasibility question but confirms a hard ceiling on what "reporting" can ever mean for raw usage data in this product.
 - *Remaining open element:* exact UI/UX integration of the embedded native report view is a Phase 6 (`22_REPORTING_AND_ANALYTICS.md`) design question, not resolved here.
 - *Blocks:* `22_REPORTING_AND_ANALYTICS.md` (Phase 6) — now substantially unblocked at the architecture level.
 
-**OQ-10 [LIKELY MOOT — pending founder confirmation, not closed unilaterally].** Should the product pursue the separate "App and Website Usage" entitlement?
-- *Phase 5 finding:* No Apple documentation was found describing this as a distinct, separate entitlement from `com.apple.developer.family-controls`. Given OQ-09's finding above, category/app-level reporting via `DeviceActivityReport` appears achievable under the existing entitlement alone. Recorded as UNKNOWN rather than resolved (§27.5) since no source confirms or denies the separate entitlement's existence, and this document does not close a question by inventing a technical conclusion. Founder should confirm this can be treated as moot before it is marked RESOLVED.
-- *Blocks:* `27_APPLE_INTEGRATION_REQUIREMENTS.md` — addressed as far as documentation allows; final closure needs founder sign-off.
+**OQ-10 [RESOLVED — see DEC-46].** Should the product pursue the separate "App and Website Usage" entitlement?
+- *Resolution:* Founder's re-check of Apple documentation located the capability under its actual name: `AuthorizationStatus.approvedWithDataAccess`, granted via the separate `com.apple.developer.family-controls.app-and-website-usage` entitlement. Apple's documentation confirms, verbatim, that customer installations can only achieve this status on devices located in the EU with an EU Apple Account. Since Themis Family V1 is UK-first (DEC-23), this capability **cannot be used by normal V1 customers regardless of entitlement outcome** and must not be part of the UK V1 architecture. Standard `DeviceActivityReport` under ordinary `.approved` authorization remains the V1 reporting path (OQ-09). Documented as a possible FUTURE FEATURE for an eventual EU-market expansion only.
+- *Blocks (now unblocked):* `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.5a; `22_REPORTING_AND_ANALYTICS.md` (Phase 6) must preserve the Themis-owned/Apple-owned reporting separation and incorporate this UK limitation explicitly.
 
-**OQ-19 [PARTIALLY ADDRESSED — number proposed, not confirmed].** What are the exact staleness thresholds before "Protected" must downgrade?
-- *Phase 5 finding:* `16_DEVICE_ENFORCEMENT.md` §16.8 proposes a 72-hour no-successful-sync threshold as a RECOMMENDATION, explicitly flagged as not yet founder-confirmed.
-- *Blocks:* Founder confirmation needed before Phase 6/7 build sequencing treats this number as final.
+**OQ-19 [PARTIALLY ADDRESSED — number deliberately not fixed, per founder instruction].** What are the exact staleness thresholds before "Protected" must downgrade?
+- *Phase 5 amendment-round finding:* the originally-proposed 72-hour threshold is **withdrawn** — the founder directed that this number depends on real heartbeat/background-sync measurement, not architectural judgement, and must not be fixed before the real-device spike. `16_DEVICE_ENFORCEMENT.md` §16.8 now confirms the five-state status model (Protected / Sync Pending / Device Offline / Needs Attention / Protection Unavailable) and requires the underlying thresholds to be **server-configurable**, so the eventual measured value can be set without an app release.
+- *Blocks:* Real-device spike (heartbeat/background-sync measurement) before any specific threshold value is set, even server-side.
 
-**OQ-30 [STILL OPEN — genuinely UNKNOWN, not resolved by Phase 5 research].** What does Apple's picker/ManagedSettings framework actually expose or permit for Phone, Messages, and Maps specifically?
-- *Phase 5 finding:* No official Apple documentation, and no credible third-party source, was found addressing this directly. Classified UNKNOWN in `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.3/§27.7 — this is the single most safety-critical unresolved item in the entire Phase 5 output and is the first item that must be validated in any real-device technical spike, per BR-222's hard safety principle.
-- *Blocks:* `27_APPLE_INTEGRATION_REQUIREMENTS.md` real-device spike (highest priority item on that spike list); `24_SECURITY_REQUIREMENTS.md` (Phase 6) final wording.
+**OQ-30 [STILL OPEN — genuinely UNKNOWN, not resolved by Phase 5 or this amendment round's research].** What does Apple's picker/ManagedSettings framework actually expose or permit for Phone, Messages, and Maps specifically?
+- *Finding:* No official Apple documentation, and no credible third-party source, was found addressing this directly, even after this round's fresh documentation re-check. Classified UNKNOWN in `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.3/§27.7 — this is the single most safety-critical unresolved item in the entire Phase 5 output and is now explicitly **Priority 2** on the real-device spike list (§27.8), just below entitlement approval (Priority 0) and remote-unlock propagation (Priority 1).
+- *Blocks:* `27_APPLE_INTEGRATION_REQUIREMENTS.md` real-device spike; `24_SECURITY_REQUIREMENTS.md` (Phase 6) final wording.
 
-**OQ-31 [NEW].** Should Resolved Shield List computation happen exclusively on-device, or should the backend also compute and push a resolution on relevant server-side changes?
-- *Why it matters:* Affects consistency guarantees across multiple parent/guardian devices and latency after a remote approval, though `16_DEVICE_ENFORCEMENT.md` §16.6 argues backend-side computation cannot fully close the latency gap given extension network constraints.
-- *Recommended default:* On-device resolution as primary mechanism, with backend-triggered push-to-wake-app as a latency-reduction measure only, per §16.6/§29.6.
-- *Blocks:* `29_API_AND_BACKEND_REQUIREMENTS.md` implementation detail (Phase 6/7); does not block Phase 5 sign-off.
+**OQ-31 [RESOLVED — see DEC-47].** Should Local Enforcement Plan (formerly "Resolved Shield List") computation happen exclusively on-device, or should the backend also compute and push a resolution?
+- *Resolution:* Backend is authoritative for shared business state (rules, approvals, requests, grants, membership, subscription); the child device is authoritative for immediate device-enforcement execution and generates its own Local Enforcement Plan from the latest synced business-state snapshot. The backend never attempts to become a runtime shield engine. Push is a latency optimisation only, never the sole correctness mechanism. See `16_DEVICE_ENFORCEMENT.md` §16.6, `29_API_AND_BACKEND_REQUIREMENTS.md` §29.1.
+- *Blocks:* None — resolved.
 
-**OQ-32 [NEW].** Are `DeviceActivitySchedule`/`DeviceActivityMonitor` resilient to a child manually changing the device clock to defeat a Deadline Lock?
-- *Why it matters:* A plausible bypass vector for time-based rules; no Apple documentation found either way.
-- *Recommended default:* Treat as UNKNOWN; include in the real-device technical spike list (`16_DEVICE_ENFORCEMENT.md` §16.8).
+**OQ-32 [STILL OPEN].** Are `DeviceActivitySchedule`/`DeviceActivityMonitor` resilient to a child manually changing the device clock to defeat a Deadline Lock?
+- *Why it matters:* A plausible bypass vector for time-based rules; no Apple documentation found either way, even after this round's re-check. Related to, but distinct from, the honest-offline-child fairness problem now addressed by the trusted-time model (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a) — that model mitigates fairness for a genuinely offline child but does not claim to solve deliberate clock tampering.
+- *Recommended default:* Treat as UNKNOWN; **Priority 6** on the real-device technical spike list (§27.8), including device-reboot scenarios per the founder's explicit instruction.
 - *Blocks:* Real-device spike; not a Phase 5 blocker.
 
-**OQ-33 [NEW].** What exactly happens to enforcement when a household's subscription lapses — does protection continue for a grace window, stop immediately, or something else?
-- *Why it matters:* Directly affects the Subscription state machine (`20_STATE_MACHINES.md` §20.10) and the product's fail-safe posture.
-- *Recommended default:* A grace window (RECOMMENDATION only) during which enforcement continues; final decision explicitly deferred to Phase 6's `24_SUBSCRIPTIONS_AND_BILLING.md` document, not yet written.
-- *Blocks:* `24_SUBSCRIPTIONS_AND_BILLING.md` (Phase 6); does not block Phase 5 sign-off, since `20_STATE_MACHINES.md` §20.10 is explicitly marked incomplete pending this.
+**OQ-33 [CARRIED FORWARD TO PHASE 6, per explicit founder instruction — not finalised in Phase 5].** What exactly happens to enforcement when a household's subscription lapses?
+- *Founder direction:* do not finalise this inside Phase 5. Carry into Phase 6's `25_SUBSCRIPTIONS_AND_BILLING.md`, preserving the confirmed safety principle: **Themis must never leave a child indefinitely locked because a subscription expired and the parent can no longer manage the rules.** Phase 6 must define active paid entitlement, App Store billing retry/grace state, expired entitlement, parent warnings, local expiry behaviour, and eventual clearing of Themis-managed restrictions — no indefinite post-subscription enforcement.
+- *Blocks:* `25_SUBSCRIPTIONS_AND_BILLING.md` (Phase 6, to be produced this phase); `20_STATE_MACHINES.md` §20.10 remains explicitly incomplete pending this.
 
-**OQ-34 [NEW].** If a device never reconnects before an EngagementSession's linked Task/context expires server-side, does a very-late outcome submission still get honoured?
-- *Why it matters:* An offline-sync edge case not addressed by any Phase 3/4 decision; affects fairness to the child and correctness of the Task state machine's terminal states.
-- *Recommended default:* Not proposed here; genuinely open, needs founder judgement call.
-- *Blocks:* `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.6 final behaviour; does not block Phase 5 document sign-off since the general fail-safe principle already covers the interim behaviour.
+**OQ-34 [ADDRESSED via the trusted-time model, not independently closed].** If a device never reconnects before an EngagementSession's linked Task/context expires server-side, does a very-late outcome submission still get honoured?
+- *Resolution approach:* `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a's trusted-time model (monotonic-clock-anchored elapsed-time estimation, reconciled against server-received time) applies to this case by direct analogy to the Deadline Lock submission case it was designed for: if trustworthy timing evidence establishes the outcome genuinely occurred within the valid context, it is reconciled as on-time; otherwise it is surfaced to the parent as "Timing could not be verified" for an explicit decision, rather than silently auto-credited or silently rejected.
+- *Blocks:* Real-device validation of the monotonic-clock approach's reliability across backgrounding/reboot (new spike item, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a) before this is treated as fully resolved.
 
-**OQ-35 [NEW].** Can an Owner/Guardian revoke an already-active Temporary Access Grant (Free Pass) early?
-- *Why it matters:* A plausible, likely-expected capability with no confirmed Phase 3/4 requirement either way.
-- *Recommended default:* Not proposed; genuinely open.
-- *Blocks:* `20_STATE_MACHINES.md` §20.7's `Revoked` state — remove if not confirmed.
+**OQ-35 [RESOLVED — see DEC-48].** Can an Owner/Guardian revoke an already-active Temporary Access Grant (Free Pass) early?
+- *Resolution:* Yes, confirmed. The grant moves to `Revoked` via the same atomic approval-handling mechanism as any other approval-type action; the backend increments `resolution_version`; the revocation is pushed/synchronised to the child device; the child device recomputes its Local Enforcement Plan and the original rule state resumes. Parent UI shows "Revocation sent" then "Access revoked" once the child device's applied state is confirmed (mirrors the Approved/Applied distinction for other approvals). See `16_DEVICE_ENFORCEMENT.md` §16.9a, `20_STATE_MACHINES.md` §20.7, `19_DATA_MODEL.md`.
+- *Blocks:* None — resolved.
 
-**OQ-36 [NEW].** What happens if an Active Engagement Session enters `TerminatedPendingResume` and is never resumed?
-- *Why it matters:* No confirmed requirement states whether the linked Task falls back to `Pending`, expires, or remains indefinitely `InSession`.
-- *Recommended default:* Not proposed; genuinely open.
-- *Blocks:* `20_STATE_MACHINES.md` §20.8 completeness.
+**OQ-36 [RESOLVED — see DEC-49].** What happens if an Active Engagement Session enters `TerminatedPendingResume` and is never resumed?
+- *Resolution:* Remains resumable until the earlier of the linked task/context's own expiry or 24 hours from the last trustworthy checkpoint. If not resumed by then, the session becomes `Abandoned`: no completion credit, persisted partial time retained only as historical/debug information per retention policy, and a fresh session may be started if the underlying task/context remains valid. No indefinite `InSession` state exists in V1. See `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.6, `20_STATE_MACHINES.md` §20.8, `19_DATA_MODEL.md`.
+- *Blocks:* None — resolved.
 
-**OQ-37 [NEW].** Should the API layer defend against child-side abuse of Request/Task/Free-Pass endpoints (e.g. flooding a Guardian's approval queue)?
-- *Why it matters:* No Phase 1–4 document addresses this; the child is sometimes an adversarial party to the very restriction being enforced, which is a somewhat unusual API threat model worth naming explicitly.
-- *Recommended default:* Defer to Phase 6's security requirements document; not addressed in Phase 5.
-- *Blocks:* `24_SECURITY_REQUIREMENTS.md` (Phase 6, not yet written).
+**OQ-37 [RESOLVED AT THE POLICY LEVEL — see DEC-50; exact controls to Phase 6].** Should the API layer defend against child-side abuse of Request/Task/Free-Pass endpoints?
+- *Resolution:* Yes, confirmed as ordinary defensive system design, not a claim that the child is malicious — the backend must treat the child client as potentially adversarial for enforcement-related endpoints given the product's own nature. Phase 6's `24_SECURITY_REQUIREMENTS.md` must specify: rate limiting, idempotency and duplicate suppression, one-active-request-per-context limits, server-side role/ownership validation, request-size limits, replay protection, audit logging, and notification-flooding protection. See `29_API_AND_BACKEND_REQUIREMENTS.md` §29.8.
+- *Blocks:* `24_SECURITY_REQUIREMENTS.md` (Phase 6, to be produced this phase) for the exact control specification.
 
-**Correction flagged (not a new OQ, logged for founder awareness):** `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.6 identifies that `10_RULE_ENGINE_SPECIFICATION.md` FR-010 currently mischaracterises an undocumented, community-reported ~50-token shield limit as "Apple's documented" limit. See `35_DECISION_LOG.md` Phase 5 completion note for the proposed correction, pending founder confirmation before FR-010's text is amended.
+**Correction applied (not a standing open question — resolved and applied directly to source documents this round, per DEC-46 in `35_DECISION_LOG.md`):** the original Phase 5 draft's proposed correction to `10_RULE_ENGINE_SPECIFICATION.md` FR-010 (describing the ~50-item shield limit as wholly undocumented) was itself found incorrect on re-verification against Apple's current documentation. FR-010 has been corrected in this amendment round to state the four exact, independently-documented per-property limits (50 applications; 50 web domains; 50 categories +50 exceptions for app categories; 50 categories +50 exceptions for web-domain categories) as VERIFIED FROM APPLE DOCUMENTATION, with only the exceeded-limit failure behaviour remaining NEEDS REAL-DEVICE TECHNICAL SPIKE. See `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.3/§27.6/§27.7 and `10_RULE_ENGINE_SPECIFICATION.md` §10.8.

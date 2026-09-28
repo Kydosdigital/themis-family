@@ -1,6 +1,6 @@
 # 20. State Machines
 
-**Status:** Phase 5 draft
+**Status:** Phase 5, amended 2026-09-28 (founder review round — see `35_DECISION_LOG.md` Phase 5 amendment completion note)
 **Depends on:** `19_DATA_MODEL.md` (field/entity names below match that document exactly)
 
 Ten state machines are defined below, matching the founder's required minimum list. Each includes states, transitions, triggers, and the guarding business rule where one exists. Transitions with no corresponding requirement, and requirements with no corresponding transition, are flagged inline and summarised in §20.11.
@@ -16,14 +16,19 @@ States: `Active` → `Deleted`
 
 This is a **derived/computed** state (per `19_DATA_MODEL.md` §19.4), not a persisted field, but is specified here as a state machine since it has clear discrete values and transitions the product must display correctly.
 
-States: `NotEnrolled` → `AuthorizationPending` → `Protected` → `NotActive` (terminal-ish, can return to `Protected`) → `Removed` (terminal)
+**Amended this round to align with the five-state parent-facing model confirmed in `16_DEVICE_ENFORCEMENT.md` §16.8 (Protected / Sync Pending / Device Offline / Needs Attention / Protection Unavailable), plus the pre-enrollment/removal states this internal machine also needs to track:**
+
+States: `NotEnrolled` → `AuthorizationPending` → `Protected` → {`SyncPending`, `DeviceOffline`, `NeedsAttention`} → `ProtectionUnavailable` (can return to `Protected`) → `Removed` (terminal)
 
 - `NotEnrolled` → `AuthorizationPending`: parent begins device onboarding, `requestAuthorization(for: .child)` called (§27.2).
-- `AuthorizationPending` → `Protected`: Apple authorization granted and at least one active Rule resolves successfully to a Resolved Shield List.
+- `AuthorizationPending` → `Protected`: Apple authorization granted and at least one active Rule resolves successfully to a Local Enforcement Plan (`16_DEVICE_ENFORCEMENT.md` §16.3).
 - `AuthorizationPending` → `NotEnrolled`: authorization declined or abandoned.
-- `Protected` → `NotActive`: `authorizationStatus` changes externally (child ages to adult account, parent changes Settings directly) per §27.2's VERIFIED external-revocation finding, detected on next foreground check (`16_DEVICE_ENFORCEMENT.md` §16.9).
-- `NotActive` → `Protected`: re-authorization succeeds (parent re-grants in Settings, or age-out is reversed — the latter is likely not practically reversible, flagged as **UNKNOWN**, not assumed either way).
-- `Protected`/`NotActive` → `Removed`: Owner/Guardian removes the device (FR-007) or the device replacement flow (§16.9) is completed.
+- `Protected` → `SyncPending`/`DeviceOffline`: the device has not successfully synced within the server-configurable staleness threshold (`16_DEVICE_ENFORCEMENT.md` §16.8); the exact distinction between these two sub-states (e.g. a brief lapse vs. a longer one) is left to the server-configurable thresholds, not fixed here.
+- `SyncPending`/`DeviceOffline` → `Protected`: sync succeeds again before any further downgrade.
+- `Protected`/`SyncPending`/`DeviceOffline` → `NeedsAttention`: a condition requiring parent action is detected that is not itself a full authorization loss (e.g. a Local Enforcement Plan could not be generated because of a configuration problem).
+- Any of the above → `ProtectionUnavailable`: `authorizationStatus` changes externally (child ages to adult account, parent changes Settings directly) per §27.2's VERIFIED external-revocation finding, detected on next foreground check (`16_DEVICE_ENFORCEMENT.md` §16.9), **or** the household's subscription lapses beyond whatever grace behaviour Phase 6 confirms (§20.10).
+- `ProtectionUnavailable` → `Protected`: re-authorization succeeds (parent re-grants in Settings, subscription resumes, or age-out is reversed — the latter is likely not practically reversible, flagged as **UNKNOWN**, not assumed either way).
+- Any non-`Removed` state → `Removed`: Owner/Guardian removes the device (FR-007) or the device replacement flow (§16.9) is completed.
 
 ## 20.3 Rule
 
@@ -61,11 +66,11 @@ States: `Pending` → `Approved`/`Rejected`/`Expired`
 
 ## 20.7 Temporary Access / Free Pass (TemporaryAccessGrant)
 
-States: `Active` → `Expired`; alternate: `Active` → `Revoked`
+States: `Active` → `Expired`; alternate: `Active` → `Revoked` (sub-states `RevocationSent` → `RevocationConfirmed`, see below)
 
 - Creation directly enters `Active` (no draft state — a grant is created already in force, per its preset-driven, often self-service nature).
 - `Active` → `Expired`: automatic at `expires_at`.
-- `Active` → `Revoked`: **OPEN QUESTION (new, OQ-35):** Phase 3/4 documents confirm Free Pass presets and scope/duration rules (DEC-33) but no document explicitly confirms whether an Owner/Guardian can revoke an already-active grant early. This is a plausible and probably expected capability (a parent should likely be able to cancel a Free Pass they or the child activated in error) but is **not a confirmed requirement** — flagged here as a genuine gap rather than assumed. If confirmed by the founder, `Revoked` is a simple terminal transition triggered by Owner/Guardian action; if not confirmed, this state and transition should be removed from the final model.
+- `Active` → `Revoked`: **CONFIRMED this amendment round, closes OQ-35.** An Owner/Guardian may revoke an already-active grant early. Behaviour (full detail in `16_DEVICE_ENFORCEMENT.md` §16.9a): the grant's `status` moves to `Revoked` via the same atomic approval-handling mechanism as any other approval-type action (§16.7); the backend increments `resolution_version`; the revocation is pushed/synchronised to the child device; the child device recomputes its Local Enforcement Plan and the overridden rule(s) resume applying. The transition itself is a single terminal state change (`Active` → `Revoked`), but the **parent-facing UI models two observable sub-states of that transition** — `revoked_at` is set immediately (parent sees "Revocation sent") and `applied_on_device_at` is set once the child device confirms (parent sees "Access revoked") — per `19_DATA_MODEL.md`'s `TemporaryAccessGrant.applied_on_device_at` field.
 
 ## 20.8 Active Engagement Session
 
@@ -76,7 +81,7 @@ States: `Running` → `Completed`; alternate: `Running` → `Backgrounded` → `
 - `Backgrounded` → `Running`: app is re-foregrounded before any termination threshold, session resumes counting.
 - `Backgrounded` → `TerminatedPendingResume`: backgrounding persists past whatever threshold triggers termination handling (exact threshold not restated here, confirmed in `11_TASK_AND_APPROVAL_SPECIFICATION.md` §11.1a); per DEC-43's persist-and-verify model, this is not a failure state but a checkpoint — session progress is persisted.
 - `TerminatedPendingResume` → `Resumed`: child reopens and continues; modelled as a **new** EngagementSession row with `resume_of_session_id` pointing at the terminated one (per `19_DATA_MODEL.md` §19.2), rather than mutating the original row, preserving a full audit trail of the resume chain.
-- `TerminatedPendingResume` → `Abandoned`: **OPEN QUESTION (new, OQ-36):** no confirmed requirement states what happens if a terminated-pending-resume session is never resumed at all (does the linked Task simply remain `InSession` forever, or does it eventually fall back to `Pending`/expire?). Flagged as a genuine gap for founder review, not assumed.
+- `TerminatedPendingResume` → `Abandoned`: **CONFIRMED this amendment round, closes OQ-36.** A session remains resumable until the **earlier of** the linked task/context's own expiry, or **24 hours from `last_checkpoint_at`** (`19_DATA_MODEL.md`). If neither resume nor the context's own natural resolution happens by then, the session moves to `Abandoned`: no completion credit is awarded, the persisted partial time is retained only as historical/debug information per Phase 6's retention policy, and — if the underlying task/context is still valid — the child may start a fresh session (a new EngagementSession row, not a further resume of the abandoned one). There is no indefinite `InSession`/`TerminatedPendingResume` state in V1.
 
 ## 20.9 Focus Session
 
@@ -93,12 +98,14 @@ States: `Active` → `Lapsed`; alternate (RECOMMENDATION only): `Lapsed` → `In
 - **The `InGrace` state and its transitions are a Phase 5 RECOMMENDATION, not a confirmed requirement** (per `16_DEVICE_ENFORCEMENT.md` §16.10/OQ-33) — Phase 6's subscription document must confirm or reject this before it is treated as final. Shown here only to make explicit that this state machine is intentionally incomplete pending that decision, rather than silently omitted.
 - `Lapsed`/`InGrace` → `Active`: payment resumes successfully.
 
-## 20.11 End-of-Phase-5 cross-check: transitions without requirements, requirements without transitions
+## 20.11 End-of-Phase-5 cross-check: transitions without requirements, requirements without transitions (re-run this amendment round)
 
-**Transitions with no backing requirement (flagged as needing founder confirmation before being treated as final, not deleted, since they represent reasonable product behaviour that simply hasn't been explicitly decided):**
-- TemporaryAccessGrant `Active` → `Revoked` (§20.7, OQ-35).
-- EngagementSession `TerminatedPendingResume` → `Abandoned` (§20.8, OQ-36).
-- Subscription `InGrace` state entirely (§20.10, OQ-33, already flagged in `16_DEVICE_ENFORCEMENT.md`).
+**Transitions previously flagged as lacking a backing requirement — now resolved:**
+- TemporaryAccessGrant `Active` → `Revoked` (§20.7) — **CONFIRMED, OQ-35 closed.**
+- EngagementSession `TerminatedPendingResume` → `Abandoned` (§20.8) — **CONFIRMED, OQ-36 closed.**
+
+**Still open, explicitly deferred rather than resolved:**
+- Subscription `InGrace` state entirely (§20.10, OQ-33) — per founder instruction, this is deliberately **not** finalised in Phase 5; it is carried into Phase 6's `25_SUBSCRIPTIONS_AND_BILLING.md`, subject to the confirmed safety principle that no lapse may leave a child indefinitely locked (`16_DEVICE_ENFORCEMENT.md` §16.10).
 
 **Requirements identified in Phase 3/4 with no corresponding state transition above (checked against `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, `18_ROLES_AND_PERMISSIONS.md`):**
 - **None identified.** Every confirmed FR/BR that describes a state change (approval, expiry, session outcome, device/household lifecycle, rule activation) was traced to a transition in §20.1–20.10 during this document's drafting. This is stated as a positive finding, not assumed by default — the cross-referencing was done document-by-document against the full list of confirmed DEC-##/BR-##/FR-## entries currently in `35_DECISION_LOG.md`.

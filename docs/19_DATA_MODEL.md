@@ -1,9 +1,11 @@
 # 19. Data Model
 
-**Status:** Phase 5 draft
+**Status:** Phase 5, amended 2026-09-28 (founder review round — see `35_DECISION_LOG.md` Phase 5 amendment completion note)
 **Depends on:** `06_FUNCTIONAL_REQUIREMENTS.md`, `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, `18_ROLES_AND_PERMISSIONS.md`, `27_APPLE_INTEGRATION_REQUIREMENTS.md`
 
 This document defines the logical entities the backend must persist and the fields each carries, derived directly from the confirmed Phase 3/4 business rules. It is a logical model (entities, relationships, key fields, ownership), not a physical schema (no column types/indices) — those are a Phase 6/7 or implementation-time concern. No production code accompanies this document per the standing engagement rule.
+
+**Amendment note (this round):** three fields in the original Phase 5 draft made assumptions the founder's re-check of Apple documentation found unsupported or contradictory to earlier confirmed decisions, and are corrected below: `Member.date_of_birth_or_age_band` (contradicted DEC-24, which confirmed no DOB is collected), `Member.apple_account_link` (assumed an Apple-exposed account identifier this product has no documented API to obtain), and `ControlledTarget.parent_assigned_label` (implied `FamilyActivityPicker` supplies a custom label, which it does not). See §19.2 for the corrected fields.
 
 ## 19.1 Modelling constraints inherited from Apple's platform (per `27_APPLE_INTEGRATION_REQUIREMENTS.md`)
 
@@ -20,12 +22,12 @@ This document defines the logical entities the backend must persist and the fiel
 - `subscription_state` (see §19.2 Subscription entity; summarised here for quick reference)
 
 ### Member
-- `member_id` (PK)
+- `member_id` (PK) — a Themis-issued identifier; Themis identifies its own Member and Device records using Themis IDs, not any Apple-exposed identifier (see below).
 - `household_id` (FK)
 - `role` (Owner | Guardian | Child | Teen — per `18_ROLES_AND_PERMISSIONS.md`)
 - `display_name`
-- `apple_account_link` (opaque reference sufficient to identify which Apple Family Sharing member this corresponds to, for `.child`-mode authorization per §27.2; not a raw Apple ID, consistent with data-minimisation)
-- `date_of_birth_or_age_band` (as already established in earlier phases for Teen/Child distinctions)
+- `experience_segment` (Child | Teen — **corrected this amendment round.** The original draft's `date_of_birth_or_age_band` field is removed: it directly contradicted DEC-24, which confirmed the parent explicitly selects "Child experience" or "Teen experience" during setup and no precise child DOB is collected for this purpose. `experience_segment` is the correct, DEC-24-consistent field: an explicit parent choice, not a derived or stored age/DOB value.)
+- **`apple_account_link` field removed this amendment round.** The original draft assumed Family Controls exposes an Apple Account identifier suitable for Themis to store as a link between a Member and their Apple Family Sharing identity. No documented Apple API was found providing such an identifier for this purpose (§27.2's `AuthorizationCenter`/`FamilyControlsMember` surface authorization status and prompts, not an account identifier). Themis does not invent an Apple account reference field. Apple authorization state is modelled purely as **device/platform state** (see `Device.platform_authorization_status` below), not as a Themis identity-provider concern. **If a platform-level binding between a Themis Member and a specific Apple Family Sharing identity is technically needed** (e.g. to route the correct `.child` authorization prompt to the correct device), that binding mechanism is classified **NEEDS REAL-DEVICE TECHNICAL SPIKE** rather than architected around an invented field.
 - `invited_by`, `invited_at`, `joined_at` (nullable until accepted)
 - `removed_at` (nullable; soft-delete, since historical Task/Rule records reference this member and must remain attributable)
 
@@ -42,7 +44,7 @@ This document defines the logical entities the backend must persist and the fiel
 - `household_id` (FK)
 - `kind` (Application | ActivityCategory | WebDomain — mirrors Apple's three token types)
 - `apple_token_opaque_ref` (stored exactly as returned by the `FamilyActivityPicker`; treated as an opaque blob, never parsed)
-- `parent_assigned_label` (the only human-readable name available, per §19.1)
+- `custom_alias` (nullable; **corrected this amendment round, replaces `parent_assigned_label`.** The original field name and description implied `FamilyActivityPicker` itself supplies a custom, parent-assigned label — it does not. The picker's selection is privacy-preserving and opaque by design (§27.3); the app may render Apple's token using the supported SwiftUI family-activity `Label` view on an authorised device, which displays Apple's own icon/name for the item, not a Themis-stored string. `custom_alias` is an entirely separate, optional field: a human-readable nickname explicitly entered by the parent *inside Themis* (e.g. "The game console app" for a target they want to refer to more simply than its `Label`-rendered name), never claimed to have come from the picker.)
 - `is_essential_or_always_allowed` (boolean; drives the unconditional subtraction in `16_DEVICE_ENFORCEMENT.md` §16.3 step 3)
 
 ### Rule
@@ -64,7 +66,7 @@ This document defines the logical entities the backend must persist and the fiel
 - `linked_rule_id` (FK → Rule, nullable)
 - `session_type` (None | ActiveEngagementSession | FocusSession — per DEC-37/§11.1a)
 - `status` (Pending | Submitted | Approved | Rejected | Interrupted | ExpiredUnresolved — the last two added per DEC-42/DEC-40 respectively)
-- `submitted_at_device_local`, `submitted_at_server_received` (both retained, per `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7's dual-timestamp requirement)
+- `submitted_at_device_local`, `submitted_at_server_received`, `trusted_time_anchor_ref` (all retained, per `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a's trusted-time model — the anchor reference supports reconciling a genuinely on-time offline submission rather than relying on server-received time alone)
 - `grace_period_expires_at` (nullable; computed per DEC-40 when a Deadline-Lock-linked task's deadline passes with the task still pending)
 - `resolved_by_member_id`, `resolved_at` (nullable until a decision is made)
 - `rejection_note` (nullable, per DEC-38's confirmed-optional field)
@@ -90,13 +92,17 @@ This document defines the logical entities the backend must persist and the fiel
 - `scope` (target_ids affected)
 - `starts_at`, `expires_at`
 - `granted_by_member_id` (nullable if self-service within an Owner/Guardian-approved preset's bounds — exact self-service bounds were confirmed in Phase 3; this field records whichever party's action actually created the grant)
+- `status` (Active | Expired | Revoked — **`Revoked` added this amendment round, closes OQ-35**; see `20_STATE_MACHINES.md` §20.7 and `16_DEVICE_ENFORCEMENT.md` §16.9a for the confirmed early-revocation behaviour)
+- `revoked_by_member_id`, `revoked_at` (nullable; populated only when `status = Revoked`)
+- `applied_on_device_at` (nullable; the timestamp the child device confirmed it received and applied the revocation — supports the "Revocation sent" → "Access revoked" UI distinction confirmed in `16_DEVICE_ENFORCEMENT.md` §16.9a, and the analogous "Approved"/"Applied on device" distinction in §16.6a for other approval-type actions)
 
 ### EngagementSession (Active Engagement Session / Focus Session)
 - `session_id` (PK)
 - `linked_task_id` (FK → Task, nullable — a session can exist standalone per some confirmed flows, or attached to a Task)
 - `session_type` (ActiveEngagementSession | FocusSession)
 - `started_at`, `ended_at` (device-local; server-received equivalents per the offline model)
-- `outcome` (Completed | Interrupted | TerminatedPendingResume — the last two per DEC-42/DEC-43)
+- `outcome` (Completed | Interrupted | TerminatedPendingResume | Abandoned — **`Abandoned` added this amendment round, closes OQ-36**; a `TerminatedPendingResume` session moves to `Abandoned` at the earlier of the linked task/context's expiry or 24 hours from `last_checkpoint_at`, per `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.6 and `20_STATE_MACHINES.md` §20.8)
+- `last_checkpoint_at` (the last trustworthy point the session's persisted partial progress was confirmed, per DEC-43's persist-and-verify model; drives the 24-hour abandonment window above)
 - `resume_of_session_id` (nullable self-reference, per DEC-43's persist-and-verify/Resume model)
 
 ### Subscription
@@ -109,7 +115,16 @@ This document defines the logical entities the backend must persist and the fiel
 ### ResolutionVersion (supporting entity for §16.7/§17.4 atomicity)
 - `household_id` (FK, PK component)
 - `device_id` (FK, PK component)
-- `version` (monotonically increasing integer, incremented atomically by the backend on every state change affecting that device's Resolved Shield List: rule change, approval, grant creation/expiry, session outcome, role change)
+- `version` (monotonically increasing integer, incremented atomically by the backend on every state change affecting that device's Local Enforcement Plan: rule change, approval, grant creation/expiry/revocation, session outcome, role change)
+
+### LocalEnforcementPlan (device-local only — not a backend-persisted entity; documented here for completeness per `16_DEVICE_ENFORCEMENT.md` §16.3)
+- `current_shield_state` (the concrete token set shielded right now)
+- `rule_config_version` / `source_resolution_version` (the `ResolutionVersion.version` this plan was generated from)
+- `generated_at`, `effective_from`
+- `transitions` (list of: transition timestamp/schedule identity, resulting shield operation or snapshot)
+- `grant_expiries`, `grace_period_expiries` (the specific expiry timestamps feeding the transitions above)
+- `timezone_context`
+- This entity exists only in the App Group shared store on the child device; the backend never stores or receives it directly, only the `ResolutionVersion` and underlying business-state rows it was derived from. It is listed here, not in §19.4 alone, because its field shape is a binding cross-document contract between `16_DEVICE_ENFORCEMENT.md`, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md`, and `29_API_AND_BACKEND_REQUIREMENTS.md`, not merely an implementation detail.
 
 ## 19.3 Relationships summary
 
@@ -124,8 +139,8 @@ This document defines the logical entities the backend must persist and the fiel
 
 Per the founder's explicit Phase 5 instruction to define "local versus server-owned state," the following distinction is made explicit and must not be blurred in implementation:
 
-- **Server-owned, persisted:** every entity and field in §19.2.
-- **Device-computed, never persisted server-side:** the Resolved Shield List (`16_DEVICE_ENFORCEMENT.md` §16.3) and the device's live "protection status" display value — both are derived, at read time or sync time, from the persisted entities above, and are recomputed rather than stored as their own row. This avoids the entire class of bug where a derived value silently drifts from the rules it was derived from.
+- **Server-owned, persisted:** every entity and field in §19.2 except `LocalEnforcementPlan`.
+- **Device-computed, never persisted server-side:** the `LocalEnforcementPlan` (`16_DEVICE_ENFORCEMENT.md` §16.3) and the device's live "protection status" display value — both are derived, at read time or sync time, from the persisted entities above, and are recomputed rather than stored as their own row. This avoids the entire class of bug where a derived value silently drifts from the rules it was derived from.
 
 ## 19.5 Requirements-to-entity traceability spot check
 

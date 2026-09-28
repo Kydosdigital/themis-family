@@ -1,13 +1,15 @@
 # 29. API and Backend Requirements
 
-**Status:** Phase 5 draft
+**Status:** Phase 5, amended 2026-09-28 (founder review round — see `35_DECISION_LOG.md` Phase 5 amendment completion note)
 **Depends on:** `19_DATA_MODEL.md`, `20_STATE_MACHINES.md`, `16_DEVICE_ENFORCEMENT.md`, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md`
 
 This document specifies backend behaviour requirements at a logical level (what the API must guarantee, not endpoint-by-endpoint wire specifications or a technology choice) since production code/implementation is out of scope for this engagement phase.
 
-## 29.1 Authoritative-source principle
+## 29.1 Authoritative-source principle (confirmed this amendment round, closes OQ-31 at the backend-contract level)
 
-**CONFIRMED REQUIREMENT.** The backend is the single authoritative source of truth for every entity in `19_DATA_MODEL.md` §19.2 except the two explicitly device-local derived values named in §19.4 (Resolved Shield List, live protection-status display). Every client (child device, parent/guardian device, any future web dashboard) is a cache-and-render layer over backend state; no client-side conflict resolution logic should ever be required for entities that only the backend can authoritatively decide, by construction (per `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.3's single-owner rule).
+**CONFIRMED REQUIREMENT.** The backend is authoritative for **shared business state**: rules, approvals, requests, grants, membership, subscription — every entity in `19_DATA_MODEL.md` §19.2 except the device-local `LocalEnforcementPlan` and the live protection-status display named in §19.4. Every client (child device, parent/guardian device, any future web dashboard) is a cache-and-render layer over this backend state for those entities; no client-side conflict resolution logic should ever be required for them, by construction (per `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.3's single-owner rule).
+
+**CONFIRMED ARCHITECTURAL BOUNDARY (per `16_DEVICE_ENFORCEMENT.md` §16.6):** the backend is explicitly **not** the runtime shield engine and must not be designed as one. The child device is authoritative for immediate device-enforcement execution — it generates and maintains its own `LocalEnforcementPlan` from the latest business-state snapshot it has synced. The backend's role on a relevant change is: commit the authoritative change, increment `resolution_version` (§29.3), and send a wake/sync signal where supported (§29.6) — never to compute or push a ready-made shield state the device merely applies verbatim. This boundary is restated here as a binding backend-contract requirement, not left only as an architectural principle in `16_DEVICE_ENFORCEMENT.md`, since it directly shapes what the API surface does and does not need to expose (no "set device shield state" endpoint exists or should exist; only business-state read/write endpoints plus a version/wake mechanism).
 
 ## 29.2 Idempotency
 
@@ -32,19 +34,31 @@ This document specifies backend behaviour requirements at a logical level (what 
 
 ## 29.6 Push notification role
 
-**RECOMMENDATION, not a hard requirement given the constraints already established:** the backend should send a silent push to the relevant child device whenever a `ResolutionVersion` change occurs that plausibly changes that device's Resolved Shield List (a new grace-period entry, an approval, a grant expiry), to reduce (not eliminate, per `16_DEVICE_ENFORCEMENT.md` §16.6's analysis) the latency before the device's next foreground-triggered resync. This is explicitly a latency-reduction measure, not a substitute for the mandatory foreground correction pass, since push delivery itself is not guaranteed and the `DeviceActivityMonitor` extension cannot act on a push directly in any case that has been confirmed (§27.4 constraints).
+**CONFIRMED (restated precisely this amendment round, per `16_DEVICE_ENFORCEMENT.md` §16.6/§16.6a):** the backend sends a silent push to the relevant child device whenever a `ResolutionVersion` change occurs that plausibly changes that device's `LocalEnforcementPlan` (a new grace-period entry, an approval, a grant expiry or revocation). **Push is explicitly a latency optimisation, never the sole correctness mechanism** — it is not a substitute for the mandatory foreground correction pass, since push delivery itself is not guaranteed and the `DeviceActivityMonitor` extension cannot act on a push directly in any case that has been confirmed (§27.4 constraints). The exact reliability of this latency reduction is precisely what `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.3a/§27.8's Priority 1 real-device spike measures — this section states the intended role of push, not a claim about its measured performance.
 
 ## 29.7 Role-and-permission enforcement at the API layer
 
 **CONFIRMED REQUIREMENT.** Every write endpoint must enforce the role permissions confirmed in `18_ROLES_AND_PERMISSIONS.md` server-side, not merely hide disallowed actions in client UI. This is a standard security requirement restated here explicitly because several Phase 3/4 decisions (e.g. BR-101/DEC-45's Owner-only household deletion, the Owner/Guardian-only rule-authoring restriction from `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.4) are safety- and account-integrity-relevant, not merely cosmetic UX gating.
 
-## 29.8 Rate/abuse considerations (flagged, not fully specified)
+## 29.8 Rate/abuse considerations — CONFIRMED at the policy level this amendment round, closes OQ-37
 
-**OPEN QUESTION (new, OQ-37):** no Phase 1–4 document addresses whether a child could abuse the Request/Task submission or Free Pass activation endpoints (e.g. rapid repeated Request creation to flood a Guardian's approval queue, or repeatedly triggering the offline-outbox idempotency path to probe for a race). This is a plausible abuse vector for a system explicitly designed to be used by a party (the child) whose incentives are sometimes adversarial to the restriction being enforced. **Not addressed by any confirmed requirement and not invented here** — flagged for Phase 6 (likely `21_SECURITY_REQUIREMENTS.md`, not yet written) rather than silently assumed away.
+**CONFIRMED PRINCIPLE.** The backend must treat the child client as potentially adversarial for enforcement-related endpoints — not because the child is assumed to be malicious as a person, but as **ordinary defensive system design**: this is a system whose whole purpose is to restrict a party whose incentives are sometimes opposed to the restriction, so its API surface should be designed the same way any system is designed when one of its authenticated clients has a plausible incentive to misuse an endpoint (rapid repeated Request creation to flood a Guardian's approval queue, repeatedly triggering the offline-outbox idempotency path to probe for a race, oversized payloads, replaying a captured request).
+
+**Phase 6's `24_SECURITY_REQUIREMENTS.md` must specify, at minimum:**
+- Rate limiting on write endpoints, scoped per Member/device.
+- Idempotency (already required, §29.2) and duplicate suppression.
+- One-active-request-per-context where appropriate (e.g. a Member cannot have unlimited simultaneous pending Requests against the same rule/context).
+- Server-side role/ownership validation on every write (already required, §29.7).
+- Request-size limits.
+- Replay protection.
+- Audit logging for suspicious patterns.
+- Protection against notification flooding (a child cannot force unlimited push/reminder notifications to a parent's device).
+
+This closes OQ-37 at the product-policy level (yes, the backend must defend against this) with the exact controls specified in Phase 6, consistent with the founder's direction not to frame this as an accusation against the child, but as standard defensive engineering.
 
 ## 29.9 Backend actions identified as capable of racing (consolidated list, feeds end-of-Phase-5 cross-check)
 
-1. Two approvals on the same Task/Request (§29.4) — resolved via atomic compare-and-increment.
+1. Two approvals on the same Task/Request/Grant-revocation (§29.4, §16.9a) — resolved via atomic compare-and-increment.
 2. Offline outbox replay producing duplicate Task/Request/Grant/Session-outcome records (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.5) — resolved via idempotency keys.
 3. Server-side scheduled expiry job vs. a simultaneous manual approval arriving in the same moment a Grace Period is about to lapse (e.g. a Guardian's approval and the automatic `GracePeriod` → `ExpiredUnresolved` transition happening within the same instant) — **newly identified here**: **RECOMMENDATION** that the scheduled expiry job and the manual-approval endpoint both go through the same atomic version-increment primitive described in §29.4, so whichever actually commits first server-side wins deterministically, with the loser's caller informed the item was already resolved, exactly as in the two-human-approvers case. This should be confirmed as an explicit implementation requirement in Phase 6/7, not left implicit.
 4. EngagementSession client-side foreground-vs-termination-timer race (`20_STATE_MACHINES.md` §20.11) — a client-local race, not a backend one, but listed here for completeness since it feeds the same end-of-phase cross-check.
