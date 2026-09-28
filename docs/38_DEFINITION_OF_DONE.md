@@ -33,7 +33,7 @@ Per the founder's explicit ten-point structure. This report assesses readiness a
 
 **1. Product requirements completeness — GO (at the specification level).** All seven phases are complete: Product Overview/Vision through Error/Edge Case Catalogue, Test Strategy, Traceability Matrix, MVP/Later matrix, Build Sequence, and this Definition of Done. `32_TRACEABILITY_MATRIX.md` §32.7 confirms no orphan HLR/FR, no untested AC, and no untraceable test. **This completeness is a documentation-level GO only** — see points 2–3 below for why the product as a whole is not yet GO to build without qualification.
 
-**2. Apple entitlement status — NO-GO (blocking).** The Family Controls entitlement has not yet been applied for/approved (Priority 0, `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.8). This is the single hardest blocker in the entire specification: essentially every enforcement capability in the product depends on it, and no amount of further documentation work resolves it.
+**2. Apple entitlement status — NOT YET EVIDENCED (blocking).** Family Controls production entitlement approval has not yet been evidenced in the project record (Priority 0, `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.8). This is the single hardest blocker in the entire specification: essentially every enforcement capability in the product depends on it, and no amount of further documentation work resolves it. Status to be updated once submission/approval is confirmed by project record.
 
 **3. Real-device spike status — NO-GO (blocking for 8 of 9 priorities).** None of the nine real-device spikes in the priority list have been run (Priority 0 is the entitlement approval itself, listed separately at point 2 for emphasis). Eight of twenty-four HLRs carry a live spike dependency (`32_TRACEABILITY_MATRIX.md` §32.6), including two genuinely safety-critical UNKNOWNs (OQ-30, Phone/Messages/Maps shielding behaviour) and (OQ-32/OQ-40, clock-tampering resilience).
 
@@ -51,9 +51,16 @@ Per the founder's explicit ten-point structure. This report assesses readiness a
 
 **10. Remaining build blockers (consolidated, narrower than launch blockers — what stops Stage 1/3/4 engineering specifically):** Apple entitlement approval (Stage 0/1); the Priority 0–8 spike programme, specifically before Stage 3 (child-device enforcement) and the Category B portion of Stage 4 (reporting) proceed, per `37_BUILD_SEQUENCE.md` §37.9's explicit no-silent-assumption rule.
 
-## 38.6 Overall verdict
+## 38.6 Overall verdict — four-level readiness
 
-**NO-GO for full production implementation as of 2026-09-28.** The requirements specification itself is complete and internally consistent (point 1), but this explicitly does not mean the product is ready to build in full — the entitlement dependency (point 2) and the real-device spike programme (point 3) are hard blockers on the enforcement core of the product, and the privacy/safeguarding readiness gates (points 4–5) are hard blockers on public launch regardless of engineering progress. **Stages 0, 1, 2 (partially), 5, and the non-spike-dependent parts of Stage 4 of `37_BUILD_SEQUENCE.md` may begin on the founder's authority once implementation is explicitly approved** ("Requirements approved. Begin implementation."), but Stage 3 (child-device enforcement) and the Category B portion of Stage 4 remain gated on Stage 1's findings, and public launch remains gated on points 4, 5, 6 (SEC-016), and 9 in full, independent of engineering completion.
+Per the founder's instruction, the project readiness model is now assessed at four distinct levels rather than one blanket verdict:
+
+- **SPECIFICATION READY: YES.** All seven phases complete; no orphan HLR/FR; every AC has a test category; no untraceable tests. Requirements documentation is finished and internally consistent.
+- **FOUNDATION ENGINEERING READY: YES.** Stages 0, 1, 2 (partially), 5, and the non-spike-dependent parts of Stage 4 of `37_BUILD_SEQUENCE.md` may proceed on the founder's explicit approval ("Requirements approved. Begin implementation."): repository/project scaffolding, CI/CD, backend project setup, non-spike-dependent database entities, Owner/Guardian authentication, child-device pairing infrastructure (to the extent independent of Family Controls), API authorization, idempotency/versioning, design system, navigation shells, static/mock UX, sandbox subscription infrastructure, support/admin foundations, Category A analytics, test harnesses, and spike harness code.
+- **PRODUCTION ENFORCEMENT READY: NO.** The entitlement dependency (point 2) and the real-device spike programme's Priority 0–8 (point 3, specifically Priorities 1–8 before Stage 3) are hard blockers: Family Controls enforcement, Local Enforcement Plan production code, Deadline Lock enforcement, scheduled shielding, remote-approval-to-unlock guarantees, Phone/Messages/Maps safety assumptions, protection-status timing thresholds, trusted-time enforcement logic, and Category B reporting UI all remain gated on Stage 1 spike findings.
+- **PUBLIC LAUNCH READY: NO.** The privacy/DPIA readiness gates (points 4–5) and safeguarding readiness (points 4–5) are hard blockers independent of engineering progress, plus completion of the real-device spikes (especially Priority 6's monotonic-clock research, feeding SEC-016) and App Store/Kids Category review readiness (OQ-12), plus accessibility audit passing (NFR-012).
+
+This distinction allows engineering progress on foundation work without embedding unverified Apple behaviour into production architecture.
 
 ## 38.7 Cross-check
 

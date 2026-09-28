@@ -17,8 +17,7 @@ This document catalogues every confirmed push/local notification in the product,
 
 | Trigger | Recipient | Type | Constraint |
 |---|---|---|---|
-| Task submitted, awaiting approval | Owner/Guardian | Push | Subject to DEC-41's reminder model if unresolved |
-| Task approaching Provisional Approval Grace Period expiry | Owner/Guardian | Push (urgent framing, still non-alarming) | One automatic reminder only, per DEC-41 |
+| Task submitted, awaiting approval | Owner/Guardian | Push | Immediate notification; subject to DEC-41's 15-minute automatic reminder if still unresolved |
 | Task approved / rejected | Child/Teen | Push | Neutral, non-punitive copy on rejection (§15.3) |
 | Request submitted | Owner/Guardian | Push | Subject to DEC-41 |
 | Request clarification asked | Owner/Guardian → Child/Teen (and reverse) | Push | Single bounded exchange, FR-042 — no notification chain beyond the one prompt/one reply |
@@ -35,16 +34,34 @@ This document catalogues every confirmed push/local notification in the product,
 | Focus Session interrupted | Child/Teen | In-app only (not push — this is a same-session, immediate event) | Neutral copy, DEC-42 |
 | EngagementSession abandoned (DEC-49) | Child/Teen (on next app open) | In-app only | No completion credit; neutral framing |
 
-## 21.4 What is explicitly NOT notified
+## 21.4 Push notification privacy — minimum payload principle
+
+**CONFIRMED REQUIREMENT, newly formalised this amendment round.** Push notifications may appear on a locked device. Therefore push notification payloads must contain the minimum information required to prompt the user to open Themis, not detailed sensitive content.
+
+Do NOT include in push payloads by default:
+- Child's free-text request reason
+- Clarification reply or rejection notes
+- Sensitive task descriptions
+- Detailed household diagnostic information
+
+**Examples:**
+- GOOD: "Sam sent an access request." → Parent unlocks → Opens Themis → reads full request
+- NOT: "Sam says: I need TikTok because..." → risk of exposure on lock screen
+
+The detailed content appears only after the authenticated user opens Themis and views the relevant screen.
+
+Add this requirement to test scenarios for notification payloads: verify sensitive data is never included in push notification delivery, only rendered after authentication.
+
+## 21.5 What is explicitly NOT notified
 
 **CONFIRMED REQUIREMENT, consistent with data-minimisation and no-covert-monitoring principles.** No notification surfaces Category B (Apple-sandboxed) raw usage data — Themis structurally cannot generate such a notification (§27.5). No notification is sent to a parent containing the free-text content of a child's request/clarification beyond what the ordinary in-app view would show (i.e. push payloads themselves are not used to exfiltrate more detail than the app screen they point to).
 
-## 21.5 Open items
+## 21.6 Open items
 
 - Exact notification copy per entry is a content-design exercise for implementation, not specified line-by-line here, but must be reviewed against `23_PRIVACY_AND_CHILD_SAFETY.md` §23.4b (child transparency) and the neutral-tone standard for every child-facing entry.
 - Device-protection-status notification timing is blocked on OQ-19's real-device spike (staleness threshold), consistent with `16_DEVICE_ENFORCEMENT.md` §16.8.
 - Notification delivery reliability itself (does the push actually arrive) is an infrastructure/APNs concern for Phase 7 build sequencing (`37_BUILD_SEQUENCE.md`), not a product-requirements gap.
 
-## 21.6 Cross-check
+## 21.7 Cross-check
 
 Every notification above traces to an already-confirmed FR/BR/DEC; no new notification-triggering behaviour is introduced by this document that was not already implied by earlier phases. SEC-011's flooding protection and DEC-41's reminder-interval cap are confirmed to bind every entry in §21.3 that could otherwise repeat.

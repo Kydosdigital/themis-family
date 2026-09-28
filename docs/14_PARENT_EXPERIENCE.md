@@ -12,7 +12,7 @@ This document specifies the Owner/Guardian-facing experience end to end: the scr
 **CONFIRMED REQUIREMENT**, per `04_USER_JOURNEYS.md` §4.1 and DEC-25's two-stage model:
 
 1. **Account Creation Complete** — the Owner has created a Themis account (Sign in with Apple, `24_SECURITY_REQUIREMENTS.md` §24.5) and a Household, but no child is protected yet. The UI must not imply protection is active at this stage.
-2. Add a child (`experience_segment`, per DEC-24 — no DOB collected), pair the child's device (`24_SECURITY_REQUIREMENTS.md` §24.5's pairing flow — one-time code/QR, not a child sign-in), grant Family Controls `.child` authorisation on the child's device (a separate, on-device Apple flow the parent walks the child through or completes on a shared device, per FR-006).
+2. Add a child (`experience_segment`, per DEC-24 — no DOB collected), pair the child's device (`24_SECURITY_REQUIREMENTS.md` §24.5's pairing flow — one-time code/QR, not a child sign-in), and grant Family Controls `.child` authorisation (a separate, on-device Apple flow: the Owner/Guardian completes the Family Controls child authorisation flow on the managed child's enrolled device, per FR-006). V1 does not support parent/child shared devices; the device being enrolled is dedicated to the child for the duration of their profile.
 3. Configure at least one working rule (HLR-020, elevated to Must per DEC-25) and confirm the Always Allowed defaults (Phone/Messages/Maps, §13.1).
 4. **Themis Protection Activated** — reached only once a device is authorised, at least one rule is active, and the device has completed its first successful sync (FR-008). The UI must not claim this state prematurely.
 

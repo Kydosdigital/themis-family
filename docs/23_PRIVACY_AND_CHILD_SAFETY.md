@@ -26,6 +26,7 @@ This document specifies what personal and child data Themis Family collects, why
 | Rule/Task/Request/Grant/Session records (Category A reporting data, `22_REPORTING_AND_ANALYTICS.md`) | Core product function, history/reporting | Retained while the household exists; subject to the retention policy in §23.5 for abandoned-session partial data specifically |
 | Custom aliases for controlled targets | Parent usability | Retained while the target/rule exists |
 | Audit logs (who approved/revoked/changed what) | Accountability, abuse protection (`29_API_AND_BACKEND_REQUIREMENTS.md` §29.8), dispute resolution | Retained for a defined period (RECOMMENDATION: 12 months rolling, not yet founder-confirmed) |
+| Push notification payloads | Latency optimisation for user notifications | Minimal content only; sensitive data excluded per `21_NOTIFICATIONS.md` §21.4; not retained after delivery |
 
 **No data collected beyond the above for V1.** Any future feature proposing a new data category must be checked against this table and, if it touches child data, against §23.4's child-safety principles before being added.
 
