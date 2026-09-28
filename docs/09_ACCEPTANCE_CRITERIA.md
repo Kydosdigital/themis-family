@@ -76,9 +76,13 @@ Acceptance criteria are given as Given/When/Then scenarios per story. Every stor
 - **AC3 (time zone travel):** Given the family travels and the device's time zone changes, when the next scheduled trigger time arrives, then it applies according to the device's new current local time zone (BR-205/DEC-36), and the transition does not produce an ambiguous double-trigger or missed-trigger state.
 - **AC4 (DST):** Given a Daylight Saving Time transition occurs, when the schedule's configured wall-clock time next arrives, then it applies at that same local wall-clock time, not shifted by the DST change.
 
-### US-CHILD-002. Not be shielded while my approved deadline task is still awaiting a decision
-- **AC1 (happy path):** Given a task was submitted before the Deadline Lock's deadline and is still Awaiting Approval when the deadline passes, when the deadline passes, then the shield does not apply while the submission remains pending.
-- **AC2 (rejection after deadline):** Given the above state, when the approver later rejects the submission, then the shield applies from the moment of rejection, not backdated to the original deadline.
+### US-CHILD-002. Get a fair, bounded grace period while my on-time submission is still awaiting a decision (Provisional Approval Grace Period — DEC-40)
+- **AC1 (happy path — approved within grace):** Given a task was submitted before the deadline and is still Awaiting Approval when the deadline passes, when the deadline passes, then status becomes "Submitted On Time, Awaiting Approval" and controlled targets remain available for a 30-minute Approval Grace Period; when the approver approves within that window, then the Deadline Lock never activates.
+- **AC2 (rejected within grace):** Given the same state, when the approver rejects within the 30-minute grace period, then the Deadline Lock activates immediately (not backdated to the original deadline).
+- **AC3 (grace period expires unresolved):** Given the same state, when 30 minutes pass from the deadline with no approver decision, then the Deadline Lock activates and remains active until the task is subsequently approved.
+- **AC4 (late approval after grace expiry):** Given the grace period has expired and the shield is active, when the approver later approves the task, then the shield is removed at that point, subject to BR-211's effective-enforcement model if another active rule still restricts the same target (e.g. a bedtime schedule).
+- **AC5 (copy check — non-punitive framing):** Given the child views the task during the grace period, when they check its status, then they see "Submitted on time. Waiting for approval." with a remaining-time indicator (e.g. "Approval grace ends in 18 min"); once the grace period expires, they see "Waiting for approval. Games are paused until this is reviewed." — never wording that frames the grace period itself as a punishment for submitting on time.
+- **AC6 (offline at grace expiry):** Given the device is offline when the 30-minute grace period would expire, when connectivity is unavailable at that exact moment, then the shield still activates on schedule using the locally cached deadline and grace-period expiry time (consistent with HLR-014's offline-first principle).
 
 ### US-CHILD-003. Complete a condition to earn access under Earn First
 - **AC1 (happy path):** Given an Earn First rule with the target shielded by default, when the associated condition resolves to complete (manually approved or automatically verified), then the reward access period begins for the fixed duration set at rule creation.
@@ -114,21 +118,26 @@ Acceptance criteria are given as Given/When/Then scenarios per story. Every stor
 - **AC4 (offline approval):** Given the child's device is offline at the moment of approval, when connectivity returns, then the shield is removed as soon as the device syncs — the approval itself is not lost or time-limited by the brief offline period.
 
 ### US-CHILD-006. See an honest "waiting for approval" state, with one reminder I can send
-- **AC1 (happy path):** Given a task is Awaiting Approval, when time passes with no approver action, then the child sees an elapsed-time indicator and, after the defined reminder interval, an automatic reminder is sent to approvers (OQ-04a — exact interval still pending, does not block this AC's structure).
-- **AC2 (child-triggered nudge):** Given a task is Awaiting Approval and the child has not yet used their nudge, when they tap "Send a reminder," then approvers are re-notified immediately and the control becomes visibly disabled (shown, not hidden) for that item.
+- **AC1 (happy path — confirmed 15-minute interval, DEC-41):** Given a task is Awaiting Approval, when 15 minutes pass with no approver action, then exactly one automatic reminder is sent to all eligible approvers, and no further automatic reminders follow.
+- **AC2 (child-triggered nudge, independent of the automatic reminder):** Given a task is Awaiting Approval and the child has not yet used their nudge, when they tap "Send a reminder" at any point (before, during, or after the 15-minute automatic reminder), then approvers are re-notified immediately, the control becomes visibly disabled for that item, and the automatic reminder's own 15-minute schedule is neither reset nor delayed by this action.
 - **AC3 (nudge already used):** Given the child has already used their one nudge for this item, when they view the item again, then the nudge control is shown but disabled, not offered again.
-- **AC4 (no response, ever — intentional behaviour, not a bug):** Given no approver ever responds, when any amount of time passes, then the restriction remains active indefinitely and no automatic unlock occurs (BR-212/DEC-15) — this must be verified as a passing test, not flagged as a defect.
+- **AC4 (no further reminders after both are used):** Given both the automatic 15-minute reminder and the child's manual nudge have already fired for a pending item, when further time passes with still no approver decision, then no additional reminder notifications are sent for that item, though it remains visibly Awaiting Approval.
+- **AC5 (no response, ever — intentional behaviour, not a bug):** Given no approver ever responds, when any amount of time passes, then the restriction remains active indefinitely and no automatic unlock occurs (BR-212/DEC-15) — this must be verified as a passing test, not flagged as a defect.
 
 ### US-CHILD-007. Complete an Active Engagement Session
 - **AC1 (happy path):** Given an Active Engagement Session task (e.g. a 15-minute in-app reading timer), when the child runs it to completion in the foreground, then the task moves to Completed and the app states "15-minute in-app reading session completed" — never "child definitely read for 15 minutes."
 - **AC2 (pause on backgrounding):** Given the session is running, when the child backgrounds Themis or locks the device, then the timer pauses and backgrounded time is not counted.
 - **AC3 (resume on foreground):** Given the session was paused by backgrounding, when the child returns Themis to the foreground, then the timer resumes from where it paused.
-- **AC4 (force-quit failure):** Given the session is running, when the app is force-quit, then the session resets with no partial credit.
+- **AC4 (app termination with verifiable persisted state — DEC-43, replaces the original force-quit-resets behaviour):** Given the session is running and Themis is terminated (force-quit, crash, memory pressure, or a device restart), when the child reopens Themis and the persisted accumulated foreground duration can be verified as trustworthy, then the app offers Resume from that exact persisted duration, and no time that elapsed while the app was not running is counted.
+- **AC5 (app termination with unverifiable persisted state):** Given the same termination scenarios, when the persisted state's integrity cannot be verified, then the session is marked Interrupted, the child is told clearly and non-blamingly why, and no partial credit is carried over.
+- **AC6 (no wall-clock credit while absent):** Given any termination scenario in AC4/AC5, when the app is reopened after any elapsed real-world time, then completion is never automatically granted based on that elapsed wall-clock time alone — only verified foreground engagement counts.
 
 ### US-CHILD-008. Complete a Focus Session
-- **AC1 (happy path):** Given a Focus Session task restricting a specific set of apps, when the child avoids opening those apps for the configured duration — including while Themis itself is backgrounded or the device is locked — then the task completes and the app states "30-minute focus session completed under the configured restrictions" — never "30 minutes of homework completed."
-- **AC2 (continues while backgrounded):** Given the session is running and Themis is backgrounded or the device is locked, when no restricted app is opened, then the session continues counting (unlike an Active Engagement Session).
-- **AC3 (violation):** Given the session is running, when the child opens one of the specifically restricted apps, then the session is treated as violated; the exact handling (reset vs. pause-and-flag) is OQ-29 and is not yet fixed — this AC records that a violation must be detected and must not be silently ignored, pending that decision.
+- **AC1 (happy path):** Given a Focus Session task restricting a specific set of apps, when the child avoids opening those apps for the configured duration — including while Themis itself is backgrounded, locked, or terminated — then the task completes and the app states "30-minute focus session completed under the configured restrictions" — never "30 minutes of homework completed."
+- **AC2 (continues while backgrounded or Themis is closed):** Given the session is running and Themis is backgrounded, the device is locked, or Themis itself is terminated, when no restricted app is opened during that time, then the session continues counting uninterrupted (unlike an Active Engagement Session) — Themis being closed is compatible with the session's purpose and is never itself a violation.
+- **AC3 (violation — confirmed Interrupted handling, DEC-42):** Given the session is running, when the child opens one of the specifically restricted apps, then the current attempt is immediately marked Interrupted, no completion credit is awarded, and no accumulated time from that attempt carries over to a new attempt.
+- **AC4 (immediate restart, no cooldown):** Given an attempt has just been marked Interrupted, when the child starts a new Focus Session attempt, then it is allowed immediately with no waiting period or penalty.
+- **AC5 (copy check — non-punitive framing):** Given an attempt is marked Interrupted, when the child views the resulting message, then it reads neutrally (e.g. "Focus session interrupted. Start again when you're ready.") and never uses "Failed," "You broke the rule," or other shame-oriented wording.
 
 ### US-OWNER-016. Reconfigure a rule's verification type
 - **AC1 (happy path):** Given an existing rule set to Automatic Verification, when the parent switches it to Parent Approval, then future task instances require approval; the task instance currently in progress (if any) is unaffected (BR-214).
@@ -198,10 +207,10 @@ Acceptance criteria are given as Given/When/Then scenarios per story. Every stor
 ### US-CHILD-013. Ask for temporary access to something for schoolwork
 - **AC1 (happy path):** Given a restriction is active on a target the child needs for schoolwork, when they submit a Temporary Access request with the School Mode-relevant prompt, then it follows the identical Request/Grant lifecycle as Epic D (US-CHILD-009 through US-CHILD-012), with no separate code path or business rules.
 
-### US-CHILD-014. Trust that I can always reach emergency help and my parents
+### US-CHILD-014. Know that Themis will never deliberately block my way to emergency help (RENAMED — DEC-44)
 - **AC1 (happy path):** Given any rule configuration a parent has set up, when the child attempts to use Phone/emergency calling functionality, then it is never blocked by Themis, regardless of any active restrictive rule.
 - **AC2 (parent cannot override the floor):** Given a parent attempts to add emergency calling/OS-level emergency functionality to a restrictive rule's targets, when they try, then the system prevents this at the picker level or, if selected, silently keeps the hard safety principle enforced regardless (FR-053) — there is no configuration path that results in emergency calling being restricted.
-- **AC3 (documentation honesty — no unverified technical claim):** Given any documentation or in-product copy states that a specific app (e.g. Phone) is "technically impossible to shield," when this claim is reviewed, then it is only made once the Apple technical spike (OQ-30) has actually verified that behaviour — until then, copy states the product policy (never deliberately restricted) without asserting an unverified technical guarantee.
+- **AC3 (documentation honesty — no unverified technical claim, and no overstated "reach my parents" guarantee):** Given any documentation, in-product copy, or story wording describes this protection, when it is reviewed, then it states only the confirmed policy — Themis never deliberately interferes with emergency communication or OS-level emergency functionality — and does not claim or imply a guarantee that the child can always specifically reach a parent (e.g. via Messages) under every Apple configuration, since that broader claim depends on OQ-30's still-pending technical validation. A claim that a specific app (e.g. Phone) is "technically impossible to shield" is likewise only made once OQ-30's spike has actually verified that behaviour.
 
 ### US-OWNER-023. Understand that School Mode assumes one device per child
 - **AC1 (happy path):** Given the parent views School Mode or essential access setup screens or help content, when they read the setup guidance, then it states the one-device-per-child assumption and does not imply that a shared device (e.g. siblings sharing an iPad) receives correctly-separated per-child configuration.
@@ -210,10 +219,11 @@ Acceptance criteria are given as Given/When/Then scenarios per story. Every stor
 
 ## Epic F: Roles, Permissions, and Household Administration
 
-### US-OWNER-024. Transfer ownership of the household
+### US-OWNER-024. Transfer ownership of the household, or leave it entirely (CONFIRMED — DEC-45, closes OQ-20)
 - **AC1 (happy path):** Given a household with an existing Guardian, when the Owner transfers ownership to them, then the transfer is a single atomic operation making the Guardian the new Owner and demoting the previous Owner to Guardian, with no moment where the household has zero Owners.
-- **AC2 (failure — no Guardian exists):** Given no Guardian exists, when the Owner attempts to transfer ownership, then the action is unavailable (BR-101) — the Owner must invite a Guardian first (or delete the household; OQ-20 tracks whether a further exit path is needed).
-- **AC3 (failure — invalid target):** Given the Owner attempts to transfer ownership to a Teen/Child or a newly-invited person in the same action, when they try, then the action is blocked — the target must already hold the Guardian role.
+- **AC2 (failure — no Guardian exists, confirmed V1 model):** Given no Guardian exists, when the Owner attempts to transfer ownership, then the action is unavailable (BR-101); the Owner's only confirmed V1 paths to leave are to invite a Guardian, wait for acceptance, and transfer to them, or to delete the household outright (BR-106) — there is no third path and no ownerless-household state in V1.
+- **AC3 (failure — invalid target):** Given the Owner attempts to transfer ownership to a Teen/Child or a newly-invited person in the same action, when they try, then the action is blocked — the target must already hold the Guardian role, accepted as a prior, separate step.
+- **AC4 (failure — split-custody multi-household not supported):** Given separated parents want two independent rule sets for the same child, when they attempt to configure this, then V1 does not support linking or splitting a single child's rules across two households — each household is independent, and this is a stated V1 limitation, not a configuration to be worked around.
 
 ### US-OWNER-025. Have approval conflicts resolved fairly when both parents respond
 - **AC1 (happy path):** Given both Owner and Guardian act on the same pending item within the race window, when the system processes both, then the first action durably recorded (via an atomic conditional state transition) wins, and the other actor receives a clear "already resolved" response naming the outcome — not a silent discard and not an unexplained error.
@@ -235,17 +245,32 @@ None found. Every FR in `06_FUNCTIONAL_REQUIREMENTS.md` (FR-001 through FR-054, 
 None found. Every story traces to a specific HLR and FR/BR pairing, shown inline in `08_EPICS_AND_USER_STORIES.md`.
 
 ### Acceptance criteria that depend on unresolved questions
-These ACs are written to the best currently-available specification but their exact pass condition depends on an item still open in `34_OPEN_QUESTIONS.md`, and must be revisited once that item resolves:
+**Update (2026-09-28, post founder amendment round, DEC-40 through DEC-45):** All four dependencies flagged in the original Phase 4 baseline are now resolved:
 
-- **US-CHILD-006 AC1** depends on OQ-04a (exact reminder interval, 30 minutes proposed but not fixed).
-- **US-CHILD-008 AC3** depends on OQ-29 (Focus Session violation handling — reset vs. pause-and-flag not yet decided); the AC is deliberately written to only require that a violation is detected and not silently ignored, without asserting which handling is correct.
-- **US-CHILD-014 AC3** depends on OQ-30 (Apple picker/ManagedSettings technical validation for Phone/Messages/Maps); the AC is written to require honest, policy-only copy until that validation completes, rather than asserting a specific technical guarantee now.
-- **US-OWNER-024 AC2** depends on OQ-20 (whether a further Owner-exit path is needed when no Guardian exists); the current AC reflects the V1 "invite a Guardian or delete the household" behaviour only, per the existing recommended default.
+- ~~US-CHILD-006 AC1 depended on OQ-04a~~ — **Resolved (DEC-41):** confirmed 15-minute single automatic reminder, independent one-time child nudge. AC1–AC4 rewritten accordingly.
+- ~~US-CHILD-008 AC3 depended on OQ-29~~ — **Resolved (DEC-42):** confirmed Interrupted handling, no credit, immediate restart, neutral copy. AC3–AC5 rewritten accordingly.
+- **US-CHILD-014 AC3 still depends on OQ-30** (Apple picker/ManagedSettings technical validation for Phone/Messages/Maps) — this one remains genuinely open; the AC continues to require honest, policy-only copy until that validation completes, and the story itself was renamed (DEC-44) specifically to stop overstating the confirmed requirement while OQ-30 is pending.
+- ~~US-OWNER-024 AC2 depended on OQ-20~~ — **Resolved (DEC-45):** confirmed V1 model is invite-Guardian-then-transfer or delete-household, with no ownerless household, no direct-to-Child/Teen transfer, and no split-custody multi-household support. AC2 rewritten, AC4 added for the split-custody exclusion.
 
-None of these four dependencies block Phase 5 from starting, since each AC is written to be correct under either resolution of its open question; they are flagged so the eventual resolution is checked against the AC rather than silently assumed compatible.
+Only **US-CHILD-014 AC3 (OQ-30)** remains a genuine open dependency, and it does not block Phase 5 — the AC is written to hold regardless of OQ-30's eventual resolution, since it requires honesty about what's confirmed rather than asserting a specific technical outcome.
 
 ### Missing negative/failure scenarios
 On review, no story was found with only a happy-path AC and no corresponding failure/alternative scenario, with one accepted exception: **US-CHILD-003** (Earn First condition completion) has only a happy path and a scope-boundary AC (no silent renegotiation), because Earn First's own failure modes (a rejected/incomplete condition) are already fully covered under Epic C's task-approval stories (US-CHILD-005/US-OWNER-015) rather than needing a duplicate failure AC here — flagged explicitly rather than silently omitted.
 
 ### Contradictions found
 None. This is the first pass through Phase 4, built directly on the founder-approved, fully-amended Phase 3 baseline (`35_DECISION_LOG.md` DEC-32 through DEC-39), so no conflicting requirements were introduced.
+
+---
+
+## 9.7 Amendment note (2026-09-28 — founder review round, DEC-40 through DEC-45)
+
+The founder's Phase 4 review amended six areas across Phase 3 and Phase 4 documents:
+
+1. **Deadline Lock loophole closed (DEC-40):** BR-207/FR-014 replaced the original "shield never applies while a pre-deadline submission is pending" rule (which allowed an indefinite loophole) with a bounded 30-minute Provisional Approval Grace Period. US-CHILD-002 and its ACs rewritten (§ above).
+2. **Reminder interval confirmed (DEC-41):** 15-minute single automatic reminder plus an independent one-time child nudge, applied identically to tasks (BR-213) and requests (new BR-230). Closes OQ-04a. US-CHILD-006 and its ACs rewritten.
+3. **Focus Session violation handling confirmed (DEC-42):** violating attempts are marked Interrupted with no credit and no cooldown; copy must be neutral, never punitive. Closes OQ-29. New BR-231. US-CHILD-008 and its ACs rewritten.
+4. **Active Engagement Session termination handling replaced (DEC-43):** the original "force-quit resets, no partial credit" rule is replaced with a persist-and-verify model — legitimate foreground progress survives a crash/termination/restart where it can be verified, with Resume offered; unverifiable state is Interrupted, never silently reset without explanation. New BR-232 (Phase 5 to define the persistence/integrity mechanism). US-CHILD-007 and its ACs rewritten.
+5. **Emergency story wording corrected (DEC-44):** US-CHILD-014 renamed and narrowed to the actually-confirmed policy (Themis never deliberately interferes with emergency communication), removing the overstated "I can always reach my parents" framing. OQ-30 (technical validation) remains open and continues to gate any stronger claim.
+6. **Owner exit path confirmed (DEC-45):** BR-101 now states the two confirmed V1 paths (transfer-then-leave, or delete) and the four explicit V1 non-support items (ownerless household, direct-to-Child/Teen transfer, simultaneous invite-and-transfer, split-custody multi-household). Closes OQ-20. US-OWNER-024 and its ACs rewritten.
+
+**Re-run cross-check result:** No new orphan FRs, no new unbacked stories, no new contradictions. Of the four AC-level dependencies flagged in the original Phase 4 baseline, three are now resolved (OQ-04a, OQ-29, OQ-20); one (OQ-30) remains genuinely open and does not block Phase 5, per §9.6 above.

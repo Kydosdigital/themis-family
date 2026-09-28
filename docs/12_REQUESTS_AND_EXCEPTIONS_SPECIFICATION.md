@@ -26,9 +26,11 @@ All four share the same underlying lifecycle and approver actions; they differ o
 - **Failure paths:** Child submits while offline → queued, shown as "Sending..." not "Pending" until confirmed received.
 - **Permissions:** Child/Teen, own requests only
 - **Data required:** Request type, target rule/app (where applicable), requested duration (where applicable), reason, timestamp
-- **Notification behaviour:** Immediate to all eligible approvers
-- **Business rules:** BR-215 (a request always references a specific rule or controlled target — it is not a free-standing message; this is what keeps it from becoming a chat feature, per DEC-29)
+- **Notification behaviour:** Immediate to all eligible approvers; if still Pending after 15 minutes, exactly one automatic reminder is sent (does not repeat); the child/teen may separately send exactly one manual nudge per pending request, independent of the automatic reminder — the same reminder policy as tasks (BR-230, restating DEC-41 for requests).
+- **Business rules:** BR-215 (a request always references a specific rule or controlled target — it is not a free-standing message; this is what keeps it from becoming a chat feature, per DEC-29), BR-230
 - **Release:** V1 / Must
+
+**BR-230 (CONFIRMED — DEC-41, applying the same reminder policy as `11_TASK_AND_APPROVAL_SPECIFICATION.md` BR-213 to requests).** A Pending request receives exactly one automatic reminder to all eligible approvers at 15 minutes if still unresolved, and the child/teen may separately send exactly one manual nudge per pending request, independent of the automatic reminder. Once both have been used (or the 15-minute window has passed even if no nudge is sent), no further reminder notifications are sent for that request while it remains Pending.
 
 ## FR-041. Approver responds to a request
 - **Actor:** Owner or Guardian

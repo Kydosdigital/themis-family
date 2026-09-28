@@ -353,3 +353,64 @@ No new Open Questions, Risks, or Decisions were required by this cross-check bey
 ## Decisions still required from the founder before Phase 5 begins
 
 None outstanding that block Phase 5 (Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour) from starting, once the founder reviews and approves Phase 4. The four AC-level dependencies noted in the Phase 4 completion note above (OQ-04a, OQ-20, OQ-29, OQ-30) should be resolved before the specific Phase 5 documents they affect are finalised, per the "Blocks" column already recorded for each in `34_OPEN_QUESTIONS.md`.
+
+---
+
+## Founder decisions received 2026-09-28 (Phase 4 review — amendments before Phase 5)
+
+**DEC-40. Deadline Lock loophole closed with a Provisional Approval Grace Period — supersedes the original pending-approval behaviour.**
+- **Status:** Confirmed
+- **Decision:** The original rule (a shield never applies while a pre-deadline submission remains pending) allowed a loophole: a child could tap "Done" immediately before a deadline without genuinely completing the task, and avoid the Deadline Lock indefinitely pending a parent's response. Replaced with: task submitted before the deadline → status "Submitted On Time, Awaiting Approval"; at the deadline, a 30-minute Approval Grace Period begins during which targets remain available; approval within the grace period → no lock ever occurs; rejection within the grace period → lock activates immediately; grace period expires unresolved → lock activates and remains active until subsequently approved (at which point BR-211's effective-enforcement model applies if another rule still restricts the target). Essential/Always Allowed/School access unaffected throughout. Child-facing copy must not frame the grace period as a punishment for submitting on time.
+- **Rationale:** Founder decision, closing a genuine correctness/fairness gap identified during Phase 4 review — the original rule's unbounded nature was a real exploitable loophole, not merely a UX nicety.
+- **Date:** 2026-09-28
+- **Supersedes:** `10_RULE_ENGINE_SPECIFICATION.md` BR-207/FR-014 (rewritten); `11_TASK_AND_APPROVAL_SPECIFICATION.md` FR-030/FR-031 (updated to reference the grace period); `08_EPICS_AND_USER_STORIES.md`/`09_ACCEPTANCE_CRITERIA.md` US-CHILD-002 (rewritten).
+
+**DEC-41. Approval reminder interval confirmed — resolves OQ-04a.**
+- **Status:** Confirmed
+- **Decision:** Immediate notification on submission (task or request); exactly one automatic reminder at 15 minutes if still unresolved (does not repeat); the child/teen may separately send exactly one manual nudge per pending item, entirely independent of the automatic reminder (using the nudge does not reset or delay the automatic schedule, and vice versa); after both have fired, no further reminder notifications are sent for that item, though it remains visibly pending.
+- **Rationale:** Founder decision, confirming a fixed, non-escalating interval and clarifying that the two reminder mechanisms (automatic, manual) are independent rather than one resetting the other.
+- **Date:** 2026-09-28
+- **Supersedes:** `11_TASK_AND_APPROVAL_SPECIFICATION.md` FR-032/BR-213 (interval fixed at 15 minutes, independence clarified); adds `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` BR-230 (applying the identical policy to requests, since the founder's decision named "task/request" together). Closes OQ-04a.
+
+**DEC-42. Focus Session violation handling confirmed — resolves OQ-29.**
+- **Status:** Confirmed
+- **Decision:** A Focus Session represents one continuous successful period of avoiding its configured restricted apps. Opening a restricted app during an active session marks that attempt **Interrupted**: the attempt ends immediately, no completion credit is awarded, and accumulated time does not carry over. The child may start a fresh attempt immediately with no cooldown. Child-facing copy must be neutral (e.g. "Focus session interrupted. Start again when you're ready.") and must never use "Failed," "You broke the rule," or other shame-oriented wording. Configurable grace behaviour is explicitly deferred as a FUTURE FEATURE; V1 stays deterministic and simple.
+- **Rationale:** Founder decision, prioritising a simple, predictable V1 behaviour and explicit non-punitive framing over a more forgiving but more complex pause-and-flag alternative.
+- **Date:** 2026-09-28
+- **Supersedes:** `11_TASK_AND_APPROVAL_SPECIFICATION.md` §11.1a/FR-033 (adds BR-231); `08_EPICS_AND_USER_STORIES.md`/`09_ACCEPTANCE_CRITERIA.md` US-CHILD-008 (rewritten). Closes OQ-29.
+
+**DEC-43. Active Engagement Session termination handling replaced with a persist-and-verify model.**
+- **Status:** Confirmed
+- **Decision:** The original "force-quit resets the session, no partial credit" rule is replaced: a child must not lose legitimate progress solely because iOS terminates the app, the app crashes, memory pressure closes it, or the device restarts. While a session runs, Themis persists the last trustworthy accumulated foreground duration locally. On reopening: if the persisted state's integrity can be verified, the child is offered Resume from that exact duration; if it cannot be verified, the session is marked Interrupted with a clear, non-blaming explanation. No wall-clock time elapsed while the app was not running is ever counted toward completion, under either path. Phase 5 must define the exact local persistence mechanism and integrity-verification model.
+- **Rationale:** Founder decision. A flat reset on any termination punishes a child for events entirely outside their control (an OS-initiated termination, a crash, memory pressure), which is inconsistent with the product's "agreement, not punishment" positioning.
+- **Date:** 2026-09-28
+- **Supersedes:** `11_TASK_AND_APPROVAL_SPECIFICATION.md` §11.1a/FR-033 (adds BR-232); `08_EPICS_AND_USER_STORIES.md`/`09_ACCEPTANCE_CRITERIA.md` US-CHILD-007 (rewritten).
+
+**DEC-44. Emergency story wording corrected to avoid overstating the confirmed requirement.**
+- **Status:** Confirmed
+- **Decision:** US-CHILD-014's original wording ("Trust that I can always reach emergency help and my parents") overstated what has actually been confirmed. The story is renamed and narrowed to: "As a child or teen, I want Themis never to deliberately prevent emergency communication, so that digital-boundary rules do not interfere with getting urgent help." Phone/Messages/Maps remain the recommended default Always Allowed set where technically supported (BR-222, DEC-35), but a guarantee that every specific route to a parent works under every Apple configuration is not yet confirmed and remains gated by OQ-30.
+- **Rationale:** Founder correction. The original wording implied a broader technical guarantee (reaching a parent specifically) than the confirmed product policy (never deliberately restricting emergency functionality) actually supports.
+- **Date:** 2026-09-28
+- **Supersedes:** `08_EPICS_AND_USER_STORIES.md`/`09_ACCEPTANCE_CRITERIA.md` US-CHILD-014 (renamed and rewritten). OQ-30 remains open, unaffected by this rename.
+
+**DEC-45. Owner exit path confirmed for V1 — resolves OQ-20.**
+- **Status:** Confirmed
+- **Decision:** A household must always have exactly one Owner. If an Owner wants to leave, V1 supports exactly two paths: (A) invite/retain a Guardian, transfer ownership to them, then leave; or (B) delete the household. V1 explicitly does not support: an ownerless household in any state; ownership transfer directly to a Child/Teen; combining an invite and a transfer into one simultaneous action; or multiple households representing a split-custody arrangement (each parent needs their own separate household, with no shared rule set between them in V1).
+- **Rationale:** Founder decision. Confirms the existing recommended default as final, with the four explicit non-support items named so they are not later mistaken for oversights.
+- **Date:** 2026-09-28
+- **Supersedes:** `18_ROLES_AND_PERMISSIONS.md` BR-101 (rewritten as confirmed/final); `08_EPICS_AND_USER_STORIES.md`/`09_ACCEPTANCE_CRITERIA.md` US-OWNER-024 (rewritten). Closes OQ-20.
+
+---
+
+## Phase 4 amendment completion note (2026-09-28)
+
+Applies DEC-40 through DEC-45 across `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `18_ROLES_AND_PERMISSIONS.md`, `08_EPICS_AND_USER_STORIES.md`, and `09_ACCEPTANCE_CRITERIA.md`. The re-run HLR → FR/BR → Story → Acceptance Criteria cross-check (full detail in `09_ACCEPTANCE_CRITERIA.md` §9.7) found no new orphan FRs, no new unbacked stories, and no new contradictions. Three of the four previously-flagged AC-level dependencies are now resolved (OQ-04a, OQ-29, OQ-20); the fourth (OQ-30, Apple technical validation) remains genuinely open and does not block Phase 5, since the relevant AC (US-CHILD-014 AC3) is written to hold under either eventual resolution.
+
+**Date:** 2026-09-28
+**Supersedes:** N/A — phase-completion record.
+
+---
+
+## Decisions still required from the founder before Phase 5 begins (updated)
+
+None. All six items from the founder's Phase 4 review are now Confirmed (DEC-40 through DEC-45). Only OQ-30 (Apple picker/ManagedSettings technical validation) remains genuinely open among items surfaced so far, and it is explicitly a technical-spike output, not a product decision — it does not block Phase 5 from starting, though `27_APPLE_INTEGRATION_REQUIREMENTS.md` must classify it honestly per the founder's Phase 5 four-status capability rule. Phase 5 (Device Enforcement, Offline/Sync Behaviour, Data Model, State Machines, Apple Integration Requirements, API/Backend Requirements) proceeds next.

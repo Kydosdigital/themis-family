@@ -33,10 +33,9 @@ Format: ID | Question | Why it matters | Recommended default | Blocks
 - *Resolution:* No auto-approval, ever, in V1. Restriction remains active; Essential/School Mode apps stay available; parent(s) notified immediately plus a reminder after a defined interval; child may send exactly one reminder/nudge; UI must clearly show "Waiting for approval." Configurable trusted-task auto-grace is a FUTURE FEATURE.
 - *Blocks (now unblocked):* `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, Approval state machine (Phase 5)
 
-**OQ-04a. [NEW]** What is the exact reminder interval, and does it escalate (e.g. re-notify every 30 minutes) or fire once?
-- *Why it matters:* DEC-15 confirms a reminder exists "after a defined interval" but doesn't fix the number or whether it repeats.
-- *Recommended default:* Single reminder at 30 minutes after submission, not a repeating escalation (to avoid notification fatigue); re-evaluate based on Phase 2/3 usability input.
-- *Blocks:* `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `21_NOTIFICATIONS.md` (later phase)
+**OQ-04a. [RESOLVED — see DEC-41].** What is the exact reminder interval, and does it escalate or fire once?
+- *Resolution:* Immediate notification on submission; exactly one automatic reminder at 15 minutes if still unresolved (does not repeat); the child/teen may separately send exactly one manual nudge per pending item, independent of the automatic reminder (using it does not reset the automatic schedule); after both have fired, no further reminders are sent for that item. Applies identically to tasks (`11_TASK_AND_APPROVAL_SPECIFICATION.md` BR-213) and requests (`12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` BR-230).
+- *Blocks (now unblocked):* `21_NOTIFICATIONS.md` (later phase)
 
 **OQ-05.** Rule conflict precedence — does the brief's proposed order (Safety > Emergency override > Hard schedule > Deadline restriction > Temporary exception > Earned access > Advisory) hold up, particularly the relative position of a parent's real-time Free Pass versus an already-pending Deadline Lock?
 - *Why it matters:* Every enforcement state must be deterministic; an unresolved conflict is a correctness bug, not a UX nitpick.
@@ -140,10 +139,9 @@ Remaining open items and their status:
 
 ## Questions raised during Phase 3 (2026-09-28)
 
-**OQ-20 [NEW — from `18_ROLES_AND_PERMISSIONS.md`].** BR-101 requires ownership transfer to go only to an existing Guardian. What happens if the Owner wants to leave the household (e.g. divorce, family breakup) and there is no Guardian to transfer to?
-- *Why it matters:* A household cannot be left ownerless (BR-101), but no path is defined for an Owner who wants to exit with no successor.
-- *Recommended default:* Require the Owner to either invite a Guardian and transfer to them first, or delete the household outright. No "orphaned household" state is supported in V1. Revisit if V1 usage shows this is a common, painful scenario.
-- *Blocks:* `20_STATE_MACHINES.md` (Phase 5) — household lifecycle state machine.
+**OQ-20 [RESOLVED — see DEC-45].** What happens if the Owner wants to leave the household and there is no Guardian to transfer to?
+- *Resolution:* V1 supports exactly two paths: invite a Guardian and transfer ownership to them, then leave; or delete the household. No ownerless household, no transfer to a Child/Teen, no simultaneous invite-and-transfer, and no split-custody multi-household support in V1 (`18_ROLES_AND_PERMISSIONS.md` BR-101).
+- *Blocks (now unblocked):* `20_STATE_MACHINES.md` (Phase 5) — household lifecycle state machine can now be built against a confirmed model.
 
 **OQ-21 [NEW — from `18_ROLES_AND_PERMISSIONS.md`].** Can a Teen ever be granted any elevated permission (e.g. approving a younger sibling's task) as a trust-building feature, or is that permanently out of scope?
 - *Why it matters:* A natural future extension of the "trust increases over time" positioning (review dates, negotiation), not raised in the original brief.
@@ -178,10 +176,9 @@ Remaining open items and their status:
 - *Resolution:* Product policy confirmed: emergency calling/OS-level emergency functionality is never deliberately restricted (hard safety principle), with Phone, Messages, Maps as the recommended default Always Allowed set where technically supported. The remaining question — exactly what Apple's picker/ManagedSettings actually permit for these apps — is technical, not a product decision, and is tracked separately as OQ-30.
 - *Blocks:* `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` — unblocked at the policy level.
 
-**OQ-29 [NEW — from `11_TASK_AND_APPROVAL_SPECIFICATION.md` §11.1a].** When a child opens a restricted app during an active Focus Session (a violation), does the session reset entirely or pause-and-flag the violation?
-- *Why it matters:* A full reset may feel disproportionately punitive for a brief lapse; a pause-and-flag risks weakening the "meaningful evidence" standard the Focus Session exists to provide (BR-228).
-- *Recommended default:* None yet — needs founder judgement informed by how violations are actually detected on-device (a Phase 5 technical input).
-- *Blocks:* `20_STATE_MACHINES.md` (Phase 5) — the Focus Session sub-state machine.
+**OQ-29 [RESOLVED — see DEC-42].** When a child opens a restricted app during an active Focus Session, does the session reset entirely or pause-and-flag the violation?
+- *Resolution:* The attempt is marked Interrupted — ends immediately, no completion credit, no carried-over time; the child may start a fresh attempt immediately with no cooldown. Copy must be neutral and non-punitive ("Focus session interrupted. Start again when you're ready." — never "Failed" or shame-oriented wording). Configurable grace behaviour is a FUTURE FEATURE, not V1.
+- *Blocks (now unblocked):* `20_STATE_MACHINES.md` (Phase 5) — the Focus Session sub-state machine can now be built against a confirmed terminal state.
 
 **OQ-30 [NEW — split from OQ-28].** What does Apple's picker and ManagedSettings framework actually expose or permit for Phone, Messages, and Maps specifically?
 - *Why it matters:* BR-222's product policy (DEC-35) is confirmed and does not wait on this, but the documentation must not claim a specific technical guarantee until the Apple technical spike verifies it.

@@ -48,8 +48,10 @@ Legend: ✅ = can perform unilaterally, 🔶 = can perform, subject to a stated 
 
 ## 18.3 Business rules
 
-**BR-101. Ownership transfer.**
-Only the current Owner may transfer ownership, and only to the household's existing Guardian (not to a Teen/Child, and not to a newly-invited person in the same action — a transfer target must already hold the Guardian role). A household must never be left with zero Owners; a transfer is a single atomic operation that makes the target the new Owner and demotes the previous Owner to Guardian in the same transaction.
+**BR-101. Ownership transfer and Owner exit (CONFIRMED as final for V1 — DEC-45, closes OQ-20).**
+Only the current Owner may transfer ownership, and only to the household's existing Guardian (not to a Teen/Child, and not to a newly-invited person in the same action — a transfer target must already hold the Guardian role, invited and accepted as a separate, prior step). A household must never be left with zero Owners; a transfer is a single atomic operation that makes the target the new Owner and demotes the previous Owner to Guardian in the same transaction.
+
+An Owner who wants to leave the household has exactly two V1 paths: **(A)** invite a Guardian if none exists, wait for them to accept, transfer ownership to them, and then leave; or **(B)** delete the household outright (BR-106). V1 explicitly does not support: an ownerless household in any state, even transiently; ownership transfer directly to a Child or Teen; combining an invite and a transfer into one simultaneous action; or multiple households representing a split-custody arrangement (each parent would need their own separate household in V1, with no shared rule set between them — this is a real limitation for separated families, not an oversight, and may be revisited post-V1 if usage shows it is a common, painful scenario).
 
 **BR-102. Approval conflict resolution.**
 When both an Owner and a Guardian act on the same pending approvable item (task completion or request) within the window before either action is durably recorded, the first action to be durably recorded (per an atomic conditional state transition — see OQ-03a) wins. The other actor's action is rejected with a "this has already been resolved" response, not silently discarded — they must be told what the resolved outcome was.
@@ -70,10 +72,7 @@ Only the Owner may delete a household. Deletion is a destructive, confirmable ac
 
 ## 18.4 Open questions surfaced
 
-**OQ-20 [NEW].** BR-101 requires ownership transfer to go only to an existing Guardian. What happens if the Owner wants to leave the household (e.g. divorce, family breakup) and there is no Guardian to transfer to?
-- *Why it matters:* A household cannot be left ownerless (BR-101), but the brief does not define a path for an Owner who wants to exit with no successor.
-- *Recommended default:* Require the Owner to either invite a Guardian and transfer to them first, or delete the household outright. No "orphaned household" state is supported in V1. Revisit if V1 usage shows this is a common, painful scenario (e.g. separating parents where neither wants to be locked in).
-- *Blocks:* `20_STATE_MACHINES.md` (Phase 5) — household lifecycle state machine.
+**OQ-20 [CLOSED — resolved by DEC-45].** A household must always have exactly one Owner. If an Owner wants to leave, V1 supports exactly two paths: (A) invite/retain a Guardian, transfer ownership to that Guardian, then leave; or (B) delete the household. V1 explicitly does NOT support: ownerless households, ownership transfer directly to a Child/Teen, simultaneous invite-and-transfer in one action, or multiple households representing split custody. See BR-101 below, confirmed as final for V1.
 
 **OQ-21 [NEW].** Can a Teen ever be granted any elevated permission (e.g. approving a younger sibling's task) as a trust-building feature, or is that permanently out of scope?
 - *Why it matters:* Not raised in the brief, but a natural future extension of the "trust increases over time" positioning (review dates, negotiation).

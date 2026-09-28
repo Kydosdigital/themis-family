@@ -106,10 +106,11 @@ Every story traces: **HLR → FR/BR → User Story**. The trace is given inline;
 **Priority:** Must
 **Notes:** Applies fully offline; follows the device's current local time zone (BR-205, DEC-36); DST does not shift the wall-clock time.
 
-### US-CHILD-002. Not be shielded while my approved deadline task is still awaiting a decision
-**Story:** As a child or teen who submitted my task before the deadline, I want the app not to lock me out while my parent hasn't yet responded, so that I'm not punished for something outside my control.
-**Trace:** HLR-006 → FR-014, BR-207
+### US-CHILD-002. Get a fair, bounded grace period while my on-time submission is still awaiting a decision
+**Story:** As a child or teen who submitted my task before the deadline, I want a bounded grace period where I'm not immediately locked out just because my parent hasn't responded yet, so that I'm not punished for something outside my control — while still knowing the grace period isn't unlimited, so it can't be used as a loophole.
+**Trace:** HLR-006 → FR-014, BR-207 (CONFIRMED — DEC-40, Provisional Approval Grace Period model)
 **Priority:** Must
+**Notes:** The grace period is exactly 30 minutes after the deadline. If it expires with no decision, the restriction activates until the task is approved. The app tells me clearly how much grace time is left ("Approval grace ends in 18 min") and, once it runs out, that the restriction is now active pending review — never framed as a punishment for having submitted on time.
 
 ### US-CHILD-003. Complete a condition to earn access under Earn First
 **Story:** As a child or teen, I want to unlock a rewarded app by first completing the agreed condition, so that I understand exactly what I need to do to earn my time.
@@ -153,22 +154,22 @@ Every story traces: **HLR → FR/BR → User Story**. The trace is given inline;
 **Notes:** (Guardian: identical, subject to first-valid-decision-wins if both parents act — BR-102.)
 
 ### US-CHILD-006. See an honest "waiting for approval" state, with one reminder I can send
-**Story:** As a child or teen, I want to see clearly that my task is waiting on my parent, and be able to send exactly one reminder if it's taking a while, so that I'm not left guessing and don't have to nag repeatedly.
-**Trace:** HLR-008 → FR-032, BR-212, BR-213
+**Story:** As a child or teen, I want to see clearly that my task is waiting on my parent, get an automatic nudge sent to them if it's taking a while, and be able to send exactly one reminder of my own whenever I want, so that I'm not left guessing and don't have to nag repeatedly.
+**Trace:** HLR-008 → FR-032, BR-212, BR-213 (CONFIRMED interval — DEC-41, closes OQ-04a)
 **Priority:** Must
-**Notes:** No auto-unlock, ever, if the parent never responds (DEC-15/BR-212) — this is intentional, not a bug to fix later.
+**Notes:** No auto-unlock, ever, if the parent never responds (DEC-15/BR-212) — this is intentional, not a bug to fix later. The automatic reminder fires once, at 15 minutes, if still unresolved. My own manual nudge is entirely separate — I can use it at any time, and using it doesn't reset or delay the automatic one. After both have fired, no more reminders are sent for that item, though it stays visibly pending.
 
 ### US-CHILD-007. Complete an Active Engagement Session (e.g. an in-app reading timer)
 **Story:** As a child or teen, I want to complete an in-app timed activity like reading, and have it verify itself automatically without needing my parent's approval, so that low-stakes activities don't create unnecessary friction.
-**Trace:** HLR-006 → FR-033, BR-209, BR-227
+**Trace:** HLR-006 → FR-033, BR-209, BR-227, BR-232 (CONFIRMED termination handling — DEC-43)
 **Priority:** Must
-**Notes:** The session pauses if I background the app or lock my device, and resumes when I come back — it doesn't quietly keep counting while I'm doing something else (DEC-37).
+**Notes:** The session pauses if I background the app or lock my device, and resumes when I come back — it doesn't quietly keep counting while I'm doing something else (DEC-37). If the app crashes, gets closed by my phone, or my phone restarts partway through, I don't lose my legitimate progress — when I reopen Themis, I'm offered Resume from where I was, not forced to start over, unless something about that saved progress can't be trusted, in which case I'm told clearly and can just start again.
 
 ### US-CHILD-008. Complete a Focus Session (staying away from distracting apps)
 **Story:** As a child or teen, I want to complete a Focus Session by simply staying out of the apps it restricts, without needing to keep Themis open the whole time, so that "focusing" doesn't mean staring at this app instead of actually focusing.
-**Trace:** HLR-006 → FR-033, BR-209, BR-228
+**Trace:** HLR-006 → FR-033, BR-209, BR-228, BR-231 (CONFIRMED violation handling — DEC-42, closes OQ-29)
 **Priority:** Must
-**Notes:** Unlike an Active Engagement Session, this one is designed to keep running while Themis is backgrounded or the device is locked (DEC-37) — that's the point.
+**Notes:** Unlike an Active Engagement Session, this one is designed to keep running while Themis is backgrounded or the device is locked (DEC-37) — that's the point. If I open one of the restricted apps during a session, the attempt is simply marked "Interrupted" — no credit, no carried-over time, but also no shaming language — and I can start a fresh attempt right away.
 
 ### US-OWNER-016. Reconfigure a rule's verification type
 **Story:** As an Owner or Guardian, I want to switch a specific rule from automatic verification back to requiring my approval, so that I can regain oversight if I decide I want it.
@@ -252,11 +253,11 @@ Every story traces: **HLR → FR/BR → User Story**. The trace is given inline;
 **Priority:** Must
 **Notes:** This is the general Request/Grant mechanism (Epic D), framed for School Mode with a schoolwork-relevant prompt.
 
-### US-CHILD-014. Trust that I can always reach emergency help and my parents
-**Story:** As a child or teen, I want to know that phone calling and messaging can never be deliberately locked by Themis, no matter what rules are active, so that I always feel safe, not trapped.
+### US-CHILD-014. Know that Themis will never deliberately block my way to emergency help
+**Story:** As a child or teen, I want Themis never to deliberately prevent emergency communication, so that digital-boundary rules do not interfere with getting urgent help.
 **Trace:** HLR-010 → FR-053, BR-222, DEC-35
 **Priority:** Must
-**Notes:** This is a hard, unconditional product policy (the founder's own words: "must never intentionally interfere with emergency communication or OS-level emergency functionality"), confirmed independently of any technical finding about exactly how it's implemented.
+**Notes (RENAMED — DEC-44, corrects overstated wording):** This story previously read "Trust that I can always reach emergency help and my parents," which overstated the confirmed requirement — it read as a guarantee about reaching a parent specifically, which has not been technically verified. What is actually confirmed, as a hard, unconditional product policy, is narrower: Themis must never deliberately interfere with emergency calling or OS-level emergency functionality. Phone, Messages and Maps remain the recommended default Always Allowed set where technically supported (BR-222), but whether every specific route to a parent (e.g. Messages under every Apple configuration) can be technically guaranteed is not yet confirmed — that remains OQ-30, open pending the Apple technical spike. The story and its acceptance criteria must not claim more than the confirmed policy until OQ-30 resolves.
 
 ### US-OWNER-023. Understand that School Mode assumes one device per child
 **Story:** As an Owner or Guardian, I want the app to be upfront that School Mode and essential access assume each child has their own device, so that I don't set up something (like siblings sharing an iPad) that won't actually work as I expect.
@@ -270,11 +271,11 @@ Every story traces: **HLR → FR/BR → User Story**. The trace is given inline;
 
 *Traces to: HLR-001, HLR-002; `18_ROLES_AND_PERMISSIONS.md` §18.2, BR-101 through BR-106*
 
-### US-OWNER-024. Transfer ownership of the household
-**Story:** As the Owner, I want to transfer ownership to our Guardian, so that responsibility for the household can move to them if circumstances require it.
-**Trace:** HLR-002 → BR-101
+### US-OWNER-024. Transfer ownership of the household, or leave it entirely
+**Story:** As the Owner, I want to transfer ownership to our Guardian, so that responsibility for the household can move to them if circumstances require it, and I want a clear path to leave the household altogether if that's what I need to do.
+**Trace:** HLR-002 → BR-101 (CONFIRMED as final for V1 — DEC-45, closes OQ-20)
 **Priority:** Must
-**Notes:** Only possible if a Guardian already exists (see OQ-20 for the no-Guardian exit path, still open, FUTURE-leaning).
+**Notes:** Only possible if a Guardian already exists. If I want to leave and no Guardian exists yet, my two confirmed V1 options are: invite a Guardian and transfer to them first, or delete the household outright. V1 does not support an ownerless household, transferring directly to a Child/Teen, inviting and transferring in one simultaneous action, or separate households for split-custody arrangements — each of these is a deliberate V1 limitation, not an oversight.
 
 ### US-OWNER-025. Have approval conflicts resolved fairly when both parents respond
 **Story:** As an Owner or Guardian, if my co-parent and I both respond to the same request or task at nearly the same time, I want the system to resolve it predictably and tell me clearly what happened, so that neither of us is confused or double-acts on the same thing.

@@ -160,6 +160,20 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Product/Founder (policy — resolved); Technical lead (remaining technical validation — open)
 - **Validation method:** Apple technical spike confirming picker/ManagedSettings behaviour for the named apps, before `24_SECURITY_REQUIREMENTS.md` (Phase 6) finalises any "cannot be restricted" wording
 
+## RISK-23: Deadline Lock pending-approval loophole (identified and RESOLVED in the same review, 2026-09-28)
+- **Likelihood:** High — this was not a rare edge case but a straightforward, obvious exploit of the original BR-207 wording (tap "Done" moments before the deadline, without genuinely completing the task, and enforcement never activates while a parent hasn't yet responded)
+- **Impact:** High — directly undermines the entire Deadline Lock mechanic, which is the product's hero mechanic (DEC-02/DEC-17); if trivially bypassable, it damages the reliability positioning (DEC-08) as badly as an enforcement bug would
+- **Resolution:** DEC-40 replaced the original indefinite-pending behaviour with a bounded 30-minute Provisional Approval Grace Period: the shield activates automatically if the grace period expires with no decision, closing the loophole while still giving a genuinely on-time child a fair, bounded window.
+- **Owner:** Product/Founder
+- **Validation method:** Scenario testing confirming the shield activates exactly at grace-period expiry when no decision has been made, and that a genuinely on-time, promptly-approved submission never triggers a shield
+
+## RISK-24: Split-custody / separated-parent households not supported in V1
+- **Likelihood:** Medium (a common enough family structure that it will surface in support requests, though not assessed as a V1 launch blocker)
+- **Impact:** Medium — a separated family cannot share one rule set across two households in V1; this is now an explicit, confirmed limitation (DEC-45) rather than an accidental gap, but it may still generate support friction or lost customers if not communicated clearly at signup
+- **Mitigation:** DEC-45 confirms this is a stated V1 limitation, not a bug: each parent needs their own separate household with no shared rule set. Onboarding/marketing copy should set this expectation honestly rather than let a separated parent discover the limitation after signing up. Revisit post-V1 if demand is significant.
+- **Owner:** Product
+- **Validation method:** Review onboarding copy for honesty on this point before launch; monitor support tickets post-launch for split-custody requests
+
 ---
 
 ## Register maintenance note

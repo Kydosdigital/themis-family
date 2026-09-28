@@ -88,14 +88,22 @@ Every rule is composed of the fields defined in `00_PRODUCT_OVERVIEW.md` §1.5: 
 - **Actor:** System (automatic), Child/Teen (submission), Owner/Guardian (approval)
 - **Trigger:** The configured deadline time passes
 - **Preconditions:** Rule is Active
-- **Happy path:** Before the deadline, controlled targets remain available as normal. At the deadline, if the associated task has not been submitted and approved (or auto-verified — see §10.4), controlled targets are shielded. This continues until the task is completed and, if required, approved (see `11_TASK_AND_APPROVAL_SPECIFICATION.md`).
-- **Alternative paths:** Task is submitted and approved before the deadline → no shield ever applies. Task is submitted before the deadline but not yet approved when the deadline passes → BR-207 governs (the shield does NOT apply while approval is still pending from a pre-deadline submission — this avoids punishing a child who acted in time but the parent hasn't yet responded).
-- **Failure paths:** See `11_TASK_AND_APPROVAL_SPECIFICATION.md` for non-response handling.
-- **Offline behaviour:** The deadline and current lock/unlock state are cached locally; the shield applies at the deadline even if the device is offline at that moment.
+- **Happy path:** Before the deadline, controlled targets remain available as normal. At the deadline, if the associated task has not been submitted (or auto-verified — see §10.4), controlled targets are shielded immediately.
+- **Alternative paths (CONFIRMED — DEC-40, Provisional Approval Grace Period model; supersedes the original indefinite-pending-approval behaviour):**
+  - Task is submitted and approved before the deadline → no shield ever applies.
+  - Task is submitted before the deadline but not yet approved when the deadline passes → status becomes **"Submitted On Time, Awaiting Approval."** Controlled targets remain available for a bounded **Approval Grace Period of 30 minutes** after the deadline (BR-207), not indefinitely.
+    - If approved during the grace period → no Deadline Lock occurs; the task completes normally.
+    - If rejected during the grace period → the Deadline Lock activates immediately.
+    - If still unresolved when the 30-minute grace period expires → the Deadline Lock activates and remains active until the task is approved.
+    - If subsequently approved after the shield has activated → the Deadline Lock is removed, subject to the effective-enforcement model (BR-211) if another active rule still restricts the same target.
+  - Essential/Always Allowed and School access remain unaffected throughout every stage of this sequence.
+- **Failure paths:** See `11_TASK_AND_APPROVAL_SPECIFICATION.md` for non-response handling beyond the grace period.
+- **Offline behaviour:** The deadline, the grace period's own expiry time, and the current lock/unlock state are all cached locally; both the deadline-arrival transition and the grace-period-expiry transition apply at their scheduled local time even if the device is offline at that moment.
+- **Child-facing communication:** During the grace period: *"Submitted on time. Waiting for approval."* with an elapsed/remaining indicator, e.g. *"Approval grace ends in 18 min."* Once the grace period expires without a decision: *"Waiting for approval. Games are paused until this is reviewed."* This is a bounded provisional-trust period, not a punishment for submitting on time, and the copy must not read as punitive.
 - **Business rules:** BR-207
 - **Release:** V1 / Must
 
-**BR-207.** If a child submits a task for a Deadline Lock rule before the deadline passes, and the submission is still awaiting approval when the deadline arrives, the shield does not apply while that submission remains pending. If the submission is later rejected, the shield applies retroactively from the moment of rejection (not backdated to the original deadline).
+**BR-207 (Provisional Approval Grace Period — CONFIRMED, DEC-40; supersedes the original "shield never applies while a pre-deadline submission remains pending" rule).** A task submitted before its Deadline Lock's deadline, while still awaiting approval, does not become subject to an indefinite unrestricted period. Instead: the deadline passing starts a fixed 30-minute Approval Grace Period during which controlled targets remain available; approval or rejection during the grace period resolves the state immediately (no shield, or immediate shield, respectively); if the grace period expires with no decision, the Deadline Lock activates and remains active until the task is subsequently approved (at which point BR-211's effective-enforcement model determines the actual resulting state, since another rule may still apply). This closes the loophole where tapping "Done" immediately before a deadline — without genuinely completing the task — could delay enforcement indefinitely pending a parent's response; 30 minutes is a bounded provisional-trust window, not an open-ended one.
 
 ---
 
