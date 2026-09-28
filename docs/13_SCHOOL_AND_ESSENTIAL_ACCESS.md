@@ -52,12 +52,16 @@
 - **Actor:** System, Owner/Guardian (configuration)
 - **Trigger:** Parent attempts to add a designated essential category app (Phone, Messages, Maps/emergency-relevant apps) to a restrictive rule's targets
 - **Preconditions:** None
-- **Happy path:** The system either prevents this selection at the picker level (RECOMMENDATION) or allows selection but silently keeps a hard-coded minimum essential set always allowed regardless (a defence-in-depth decision to be made in Phase 5, not here) — either way, a small, non-configurable essential minimum (Phone, Emergency SOS-adjacent functionality) can never be shielded, even by parent choice.
+- **Happy path:** The system either prevents this selection at the picker level (RECOMMENDATION) or allows selection but silently keeps the hard safety principle enforced regardless (a defence-in-depth decision to be made in Phase 5, not here) — either way, emergency calling / emergency OS-level functionality can never be deliberately restricted by Themis, even by parent choice.
 - **Business rules:** BR-222
 - **Release:** V1 / Must
-- **Open questions:** OQ-28 (exact non-configurable minimum set)
+- **Open questions:** OQ-28 is closed at the product-policy level (§13.3, DEC-35); OQ-30 (NEW) tracks the remaining technical-validation question.
 
-**BR-222.** There exists a small, non-configurable minimum set of essential functionality (at minimum: the Phone app / emergency calling capability) that cannot be added to any restrictive rule's targets, cannot be removed from Always Allowed, and is not subject to parental configuration at all. Beyond this hard minimum, all other "essential" designations (Messages, Maps, school apps, etc.) are configurable via Always Allowed (FR-050), not hard-coded.
+**BR-222 (hard safety principle, CONFIRMED — DEC-35; closes OQ-28 at the product-policy level).** Themis Family must never intentionally interfere with emergency communication or OS-level emergency functionality. Emergency calling and emergency OS-level functionality are never deliberately restricted by Themis, for any child, under any rule configuration, with no parental override capable of changing this. This is a product policy decision, confirmed now, and does not depend on the outcome of the technical spike.
+
+Beyond that hard floor, the **recommended default Always Allowed set**, where technically supported, is: **Phone, Messages, Maps**. Messages and Maps are strongly recommended and pre-selected during onboarding (per FR-050's auto-suggested defaults) but remain parent-configurable — they are not hard-coded like the emergency-calling floor itself.
+
+**Themis Family must not claim that a specific system app is technically impossible to shield until the Apple technical spike verifies that behaviour.** The product policy above (the hard safety principle) is confirmed independently of any such claim; what remains open is only the technical question of exactly what Apple's picker and ManagedSettings framework actually expose or permit for these specific system apps — see OQ-30.
 
 ---
 
@@ -75,7 +79,9 @@
 
 ## 13.5 Open questions surfaced by this document
 
-**OQ-28 [NEW].** What exactly is in the hard-coded, non-configurable minimum essential set (BR-222) — just Phone/Emergency calling, or also something like a default Maps/location-sharing-for-safety capability?
-- *Why it matters:* Too narrow a hard-coded minimum relies entirely on parent configuration for basic safety (risk if a parent misconfigures Always Allowed); too broad removes parental choice and could itself be seen as overreach.
-- *Recommended default:* Keep the hard-coded minimum to Phone/emergency calling only; treat Messages and Maps as strongly-recommended, pre-selected Always Allowed defaults (configurable, but defaulted on) rather than hard-coded, consistent with the brief's general preference for parent configurability over rigid defaults.
-- *Blocks:* `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` itself (this document) is written assuming this recommendation; `24_SECURITY_REQUIREMENTS.md`/`26_ERROR_AND_EDGE_CASE_CATALOGUE.md` (Phase 6/7) should confirm before final.
+**OQ-28 [CLOSED at the product-policy level — resolved by DEC-35/BR-222; split into a remaining technical question, OQ-30].** The founder confirmed the product policy: emergency calling/OS-level emergency functionality is never deliberately restricted (hard safety principle), with Phone, Messages and Maps as the recommended default Always Allowed set where technically supported. What remains open is purely technical — see OQ-30.
+
+**OQ-30 [NEW — split from OQ-28].** What does Apple's picker and ManagedSettings framework actually expose or permit for Phone, Messages, and Maps specifically — can each be technically guaranteed un-shieldable, or does Apple's API only support shielding at a granularity that makes some part of this harder than the product policy assumes?
+- *Why it matters:* BR-222's product policy is confirmed and does not wait on this answer, but the documentation must not claim a specific technical guarantee (e.g. "Phone can never be shielded by any configuration") until the Apple technical spike verifies it. An unverified API assumption must not become a stated requirement.
+- *Recommended default:* None — this is a pure technical-spike output, not a product judgement call.
+- *Blocks:* `27_APPLE_INTEGRATION_REQUIREMENTS.md` (Phase 5); `24_SECURITY_REQUIREMENTS.md` (Phase 6) should confirm the final wording of any "cannot be restricted" claim against the spike's actual findings before release.

@@ -35,7 +35,7 @@ Formal state machine diagrams are a Phase 5 deliverable (`20_STATE_MACHINES.md`)
 - **Trigger:** Approver opens a pending Awaiting Approval task
 - **Preconditions:** Task is in Awaiting Approval state
 - **Happy path:** Approver taps Approve → task moves to Approved/Completed → the rule's associated shield is removed on the child's device → child sees confirmation ("Done. [X] unlocked.").
-- **Alternative paths:** Approver taps Reject ("Needs work") → task returns to Overdue (or Available, if before deadline) with an optional note to the child explaining what's missing; child may resubmit.
+- **Alternative paths:** Approver taps Reject ("Needs work") → task returns to Overdue (or Available, if before deadline) with a note to the child explaining what's missing (CONFIRMED, DEC-38 — closes OQ-25: the note is optional, the UI should strongly encourage a short explanation via a prominent open field, but submitting a rejection is never blocked on providing one; no open-ended conversation thread is created by a rejection note — it is one-way, distinct from the bounded clarification exchange in FR-042); child may resubmit.
 - **Failure paths:** Two approvers act on the same task within the race window → BR-102 (`18_ROLES_AND_PERMISSIONS.md`) applies: first valid decision wins, the other is told the outcome.
 - **Permissions:** Owner, Guardian only (BR-105)
 - **Offline behaviour:** The approval decision is recorded by the backend and pushed to the child device; if the child device is offline at the moment of approval, the shield is removed as soon as the device reconnects and syncs — the approval itself is not lost or time-limited by the child device being briefly offline.
@@ -59,28 +59,54 @@ Formal state machine diagrams are a Phase 5 deliverable (`20_STATE_MACHINES.md`)
 **BR-213.** The child/teen's manual reminder ("nudge") is capped at exactly one use per pending Awaiting Approval item. Once used, the control is disabled (shown, not hidden, so the child understands they've already used it) until the item is resolved.
 
 ## FR-033. Automatic Verification completion
-- **Actor:** Child/Teen (starts the timer/session), System (verifies completion)
-- **Trigger:** Child/Teen starts an in-app timer or focus session associated with a task whose Verification Type is Automatic Verification
-- **Preconditions:** Task is Available; Verification Type = Automatic Verification
-- **Happy path:** Timer/session runs to completion within the app → system records a completion event → task moves directly to Completed → associated shield is removed immediately, with no approval step and no "Awaiting Approval" state ever entered.
-- **Alternative paths:** Child backgrounds the app or locks the device mid-timer → RECOMMENDATION (not yet founder-confirmed): the timer pauses and does not count backgrounded time as elapsed, to preserve the "deterministic system evidence" standard in BR-209; see OQ-24.
-- **Failure paths:** App is force-quit mid-timer → timer resets (no partial credit) per the same reasoning.
-- **Business rules:** BR-209 (`10_RULE_ENGINE_SPECIFICATION.md` — evidence scope), BR-214
+- **Actor:** Child/Teen (starts the session), System (verifies completion)
+- **Trigger:** Child/Teen starts an in-app session associated with a task whose Verification Type is Automatic Verification
+- **Preconditions:** Task is Available; Verification Type = Automatic Verification; the task's Session Type (§11.1a) is set to either Active Engagement Session or Focus Session
+- **Happy path:** Session runs to completion, per the backgrounding rule for its Session Type (§11.1a) → system records a completion event → task moves directly to Completed → associated shield is removed immediately, with no approval step and no "Awaiting Approval" state ever entered.
+- **Alternative paths:** Backgrounding/locking behaviour during the session is governed entirely by which Session Type the task uses — see §11.1a. This FR does not define a single universal backgrounding rule; DEC-37 confirmed that one rule cannot correctly serve both session kinds.
+- **Failure paths:** App is force-quit mid-session → session resets (no partial credit), for both Session Types, since a force-quit is not a state either Session Type's evidence standard can account for.
+- **Business rules:** BR-209 (`10_RULE_ENGINE_SPECIFICATION.md` — evidence scope), BR-214, BR-227, BR-228 (§11.1a)
 - **Release:** V1 / Must
-- **Open questions:** OQ-24 (backgrounding behaviour)
+- **Open questions:** None outstanding — OQ-24 is closed by DEC-37/§11.1a below.
 
 **BR-214.** A parent may reconfigure any specific rule/task from Automatic Verification to Parent Approval at any time (but not the reverse for a condition type that isn't system-verifiable — see FR-016's failure path). Changing this setting applies to future task instances, not retroactively to a task already in progress.
 
 ---
 
+## 11.1a Automatic Verification session types (CONFIRMED, DEC-37 — closes OQ-24)
+
+A single "does the timer pause when backgrounded" rule cannot correctly describe every Automatic Verification use case, because two genuinely different things were being conflated under one "timer/focus session" label. V1 formalises exactly two Session Types, and every Automatic Verification task must be configured as one or the other — there is no third, undifferentiated "timer" option.
+
+### Active Engagement Session
+- **Purpose:** The child is meant to be actively using a specific in-app experience right now (the canonical example: an in-app reading session).
+- **Backgrounding rule (BR-227):** If Themis leaves the foreground, or the device locks, the verified activity timer **pauses**. It resumes only when the required in-app experience returns to the foreground. Backgrounded time is never counted as elapsed.
+- **Truthful completion statement:** *"15-minute in-app reading session completed."*
+- **What it must NOT claim:** *"Child definitely read for 15 minutes."* The evidence is that the in-app session ran to completion in the foreground, not proof of the underlying real-world activity (this restates DEC-28/BR-209's capability-honesty standard for this specific Session Type).
+
+### Focus Session
+- **Purpose:** The child is meant to intentionally stay away from a configured set of distracting apps for a period (e.g. "30 minutes away from games and social apps").
+- **Backgrounding rule (BR-228):** A Focus Session **may continue** while Themis itself is backgrounded or the device is locked, because backgrounding Themis is entirely compatible with the intended behaviour — the child isn't meant to be looking at Themis, they're meant to be away from the restricted apps. The session is only invalidated if the child opens one of the specific apps the Focus Session restricts during the session window (a violation, handled per the failure path below), not merely by backgrounding Themis.
+- **Truthful completion statement:** *"30-minute focus session completed under the configured restrictions."*
+- **What it must NOT claim:** *"30 minutes of homework completed."* The evidence is that the configured restricted apps were not opened during the session window, not proof that any particular productive activity occurred.
+- **Failure path:** The child opens a restricted app during an active Focus Session → RECOMMENDATION (not yet founder-confirmed, tracked as OQ-29): the session either resets or pauses-and-flags depending on which is less punitive while still meaningful evidence; to be resolved before Phase 5's state machine for this Session Type.
+
+**Business-rule summary:**
+
+**BR-227.** An Active Engagement Session's timer pauses on backgrounding/device lock and resumes on return to foreground; backgrounded time is never counted.
+
+**BR-228.** A Focus Session continues running while Themis is backgrounded or the device is locked, provided none of that Focus Session's specifically restricted apps are opened during the window; opening a restricted app during the session is a violation (exact handling: OQ-29).
+
+**DEC-37 also updates DEC-28/BR-209's general wording (`10_RULE_ENGINE_SPECIFICATION.md` §10.5):** "deterministic system evidence" now explicitly branches into these two Session Type-specific evidence statements rather than one generic "timer completed" statement — see the cross-reference added there.
+
+---
+
 ## 11.2 Open questions surfaced by this document
 
-**OQ-24 [NEW].** Does an in-app timer/focus session pause when the app is backgrounded or the device is locked, or does it continue counting?
-- *Why it matters:* Directly affects whether Automatic Verification evidence is genuinely deterministic (BR-209). If the timer keeps running while the child does something else entirely, "the timer completed" stops being meaningful evidence of anything.
-- *Recommended default:* Pause on background/lock, resume on foreground; do not count backgrounded time. This is the more conservative, defensible interpretation of DEC-28's "deterministic system evidence" standard, but has UX trade-offs (a child who receives a phone call mid-timer loses progress) worth testing.
-- *Blocks:* `10_RULE_ENGINE_SPECIFICATION.md`/`20_STATE_MACHINES.md` (Phase 5) — the Task state machine's in-progress-timer sub-states.
+**OQ-24 [CLOSED — resolved by DEC-37, see §11.1a].** Replaced by the Active Engagement Session / Focus Session distinction rather than a single universal backgrounding rule.
 
-**OQ-25 [NEW].** When a Reject ("Needs work") decision is made, is a note from the approver to the child mandatory, optional, or absent in V1?
-- *Why it matters:* An unexplained rejection undermines the "agreement, not punishment" positioning (a child who did the homework and gets rejected with no reason feels arbitrarily punished).
-- *Recommended default:* Optional but strongly encouraged (UI defaults to an open note field, not required to submit). Do not make it mandatory in V1 to avoid adding friction that discourages parents from rejecting when they should.
-- *Blocks:* `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` (the clarification mechanism, DEC-29, is a related but distinct concept — a rejection note is one-way, not a bounded exchange).
+**OQ-25 [CLOSED — resolved by DEC-38].** A rejection note is optional, strongly encouraged via a prominent UI field, never mandatory, and remains one-way (not a conversation thread).
+
+**OQ-29 [NEW].** When a child opens a restricted app during an active Focus Session (a violation of §11.1a's Focus Session conditions), does the session reset entirely or pause-and-flag the violation?
+- *Why it matters:* A full reset may feel disproportionately punitive for a brief lapse; a pause-and-flag risks weakening the "meaningful evidence" standard the Focus Session exists to provide (BR-228).
+- *Recommended default:* None yet — needs founder judgement on the trade-off between fairness and evidentiary strength, informed by how Focus Session violations are actually detected on-device (a technical input from the Phase 5 spike, not purely a product call).
+- *Blocks:* `20_STATE_MACHINES.md` (Phase 5) — the Focus Session sub-state machine.

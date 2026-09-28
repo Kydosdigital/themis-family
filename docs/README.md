@@ -1,7 +1,7 @@
 # Themis Family — Product Documentation
 
 **Repository:** [Kydosdigital/themis-family](https://github.com/Kydosdigital/themis-family)
-**Status: PHASE 3 OF 7 COMPLETE (2026-09-28); AWAITING FOUNDER REVIEW BEFORE PHASE 4 BEGINS.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
+**Status: PHASE 3 OF 7 COMPLETE AND FOUNDER-APPROVED (amended 2026-09-28); PHASE 4 IN PROGRESS.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
 
 ---
 
@@ -28,23 +28,25 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 | 03_PERSONAS.md | Complete (Phase 2, amended 2026-09-28 — approved) |
 | 04_USER_JOURNEYS.md | Complete (Phase 2, amended 2026-09-28 — approved) |
 | 05_HIGH_LEVEL_REQUIREMENTS.md | Complete (Phase 2, amended 2026-09-28 — approved) |
-| 06_FUNCTIONAL_REQUIREMENTS.md | Complete (Phase 3, 2026-09-28) — awaiting founder review |
-| 10_RULE_ENGINE_SPECIFICATION.md | Complete (Phase 3, 2026-09-28) — awaiting founder review; BR-211 flagged unapproved |
-| 11_TASK_AND_APPROVAL_SPECIFICATION.md | Complete (Phase 3, 2026-09-28) — awaiting founder review |
-| 12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md | Complete (Phase 3, 2026-09-28) — awaiting founder review; BR-219 flagged unapproved |
-| 13_SCHOOL_AND_ESSENTIAL_ACCESS.md | Complete (Phase 3, 2026-09-28) — awaiting founder review; BR-222 essential-set scope flagged (OQ-28) |
-| 18_ROLES_AND_PERMISSIONS.md | Complete (Phase 3, 2026-09-28) — awaiting founder review |
+| 06_FUNCTIONAL_REQUIREMENTS.md | Complete (Phase 3, amended 2026-09-28 — approved) |
+| 10_RULE_ENGINE_SPECIFICATION.md | Complete (Phase 3, amended 2026-09-28 — approved; BR-211 rewritten to an effective-enforcement model) |
+| 11_TASK_AND_APPROVAL_SPECIFICATION.md | Complete (Phase 3, amended 2026-09-28 — approved; Automatic Verification split into two Session Types) |
+| 12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md | Complete (Phase 3, amended 2026-09-28 — approved) |
+| 13_SCHOOL_AND_ESSENTIAL_ACCESS.md | Complete (Phase 3, amended 2026-09-28 — approved; essential-access hard safety principle confirmed) |
+| 18_ROLES_AND_PERMISSIONS.md | Complete (Phase 3, 2026-09-28 — approved, no amendments required) |
 | 33_PRODUCT_RISK_REGISTER.md | Complete (Phase 1–3, amended 2026-09-28) — will grow in later phases |
 | 34_OPEN_QUESTIONS.md | Complete (Phase 1–3, amended 2026-09-28) — will grow in later phases |
 | 35_DECISION_LOG.md | Complete (Phase 1–3, amended 2026-09-28) — will grow in later phases |
-| All other documents (07–09, 14–17, 19–32, 36–38) | Not yet started |
+| 08_EPICS_AND_USER_STORIES.md | Phase 4 in progress |
+| 09_ACCEPTANCE_CRITERIA.md | Phase 4 in progress |
+| All other documents (07, 14–17, 19–32, 36–38) | Not yet started |
 
 ## Phase plan
 
 1. **Phase 1 (complete, amended 2026-09-28):** Product Overview, Vision, Risks, Open Questions, Decision Log.
 2. **Phase 2 (complete and founder-approved, amended 2026-09-28):** Personas, User Journeys, Scope and Release Strategy, High-Level Requirements.
-3. **Phase 3 (complete, 2026-09-28 — awaiting founder review):** Functional Requirements, Business Rules, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions.
-4. **Phase 4 (not started — awaiting founder review of Phase 3):** User Stories and Acceptance Criteria.
+3. **Phase 3 (complete and founder-approved, amended 2026-09-28):** Functional Requirements, Business Rules, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions.
+4. **Phase 4 (in progress):** Epics and User Stories, Acceptance Criteria.
 5. **Phase 5:** Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour.
 6. **Phase 6:** Privacy and Child Safety, Security, Reporting and Analytics, Subscriptions and Billing, Admin and Support.
 7. **Phase 7:** Error/Edge Case Catalogue, Test Strategy, Traceability Matrix, Build Sequence, MVP vs. Later Feature Matrix, Definition of Ready/Done.
@@ -65,13 +67,24 @@ Phase 2 was reviewed by the founder and approved subject to nine amendments (DEC
 
 ## Phase 3 status
 
-Phase 3 is complete as of 2026-09-28 and is now awaiting founder review before Phase 4 begins. It produced six documents: `06_FUNCTIONAL_REQUIREMENTS.md` (the FR index, tying every FR back to its HLR, plus the household/device FRs not covered elsewhere), `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, and `18_ROLES_AND_PERMISSIONS.md`. No user stories and no production code were written, per the founder's explicit instruction.
+Phase 3 is complete and founder-approved as of 2026-09-28. It produced six documents: `06_FUNCTIONAL_REQUIREMENTS.md` (the FR index, tying every FR back to its HLR, plus the household/device FRs not covered elsewhere), `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, and `18_ROLES_AND_PERMISSIONS.md`. No user stories and no production code were written, per the founder's explicit instruction.
 
-The mandatory end-of-Phase-3 cross-check (full detail in `35_DECISION_LOG.md`, Phase 3 completion note) found: no orphan FRs; two HLRs (website control, protection status) only partially decomposed, correctly deferred to Phase 5 documents not yet started; no unresolved contradictions requiring rework, though one internal tension (rule conflict precedence, BR-211) is explicitly flagged rather than silently settled. Five items are recommended but not yet founder-confirmed as final: BR-211's precedence order, BR-219's Free Pass default scope, FR-042's clarification-mechanism structure (closing OQ-18), OQ-24's timer-backgrounding behaviour, and OQ-28's essential-access minimum set. None of these block Phase 4 starting; all should be confirmed before Phase 5's data model and state machines treat them as fixed.
+The founder's review round amended four of the six documents (DEC-32 through DEC-39, `35_DECISION_LOG.md`):
+
+- **Rule conflict resolution (BR-211)** replaced the withdrawn linear rule-type precedence with an **effective-enforcement model**: no rule type outranks another; a target stays restricted while any active rule still covers it; completing one rule's condition never implies access returns if another still applies. A new FR-019/BR-226 requires the child-facing UI to name every still-active restriction rather than imply a false unlock.
+- **Free Pass scope (BR-219)** confirmed as always explicit (target/scope and duration, via preset or custom choice), with the overridden rule(s) disclosed before confirmation.
+- **Request clarification (FR-042/BR-218)** approved as final: one prompt, one reply, then a decision.
+- **Automatic Verification** split into two Session Types with opposite backgrounding rules: Active Engagement Session (pauses when backgrounded) and Focus Session (may continue when backgrounded, since that matches its purpose).
+- **Rejection notes** confirmed optional but strongly encouraged.
+- **Essential access (BR-222)** confirmed as a hard safety principle (emergency calling/OS functionality never deliberately restricted) with Phone/Messages/Maps as the recommended default, split from the still-open technical question of what Apple's APIs actually permit.
+- **Scheduled Rule time zones (BR-205)** confirmed to follow the device's current local time zone.
+- **Request expiry (FR-043/BR-229)** replaced a flat window with a context-based model (expires when the underlying rule/context ends, or after a 4-hour backstop, whichever comes first).
+
+The end-of-Phase-3 cross-check (re-run after amendments; full detail in `35_DECISION_LOG.md`) found no orphan FRs, no unresolved contradictions, and confirmed all five previously-flagged pending items are now resolved. Two narrower, Phase-5-appropriate technical questions were raised by the amendments themselves (OQ-29: Focus Session violation handling; OQ-30: Apple picker/ManagedSettings validation for Phone/Messages/Maps) — neither blocks Phase 4.
 
 ## Known contradictions / things to watch
 
-See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, verification type, launch region, age-segment selection method, and the onboarding-must-verify-protection requirement. From the Phase 2 amendment round: OQ-17 (shared-device scenarios — explicitly out of V1, needs separate research), OQ-18 (request-clarification mechanism — now specified by FR-042, pending founder confirmation), OQ-19 (exact protection-status staleness thresholds — for Phase 5). New from Phase 3: OQ-20/OQ-21 (ownerless-household exit path; Teen elevated permissions, both FUTURE-leaning), OQ-22/OQ-23 (Scheduled Rule time-zone following; rule conflict precedence between Scheduled Rule, Deadline Lock and Earn First), OQ-24/OQ-25 (Automatic Verification timer backgrounding; whether a rejection note is mandatory), OQ-26/OQ-27 (request expiry window; Free Pass default scope), OQ-28 (exact essential-access minimum set). Still open from earlier: rule conflict precedence root question (OQ-05, addressed but not approved by BR-211), the definitive UK school-platform list (OQ-07), technical feasibility of cross-device usage reporting (OQ-09), the App and Website Usage entitlement decision (OQ-10), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12). None of these block Phase 4.
+See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, verification type, launch region, age-segment selection method, the onboarding-must-verify-protection requirement, and — from the Phase 3 founder review — OQ-05, OQ-18, OQ-22 through OQ-28 (rule conflict precedence, request clarification, time zones, Automatic Verification backgrounding, rejection notes, request expiry, Free Pass scope, essential-access policy). From the Phase 2 amendment round, still open: OQ-17 (shared-device scenarios — explicitly out of V1, needs separate research), OQ-19 (exact protection-status staleness thresholds — for Phase 5). From Phase 3, still open (FUTURE-leaning or narrow technical questions, none blocking): OQ-20/OQ-21 (ownerless-household exit path; Teen elevated permissions), OQ-29 (Focus Session violation handling), OQ-30 (Apple picker/ManagedSettings validation for Phone/Messages/Maps). Still open from earlier phases: the definitive UK school-platform list (OQ-07), technical feasibility of cross-device usage reporting (OQ-09), the App and Website Usage entitlement decision (OQ-10), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12). None of these block Phase 4.
 
 ## Process note
 

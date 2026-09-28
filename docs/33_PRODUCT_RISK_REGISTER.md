@@ -132,33 +132,33 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Product/Technical lead
 - **Validation method:** Explicit test scenarios forcing a device to go quiet and confirming the UI downgrades from Protected within the defined threshold
 
-## RISK-19: Rule conflict precedence order ships unresolved or wrong (BR-211)
-- **Likelihood:** Medium
+## RISK-19: Rule conflict precedence order ships unresolved or wrong (BR-211) — RESOLVED 2026-09-28
+- **Likelihood:** Medium (as originally assessed)
 - **Impact:** High — an incorrect precedence order produces a confusing or unfair enforcement outcome in a visible, recurring scenario (e.g. bedtime vs. an unresolved homework deadline)
-- **Mitigation:** BR-211 (`10_RULE_ENGINE_SPECIFICATION.md`) is explicitly flagged as an unapproved hypothesis, not a final rule; must be confirmed or amended by the founder, informed by realistic scenario walkthroughs, before Phase 5 state machines are finalised (OQ-05, OQ-23).
+- **Resolution:** DEC-32 replaced the linear precedence hierarchy with an effective-enforcement model (no rule type outranks another; a target stays restricted while any active rule still covers it), removing the underlying ambiguity rather than picking an order. Residual risk is now only in correct implementation of the model, tracked as ordinary engineering risk, not a product-decision risk.
 - **Owner:** Product/Founder
-- **Validation method:** Scenario walkthrough sign-off before Phase 5; later, user testing of the shipped precedence order
+- **Validation method:** Scenario walkthrough sign-off (complete, DEC-32's worked example); implementation correctness to be verified by Phase 7 test strategy
 
-## RISK-20: Free Pass granted with an unintentionally broad scope
-- **Likelihood:** Low-Medium
+## RISK-20: Free Pass granted with an unintentionally broad scope — RESOLVED 2026-09-28
+- **Likelihood:** Low-Medium (as originally assessed)
 - **Impact:** Medium — an unscoped Free Pass could unlock more than the parent intended, undermining trust in a "reliable enforcement" product
-- **Mitigation:** BR-219 (`12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`) recommends mandatory explicit scope selection with no unscoped default; flagged as OQ-27 pending founder confirmation.
+- **Resolution:** DEC-33 confirmed BR-219 as final: explicit target/scope and duration are always required (preset or custom), with the specific overridden rule(s) disclosed before confirmation. No unscoped default exists.
 - **Owner:** Product
-- **Validation method:** UX review of the Free Pass creation flow before Phase 5
+- **Validation method:** UX review of the Free Pass creation flow in Phase 5/6 design work, confirming the confirmation-step disclosure is implemented as specified
 
-## RISK-21: Automatic Verification evidence standard undermined by timer backgrounding behaviour
-- **Likelihood:** Medium
+## RISK-21: Automatic Verification evidence standard undermined by timer backgrounding behaviour — RESOLVED 2026-09-28
+- **Likelihood:** Medium (as originally assessed)
 - **Impact:** Medium-High — if a timer counts time while the app is backgrounded or the device is locked, "the timer completed" stops being deterministic evidence of anything (directly weakens DEC-28/BR-209's capability-honesty standard)
-- **Mitigation:** Recommended default is pause-on-background/lock, resume-on-foreground (OQ-24); must be confirmed before Phase 5's Task state machine is finalised.
+- **Resolution:** DEC-37 replaced the single universal rule with two Session Types with opposite, individually-correct backgrounding behaviour (Active Engagement Session pauses; Focus Session may continue). Each has its own truthful completion statement. Residual risk: OQ-29 (Focus Session violation handling) remains open but is a narrower, bounded question, not a capability-honesty risk.
 - **Owner:** Technical lead
-- **Validation method:** Device testing of timer behaviour across backgrounding/locking scenarios
+- **Validation method:** Device testing of both Session Types' backgrounding behaviour in Phase 5
 
-## RISK-22: Non-configurable essential-access minimum set is too narrow or too broad
-- **Likelihood:** Low-Medium
+## RISK-22: Non-configurable essential-access minimum set is too narrow or too broad — PARTIALLY RESOLVED 2026-09-28
+- **Likelihood:** Low-Medium (as originally assessed)
 - **Impact:** Medium — too narrow relies entirely on correct parent configuration for basic safety functionality; too broad removes parental choice and risks an overreach perception
-- **Mitigation:** BR-222 (`13_SCHOOL_AND_ESSENTIAL_ACCESS.md`) recommends Phone/emergency calling only as the hard-coded floor, with Messages/Maps as strongly-recommended configurable defaults; flagged as OQ-28 pending confirmation.
-- **Owner:** Product/Founder
-- **Validation method:** Founder/legal confirmation before Phase 6 security requirements finalise the essential-access floor
+- **Resolution:** DEC-35 confirmed the product policy (hard safety principle: emergency calling/OS-level emergency functionality never deliberately restricted; Phone/Messages/Maps recommended default Always Allowed set). The product-policy dimension of this risk is resolved. A narrower technical risk remains: whether Apple's picker/ManagedSettings actually support this for Phone/Messages/Maps as assumed — tracked as OQ-30, not a product-decision risk.
+- **Owner:** Product/Founder (policy — resolved); Technical lead (remaining technical validation — open)
+- **Validation method:** Apple technical spike confirming picker/ManagedSettings behaviour for the named apps, before `24_SECURITY_REQUIREMENTS.md` (Phase 6) finalises any "cannot be restricted" wording
 
 ---
 

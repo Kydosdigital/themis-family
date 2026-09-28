@@ -95,7 +95,7 @@ This is the Phase 3 decomposition record. A full formal Traceability Matrix (wit
 | HLR-002 (Role-based permissions) | `18_ROLES_AND_PERMISSIONS.md` §18.2, BR-101 to BR-106 | Decomposed |
 | HLR-003 (Device authorisation) | FR-006, FR-007 | Decomposed |
 | HLR-004 (Rule creation/targeting) | FR-010 (`10_RULE_ENGINE_SPECIFICATION.md`) | Decomposed |
-| HLR-005 (Rule types) | FR-013, FR-014, FR-015 (`10_RULE_ENGINE_SPECIFICATION.md`) | Decomposed |
+| HLR-005 (Rule types) | FR-013, FR-014, FR-015, FR-019 (`10_RULE_ENGINE_SPECIFICATION.md`) | Decomposed |
 | HLR-006 (Verification Type) | FR-016 (`10_RULE_ENGINE_SPECIFICATION.md`), FR-030–FR-033 (`11_TASK_AND_APPROVAL_SPECIFICATION.md`) | Decomposed |
 | HLR-007 (Approval workflow) | FR-030, FR-031 (`11_TASK_AND_APPROVAL_SPECIFICATION.md`) | Decomposed |
 | HLR-008 (Non-response handling) | FR-032 (`11_TASK_AND_APPROVAL_SPECIFICATION.md`) | Decomposed |
@@ -136,3 +136,16 @@ Per §6.2, two HLRs are only partially decomposed by Phase 3's actual document l
 - **HLR-013 (Protection status)** has no dedicated specification document in Phase 3's list. The brief's own document plan places full device-enforcement detail in `16_DEVICE_ENFORCEMENT.md`, which is explicitly a Phase 5 deliverable. Phase 3 only references protection status where it intersects with FR-006/FR-008 (device authorisation and the two-stage onboarding model). **This is correctly deferred, not an oversight** — but is called out explicitly here so it isn't mistaken for a completed decomposition.
 
 No orphan FRs were found (every FR above traces to an HLR); see §7 for the full Phase 3 cross-check.
+
+---
+
+## 6.5 Amendment note (2026-09-28 — post founder review, pre-Phase 4)
+
+The founder's Phase 3 review round (DEC-32 through DEC-39) amended `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, and `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`. One new FR was added (**FR-019**, multi-rule status communication, DEC-32 — indexed against HLR-005 above); no FRs were removed or renumbered. The cross-check was re-run against the amended documents:
+
+- **Orphan FRs:** None. FR-019 traces to HLR-005 (Rule types) as the child-facing consequence of the effective-enforcement model.
+- **HLRs newly affected:** None newly undecomposed — the amendments sharpened existing FR/BR content (BR-211, BR-219, BR-222, FR-033, FR-042, FR-043) rather than removing coverage.
+- **Contradictions:** None found. The amendment round explicitly resolved the one flagged internal tension (BR-211's precedence order) rather than leaving it standing alongside new content.
+- **Items previously pending founder sign-off:** All five (BR-211, BR-219, FR-042/OQ-18, OQ-24, OQ-28) are now resolved per `35_DECISION_LOG.md` DEC-32–DEC-39. Two narrower follow-on questions were raised by these same decisions (OQ-29: Focus Session violation handling; OQ-30: technical validation of Apple's picker/ManagedSettings support for Phone/Messages/Maps) — neither blocks Phase 4.
+
+Phase 3 is now fully confirmed, with only Phase 5-appropriate technical detail (time-zone recalculation, Focus Session violation handling, Apple picker capability) remaining open.

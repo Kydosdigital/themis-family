@@ -263,6 +263,66 @@ None of the above block Phase 4 from starting (they are all flagged, bounded REC
 
 ---
 
+## Founder decisions received 2026-09-28 (Phase 3 review — amendments before Phase 4)
+
+**DEC-32. Rule conflict resolution replaced with an effective-enforcement model — resolves OQ-05, OQ-23.**
+- **Status:** Confirmed
+- **Decision:** BR-211's linear rule-type precedence (Scheduled Rule > Deadline Lock > Earn First) is withdrawn. Instead: Essential/Always Allowed is evaluated first and absolutely; explicit parent overrides/grants apply only to the scope they explicitly name; after overrides are applied, a target remains restricted if any other active blocking rule still covers it; no rule type inherently outranks another, and completing one rule's condition never implies access returns if a different active rule still restricts the same target. Worked example: a bedtime Scheduled Rule and an overdue-homework Deadline Lock both restrict Roblox; completing homework clears the Deadline Lock restriction but Roblox stays blocked by bedtime; the UI must not say "Games unlocked."
+- **Rationale:** Founder decision. The withdrawn linear model would have produced incorrect and potentially unsafe enforcement outcomes (e.g. a completed task appearing to unlock an app still meant to be restricted by a separate rule).
+- **Date:** 2026-09-28
+- **Supersedes:** `10_RULE_ENGINE_SPECIFICATION.md` BR-211/FR-018 (rewritten); adds FR-019/BR-226 (child-facing multi-rule status communication). Closes OQ-05 and OQ-23.
+
+**DEC-33. Free Pass scope confirmed — resolves OQ-27.**
+- **Status:** Confirmed
+- **Decision:** A Free Pass has no silent or unscoped blanket default. The parent must always explicitly select target/scope and duration, whether via a one-tap preset (e.g. "Games — 30 minutes," "YouTube — 20 minutes," "All entertainment — 30 minutes") or a custom selection. Before confirmation, the app must state which active rule(s) the Free Pass will temporarily override. Expiry occurs locally and the normal effective enforcement state resumes automatically.
+- **Rationale:** Founder decision, confirming the Phase 3 recommendation as final.
+- **Date:** 2026-09-28
+- **Supersedes:** `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` BR-219 (now Confirmed, with presets and pre-confirmation rule disclosure added). Closes OQ-27.
+
+**DEC-34. Request clarification mechanism approved as final — resolves OQ-18.**
+- **Status:** Confirmed
+- **Decision:** FR-042/BR-218 is approved exactly as specified: V1 supports exactly one clarification prompt from the parent/guardian and one reply from the child/teen, after which the approver must approve, partially approve, or decline. No open-ended messaging thread; the interaction exists only inside the specific request.
+- **Rationale:** Founder decision, confirming the Phase 3 specification as final.
+- **Date:** 2026-09-28
+- **Supersedes:** Closes OQ-18 (previously specified but not confirmed).
+
+**DEC-35. Essential access hard safety principle confirmed, split from the technical-validation question — resolves OQ-28 at the product-policy level.**
+- **Status:** Confirmed
+- **Decision:** Themis Family must never intentionally interfere with emergency communication or OS-level emergency functionality — this is a hard, unconditional product policy for V1, confirmed independently of any technical finding. The recommended default Always Allowed set, where technically supported, is Phone, Messages, and Maps; Messages and Maps are strongly recommended and pre-selected but remain parent-configurable. The product must not claim a specific system app is technically impossible to shield until the Apple technical spike verifies that behaviour — an unverified API assumption must not become a stated requirement.
+- **Rationale:** Founder decision. Separates a policy commitment (which can be made now) from a technical fact (which cannot be asserted until verified), avoiding both an unsafe policy gap and an overstated technical claim.
+- **Date:** 2026-09-28
+- **Supersedes:** `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` BR-222 (rewritten). OQ-28 is closed at the product-policy level; the remaining technical question is tracked as new OQ-30.
+
+**DEC-36. Scheduled Rule time zone behaviour confirmed — resolves OQ-22.**
+- **Status:** Confirmed
+- **Decision:** Scheduled rules follow the child device's current local time zone (not a fixed home-zone offset). A time-zone change must not silently create an ambiguous rule state. V1 does not build home-vs-travel time zone configuration. Phase 5 must define time-zone-change detection, schedule recalculation, local persistence, and a parent-facing indication where the change is material.
+- **Rationale:** Founder decision, confirming the Phase 3 recommendation, with explicit Phase 5 technical scope attached.
+- **Date:** 2026-09-28
+- **Supersedes:** `10_RULE_ENGINE_SPECIFICATION.md` BR-205 (now Confirmed). Closes OQ-22, subject to the named Phase 5 technical implementation detail.
+
+**DEC-37. Automatic Verification split into two Session Types — resolves OQ-24.**
+- **Status:** Confirmed
+- **Decision:** A single universal backgrounding rule cannot correctly serve every Automatic Verification use case. V1 formalises exactly two Session Types: **Active Engagement Session** (e.g. in-app reading — pauses on backgrounding/device lock, resumes on foreground return, backgrounded time never counted; truthful statement: "15-minute in-app reading session completed," never "child definitely read for 15 minutes") and **Focus Session** (staying away from configured distracting apps — may continue while Themis is backgrounded or the device is locked, since that is compatible with the intended behaviour; invalidated only by opening a specifically-restricted app during the window; truthful statement: "30-minute focus session completed under the configured restrictions," never "30 minutes of homework completed").
+- **Rationale:** Founder decision. The two use cases have opposite correct backgrounding behaviour, so one shared rule was structurally wrong, not merely underspecified.
+- **Date:** 2026-09-28
+- **Supersedes:** `11_TASK_AND_APPROVAL_SPECIFICATION.md` FR-033 (rewritten); adds §11.1a (BR-227, BR-228). Updates the general wording of DEC-28/BR-209 in `10_RULE_ENGINE_SPECIFICATION.md` §10.5 to cross-reference the two Session Type-specific evidence statements. Closes OQ-24. Raises new OQ-29 (Focus Session violation handling).
+
+**DEC-38. Rejection note confirmed optional — resolves OQ-25.**
+- **Status:** Confirmed
+- **Decision:** When a parent rejects a task completion as "Needs work," a note is optional; the UI should strongly encourage a short explanation via a prominent field, but the note is never mandatory, and it does not create an open-ended conversation thread.
+- **Rationale:** Founder decision, confirming the Phase 3 recommendation as final.
+- **Date:** 2026-09-28
+- **Supersedes:** Closes OQ-25.
+
+**DEC-39. Request expiry replaced with a context-based model — resolves OQ-26.**
+- **Status:** Confirmed
+- **Decision:** A request does not use one arbitrary expiry duration. It expires when it can no longer meaningfully affect its underlying rule/context, with a maximum pending lifetime of 4 hours as a backstop only (used when the underlying context does not itself end sooner). Every request record carries `created_at`, `expires_at`, and a context/rule reference. If the underlying rule/target is deleted or materially changed while the request is Pending, the request expires immediately if its context reference no longer resolves. Phase 4 acceptance criteria must cover: parent acts before expiry; parent acts exactly around expiry; request expires while devices are offline; late approval attempt; underlying rule deleted/changed; request becomes irrelevant before the 4-hour backstop.
+- **Rationale:** Founder decision. A flat expiry window (e.g. always 4 hours) could let an already-irrelevant request linger, or expire a still-relevant one too early; tying expiry to the underlying context avoids both failure modes.
+- **Date:** 2026-09-28
+- **Supersedes:** `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` FR-043 (rewritten); adds BR-229. Closes OQ-26.
+
+---
+
 ## Decisions still required from the founder before Phase 4 begins
 
-None outstanding that block starting Phase 4 (User Stories and Acceptance Criteria). The five items listed in the Phase 3 completion note above should be confirmed before Phase 5 (Data Model, State Machines) treats them as final, but Phase 4 may proceed against the Phase 3 documents as written.
+None. All items flagged in the Phase 3 completion note above (BR-211, BR-219, FR-042/OQ-18, OQ-24, OQ-28) are now resolved by DEC-32 through DEC-39. Two new, narrower open questions were raised by these same decisions (OQ-29: Focus Session violation handling; OQ-30: technical validation of Apple's picker/ManagedSettings support for Phone/Messages/Maps) — neither blocks Phase 4; both are tracked in `34_OPEN_QUESTIONS.md` against the Phase 5 documents they affect. Phase 4 (Epics and User Stories, Acceptance Criteria) proceeds next.

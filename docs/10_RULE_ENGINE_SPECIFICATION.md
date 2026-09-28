@@ -74,9 +74,9 @@ Every rule is composed of the fields defined in `00_PRODUCT_OVERVIEW.md` §1.5: 
 - **Offline behaviour:** Fully local; does not require connectivity at trigger time.
 - **Business rules:** BR-205 (time zone), BR-206 (DST)
 - **Release:** V1 / Must
-- **Open questions:** OQ-22 (new, see §10.7)
+- **Open questions:** None outstanding for V1 scope; technical implementation detail deferred to Phase 5 (see BR-205).
 
-**BR-205.** A Scheduled Rule's times are interpreted in the time zone of the child's device at the moment the schedule was set, and re-evaluated against the device's current time zone on each check — i.e., if the family travels, the schedule follows the device's local clock, not a fixed UTC offset. (RECOMMENDATION — not explicitly resolved by the founder; flagged as OQ-22.)
+**BR-205 (CONFIRMED, DEC-36 — closes OQ-22).** A Scheduled Rule's times are interpreted in the child device's current local time zone; if the family travels, the schedule follows the device's local clock, not a fixed UTC offset or a "home" time zone. A time-zone change must not silently create an ambiguous rule state (e.g. a schedule appearing to apply twice, or not at all, during the transition). V1 does not build separate home-time-zone-vs-travel-time-zone configuration — device-local time zone is the only V1 behaviour. `20_STATE_MACHINES.md` (Phase 5) must define: time-zone-change detection, schedule recalculation on change, local persistence of the recalculated schedule, and a parent-facing indication where the change is material (e.g. a schedule's next occurrence shifting by more than an hour).
 
 **BR-206.** On a Daylight Saving Time transition, a schedule's start/end times are defined in local wall-clock time and are not shifted by the DST change (a 6:00 PM deadline is 6:00 PM local time before and after the clock change).
 
@@ -122,7 +122,7 @@ Every rule is composed of the fields defined in `00_PRODUCT_OVERVIEW.md` §1.5: 
 - **Dependencies:** `11_TASK_AND_APPROVAL_SPECIFICATION.md` (task submission/approval lifecycle)
 - **Release:** V1 / Must
 
-**BR-209.** Automatic Verification evidence is scoped strictly to "the configured in-app timer/focus session ran to completion, as measured by the device." No in-product copy, notification, or report may describe this as evidence that the underlying real-world activity (e.g. reading) occurred — see DEC-28 and the wording contrast in `04_USER_JOURNEYS.md` §4.7.
+**BR-209.** Automatic Verification evidence is scoped strictly to "the configured in-app session ran to completion, as measured by the device," and the exact evidence statement depends on which of the two Session Types (Active Engagement Session or Focus Session) the task uses — see `11_TASK_AND_APPROVAL_SPECIFICATION.md` §11.1a (DEC-37) for the two truthful completion statements and their respective backgrounding rules (BR-227, BR-228). No in-product copy, notification, or report may describe either Session Type's completion as evidence that the underlying real-world activity (e.g. reading, or homework) occurred — see DEC-28 and the wording contrast in `04_USER_JOURNEYS.md` §4.7.
 
 ---
 
@@ -141,37 +141,42 @@ Every rule is composed of the fields defined in `00_PRODUCT_OVERVIEW.md` §1.5: 
 ## FR-018. Rule conflict resolution
 - **Actor:** System
 - **Trigger:** More than one active rule, override, or exception applies to the same controlled target at the same moment
-- **Happy path:** The system resolves to a single deterministic enforcement state using the precedence order in BR-211.
+- **Happy path:** The system resolves each controlled target's enforcement state using the **effective-enforcement model** in BR-211 (DEC-32), not a linear rule-type precedence. A target is unrestricted only when every active restriction that applies to it has been cleared or explicitly overridden; clearing one restriction never implies the target is now accessible if another active restriction still covers it.
+- **Alternative paths:** A restriction clears (e.g. a Deadline Lock task is approved) while another restriction on the same target remains active (e.g. a Scheduled Rule bedtime window) → the target remains shielded; the child sees which restriction(s) still apply, not a generic "still locked" message (see FR-019).
 - **Business rules:** BR-211
 - **Release:** V1 / Must
-- **Open questions:** OQ-05 (this FR does not close OQ-05 — see below)
+- **Open questions:** OQ-05 is now closed by this model — see below.
 
-**BR-211 (precedence order — CARRIED FORWARD AS A HYPOTHESIS, NOT YET FORMALLY TESTED; this is what OQ-05 asked for and this document is where it must ultimately be resolved).**
+**BR-211 (effective-enforcement model — CONFIRMED, DEC-32; supersedes the linear precedence hierarchy originally proposed).**
 
-Proposed precedence, highest first:
-1. Essential/Always Allowed (never overridden by anything below — BR-202)
-2. Emergency/parent-initiated override (Free Pass — see `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`)
-3. Approved temporary access / extra time grant (time-bounded — BR-210)
-4. Hard Scheduled Rule restriction
-5. Deadline Lock restriction
-6. Earn First restriction (default-locked state)
+Rule conflict resolution is not a rank-ordered list of rule *types*. Instead, every controlled target's enforcement state is computed as follows, each time it needs to be evaluated (on a schedule transition, a task/request outcome, a grant's creation or expiry, or app-launch attempt):
 
-**Rationale for this order:** Essential access must never be blockable (child safety). An emergency override is a deliberate, immediate parent action and should win over any standing schedule. An already-approved temporary grant should not be silently overridden by a schedule that started after the grant was made. Between the three restriction types, Scheduled Rule is deliberately given precedence over Deadline Lock and Earn First on the reasoning that a hard schedule (e.g. bedtime) represents a stronger, less negotiable family boundary than a task-contingent restriction — but this ordering between 4/5/6 is the weakest-justified part of this proposal and is exactly the kind of assumption the brief warns against adopting uncritically.
+1. **Essential/Always Allowed is evaluated first and absolutely.** If a target is Essential or Always Allowed, it is never restricted by anything below, full stop (BR-202, BR-222).
+2. **Explicit parent overrides and temporary grants apply only to the scope they explicitly name.** A Free Pass, extra-time grant, or temporary-access grant lifts restriction only for the specific target(s)/rule(s) it was scoped to (BR-210, BR-219) — it does not implicitly clear any other active restriction on the same or a different target.
+3. **After all currently-applicable overrides/grants are applied, the target remains restricted if any other active blocking rule still covers it.** Scheduled Rule, Deadline Lock and Earn First restrictions are evaluated independently and are all still-in-force unless each one has individually been satisfied, approved, or overridden. None of the three rule types inherently outranks or clears another by virtue of its type.
+4. **Completing or satisfying one rule's condition never implies access returns** if a different active rule still restricts the same target. The system must not report or imply "unlocked" for a target that remains shielded by another rule.
 
-**This precedence order is NOT approved — it requires explicit founder sign-off or must be tested against realistic multi-rule scenarios before being treated as final.** Recorded here as the working hypothesis so Phase 4 (acceptance criteria) and Phase 5 (state machines) have something concrete to build against, but flagged for founder decision before Phase 5 finalises the state machine.
+**Worked example (from the founder's own brief):** A bedtime Scheduled Rule and an overdue-homework Deadline Lock both restrict Roblox. The child completes the homework task and it is approved. Result: the Deadline Lock restriction on Roblox clears, but Roblox remains blocked because the bedtime Scheduled Rule is still active. The child is not told "Games unlocked" — they are told which restriction(s) still apply (see FR-019, BR-226).
+
+**This closes OQ-05 and OQ-23.** The previous linear-precedence proposal (Scheduled Rule > Deadline Lock > Earn First) is withdrawn; it is no longer a candidate model, not merely deprioritised.
+
+## FR-019. Multi-rule status communication to the child/teen
+- **Actor:** System
+- **Trigger:** A target the child is attempting to access, or checking the status of, has more than one active restriction, or a restriction has just partially cleared
+- **Preconditions:** BR-211's effective-enforcement model determines the target remains restricted after at least one, but not all, applicable restrictions have cleared
+- **Happy path:** The child/teen sees an honest, specific statement naming every restriction still in force on that target, not a single generic "locked" message and not a false "unlocked" message when a different restriction still applies. Example copy: *"Games are paused for bedtime. Homework is also overdue."* When a restriction clears while another remains, the UI communicates the change (e.g. "Homework done — nice work. Games are still paused until bedtime ends.") rather than staying silent or implying nothing changed.
+- **Business rules:** BR-226 (no false "unlocked" state; every still-active restriction on a target must be named, not just the most recently evaluated one)
+- **Dependencies:** `15_CHILD_AND_TEEN_EXPERIENCE.md` (Phase 5/6) — the exact copy library and visual treatment for multi-restriction states is a UX-detail document not yet written; this FR defines the underlying behavioural requirement it must satisfy.
+- **Release:** V1 / Must
+
+**BR-226 (restates DEC-32's child-experience consequence as a binding rule).** Wherever the product communicates a target's lock state to a child/teen, it must name every currently-active restriction on that target, and must never state or imply a target is unlocked/available while any restriction from BR-211's evaluation still applies to it.
 
 ---
 
 ## 10.7 Open questions surfaced by this document
 
-**OQ-05 [Still open — addressed, not resolved, by BR-211].** See above: the precedence order is proposed but not confirmed. *Blocks:* Phase 5 state machines cannot be finalised until this is confirmed or amended.
+**OQ-05 [CLOSED — resolved by DEC-32/BR-211].** The founder replaced the linear rule-type precedence question with the effective-enforcement model: no rule type inherently outranks another; a target stays restricted while any active rule still covers it. There is no longer a "precedence order" to confirm.
 
-**OQ-22 [NEW].** Should Scheduled Rule times follow the device's current time zone (i.e., shift with travel) or stay fixed to the time zone in which the household was set up?
-- *Why it matters:* A family travelling abroad could otherwise see their bedtime rule apply at a confusing local time, or alternatively silently apply at the "wrong" local time if fixed to the home zone.
-- *Recommended default:* Follow the device's current time zone (BR-205), since this matches what a parent watching the clock in the room with the child would expect. Flag for user testing given international travel is a real scenario for some households.
-- *Blocks:* `19_DATA_MODEL.md`, `20_STATE_MACHINES.md` (Phase 5)
+**OQ-22 [CLOSED — resolved by DEC-36/BR-205].** Scheduled Rule times follow the child device's current local time zone. V1 does not build home-vs-travel time zone configuration. Phase 5 technical detail (change detection, recalculation, persistence, parent-facing indication) remains to be specified in `20_STATE_MACHINES.md`, tracked as a Phase 5 implementation task, not a further open product question.
 
-**OQ-23 [NEW].** BR-211 puts Scheduled Rule above Deadline Lock and Earn First in precedence — is this the right call, or should Deadline Lock (the hero mechanic) take precedence over a generic schedule?
-- *Why it matters:* Affects a real scenario: if bedtime (Scheduled Rule, 9pm) and an unresolved homework Deadline Lock (due 6pm, still pending at 9pm) both apply to the same games app, which wins is not obviously "correct" either way — arguably it shouldn't matter, since both would restrict the app anyway, but the distinction matters for what message the child sees and what unlocks the app.
-- *Recommended default:* No default recommended — this needs founder judgement informed by realistic scenario walkthroughs, not just architectural tidiness. Flagged as a Phase 4/5 blocker, not resolved here.
-- *Blocks:* `20_STATE_MACHINES.md` (Phase 5)
+**OQ-23 [CLOSED — resolved by DEC-32].** Superseded by the effective-enforcement model: the question "should Scheduled Rule outrank Deadline Lock" no longer applies, since neither outranks the other — both remain independently in force until each is individually satisfied.
