@@ -24,15 +24,19 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 |---|---|
 | 00_PRODUCT_OVERVIEW.md | Complete (Phase 1, amended 2026-09-28) |
 | 01_PRODUCT_VISION_AND_GOALS.md | Complete (Phase 1, amended 2026-09-28) |
-| 33_PRODUCT_RISK_REGISTER.md | Complete (Phase 1) — will grow in later phases |
-| 34_OPEN_QUESTIONS.md | Complete (Phase 1, amended 2026-09-28) — will grow in later phases |
-| 35_DECISION_LOG.md | Complete (Phase 1, amended 2026-09-28) — will grow in later phases |
-| All other documents (02–32, 36–38) | Not yet started — Phase 2 in progress |
+| 02_SCOPE_AND_RELEASE_STRATEGY.md | Complete (Phase 2) |
+| 03_PERSONAS.md | Complete (Phase 2) |
+| 04_USER_JOURNEYS.md | Complete (Phase 2) |
+| 05_HIGH_LEVEL_REQUIREMENTS.md | Complete (Phase 2) |
+| 33_PRODUCT_RISK_REGISTER.md | Complete (Phase 1, amended 2026-09-28) — will grow in later phases |
+| 34_OPEN_QUESTIONS.md | Complete (Phase 1+2, amended 2026-09-28) — will grow in later phases |
+| 35_DECISION_LOG.md | Complete (Phase 1+2, amended 2026-09-28) — will grow in later phases |
+| All other documents (06–32, 36–38) | Not yet started — awaiting founder review before Phase 3 |
 
 ## Phase plan
 
 1. **Phase 1 (complete, amended 2026-09-28):** Product Overview, Vision, Risks, Open Questions, Decision Log.
-2. **Phase 2:** Personas, User Journeys, Scope and Release Strategy, High-Level Requirements.
+2. **Phase 2 (complete, awaiting founder review):** Personas, User Journeys, Scope and Release Strategy, High-Level Requirements.
 3. **Phase 3:** Functional Requirements, Business Rules, Rule Engine Specification, Roles and Permissions.
 4. **Phase 4:** User Stories and Acceptance Criteria.
 5. **Phase 5:** Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour.
@@ -51,8 +55,12 @@ All five decisions that were blocking Phase 2 have been resolved by the founder 
 4. Parent non-response: no auto-unlock; honest "Waiting for approval" state, reminder, one child nudge.
 5. Task verification: formalised as a Verification Type field (Parent Approval or Automatic Verification).
 
-Phase 2 (Personas, User Journeys, Scope and Release Strategy, High-Level Requirements) is now in progress.
+Phase 2 (Personas, User Journeys, Scope and Release Strategy, High-Level Requirements) is now **complete**. Per the founder's own process instruction, work stops here for review — Phase 3 does not begin automatically.
 
 ## Known contradictions / things to watch
 
-See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, and verification type. Still open: the definitive UK school-platform list (OQ-07), technical feasibility of cross-device usage reporting (OQ-09), the App and Website Usage entitlement decision (OQ-10), rule conflict precedence (OQ-05), final pricing (OQ-11), and Kids Category exclusion confirmation (OQ-12) — none of these block Phase 2.
+See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, and verification type. Still open going into Phase 3: rule conflict precedence (OQ-05), the definitive UK school-platform list (OQ-07), technical feasibility of cross-device usage reporting (OQ-09), the App and Website Usage entitlement decision (OQ-10), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12), and four new items raised during Phase 2 (OQ-13 through OQ-16 — App Store region, single-guardian household coverage, age-segment selection method, and the priority level of the onboarding-demonstrates-a-working-rule requirement). None of OQ-05 through OQ-16 block Phase 3 from starting, but the founder may want to weigh in first.
+
+## Process note
+
+Per founder instruction (2026-09-28): every major product decision is committed to this repository under `/docs`, not left to live only in conversation history. Each phase's documents are drafted, cross-checked against prior phases, and committed before the next phase begins.

@@ -152,3 +152,16 @@ Format: ID | Decision | Status | Rationale | Date | Supersedes
 ## Decisions still required from the founder before Phase 2 begins
 
 None outstanding from the original priority list — OQ-01 through OQ-04 and OQ-06 are resolved above (DEC-12 through DEC-16). Remaining open items (OQ-05, OQ-07, OQ-09, OQ-10, OQ-12) are research/technical-spike or Phase-3-appropriate items and do not block Phase 2 per `34_OPEN_QUESTIONS.md`.
+
+---
+
+## DEC-22. Process decision: all major product decisions committed to GitHub, not just conversation history.
+- **Status:** Confirmed
+- **Decision:** From 2026-09-28 onward, every major product decision is committed to the `Kydosdigital/themis-family` repository under `/docs`, in addition to (not instead of) being discussed with the founder. The repository is the durable source of truth; conversation history is not relied upon as the record.
+- **Rationale:** Founder instruction, given directly.
+- **Date:** 2026-09-28
+- **Supersedes:** N/A — reinforces DEC-21.
+
+## Decisions still required from the founder before Phase 3 begins
+
+Phase 2 (Personas, User Journeys, Scope and Release Strategy, High-Level Requirements) is complete as of this commit. Per the founder's own process instruction, work stops here for review. No decisions are strictly blocking, but the founder may wish to weigh in on the new open questions raised during Phase 2 (OQ-13 through OQ-16 in `34_OPEN_QUESTIONS.md`) before Phase 3 (Functional Requirements, Business Rules, Rule Engine Specification, Roles and Permissions) begins.

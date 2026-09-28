@@ -1,6 +1,6 @@
 # 34. Open Questions
 
-**Status:** Phase 1 draft. Every question here blocks a specific downstream document until resolved. Questions are not listed in priority order within their category; Section 5 gives the priority list for Phase 2 readiness.
+**Status:** Phase 2 draft (amended). Every question here blocks a specific downstream document until resolved. Questions are not listed in priority order within their category; Section 5 gives the priority list for Phase 2 readiness. A new §"Questions raised during Phase 2" is appended at the end.
 
 Format: ID | Question | Why it matters | Recommended default | Blocks
 
@@ -98,3 +98,27 @@ Remaining open items and their status:
 - **OQ-05** (rule conflict precedence) — must close before `10_RULE_ENGINE_SPECIFICATION.md` in Phase 3. Does not block Phase 2.
 - **OQ-11** (exact pricing number/trial length) — explicitly must NOT block Phase 2 per DEC-20; needed before `25_SUBSCRIPTIONS_AND_BILLING.md` in Phase 6.
 - **OQ-12** (Kids Category exclusion — legal/App Store confirmation) — can be resolved during Phase 3–6 without blocking Phase 2.
+
+---
+
+## Questions raised during Phase 2
+
+**OQ-13.** Should V1's App Store listing target UK only, or a wider English-speaking region from day one?
+- *Why it matters:* Affects launch/marketing planning; no functional difference is anticipated.
+- *Recommended default:* UK-only listing initially, to keep support scope narrow; revisit post-validation.
+- *Blocks:* None for Phase 2/3; relevant to launch planning (Phase 7 / go-to-market, outside this spec's scope).
+
+**OQ-14.** Should a single-child, single-guardian household be documented as its own distinct persona/journey, given it is plausibly a large share of the real customer base, versus the richer two-child, two-guardian household used as the primary example?
+- *Why it matters:* If Phase 3–4 requirements are only exercised against the richer household, simpler-household edge cases (e.g., "what does the Guardian invite screen look like when there's no Guardian yet") could be under-specified.
+- *Resolution applied:* `04_USER_JOURNEYS.md` §4.1 now uses the single-child, single-guardian household as the onboarding journey specifically to cover this. No further action needed unless Phase 3 finds gaps.
+- *Blocks:* None currently — resolved by document structure.
+
+**OQ-15.** Does the app infer a child's UX segment (Child vs. Teen) from a stored date of birth, or does the parent explicitly select the segment label?
+- *Why it matters:* Affects the User data model (whether a precise child DOB is collected at all) and interacts with data-minimisation privacy principles (brief §"Privacy Principles").
+- *Recommended default:* Parent explicitly selects Child or Teen at setup, rather than the app deriving it from a stored DOB. A DOB is not required for V1's segment logic. Age band remains provisional per DEC-12, so parents can also change the segment later (e.g. moving a child from Child to Teen UX as they grow) without needing account deletion/recreation.
+- *Blocks:* `19_DATA_MODEL.md` (Phase 5) — the User entity's age/DOB-band field.
+
+**OQ-16.** `05_HIGH_LEVEL_REQUIREMENTS.md` HLR-020 (onboarding must demonstrate one working rule before completion) is marked "Should," but the Risk Register (RISK-08) treats onboarding abandonment as high-likelihood/high-impact — is "Should" the right priority, or should this be elevated to "Must"?
+- *Why it matters:* A "Should" can be quietly deprioritised under schedule pressure; if this is really release-blocking, it should be visible as such.
+- *Recommended default:* Keep the formal priority as "Should" (it is a UX quality bar, not a strict functional gate — the app must work without it, just less well), but explicitly carry it into Phase 7's Definition of Done as a release-blocking acceptance item. Document this dual status rather than resolving it as a single flat priority.
+- *Blocks:* `38_DEFINITION_OF_DONE.md` (Phase 7) — needs to reflect this explicitly when written.
