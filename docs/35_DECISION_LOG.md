@@ -531,11 +531,73 @@ Phase 6 produced six documents: `07_NON_FUNCTIONAL_REQUIREMENTS.md`, `22_REPORTI
 
 ---
 
+## DEC-52 through DEC-59 — Phase 6 founder review round (2026-09-28)
+
+**DEC-52 — Lawful basis is not assumed; Lawful Basis Matrix required before launch (23_PRIVACY_AND_CHILD_SAFETY.md §23.4/§23.4a).**
+- **Status:** Confirmed.
+- **Decision:** The original Phase 6 draft's statement that the Owner/Guardian's consent is automatically the lawful basis for all processing of the child's personal data is **withdrawn**. Themis Family must identify and document an appropriate lawful basis for each processing purpose as part of a DPIA and specialist legal/privacy review before launch; this specification does not make that legal determination. A required launch-readiness artefact, the Lawful Basis Matrix, is introduced, covering Member profile, Device status, Rules, Tasks, Requests, Temporary grants, Session records, Audit logs, Support access, Product analytics, and Push notifications, each recording data/purpose/proposed lawful basis/necessity/retention/recipient-access/child-specific impact/legal-review status.
+- **Rationale:** "the parent is the account holder" is an account-administration fact, not a legal conclusion about lawful basis under UK GDPR/DPA 2018, particularly given UK requirements around consent for information society services offered directly to a child.
+- **Date:** 2026-09-28.
+
+**DEC-53 — Child transparency is a confirmed product requirement, not merely a stated principle (23_PRIVACY_AND_CHILD_SAFETY.md §23.4b).**
+- **Status:** Confirmed.
+- **Decision:** The child/teen experience must contain an accessible protection indicator (e.g. "Themis is active" or equivalent) and must let the child understand, in age-appropriate terms: that parental controls are active; broadly what Themis controls; what parents can see; what parents cannot see; why a specific app/site is currently restricted; and how to request an exception. This does not extend to exposing implementation/security detail that would materially aid circumvention.
+- **Rationale:** "No covert monitoring" as a principle alone does not guarantee the child experience actively communicates that controls exist; an active requirement closes that gap.
+- **Date:** 2026-09-28. **Feeds:** `15_CHILD_AND_TEEN_EXPERIENCE.md` (Phase 7).
+
+**DEC-54 — Child-device authentication is a scoped pairing/credential model, separate from Family Controls `.child` authorisation and from Sign in with Apple (24_SECURITY_REQUIREMENTS.md §24.5, 19_DATA_MODEL.md, 29_API_AND_BACKEND_REQUIREMENTS.md §29.6a, 16_DEVICE_ENFORCEMENT.md §16.10a).**
+- **Status:** Confirmed V1 architecture.
+- **Decision:** Owner/Guardian authenticate to Themis via a normal secure consumer identity flow (preferred V1 option: Sign in with Apple). The child device does **not** require a separate Themis account or Apple ID sign-in: the parent creates the child profile, initiates pairing, the child device completes a one-time pairing code/QR/secure-enrolment flow, and the backend issues a scoped, revocable device credential (household + Member + device scoped, child-device permissions only). This device credential is entirely separate from, and never derived from, the device's Family Controls `.child` authorisation, which continues to be checked independently via Apple's own framework.
+- **Rationale:** the original SEC-014 draft risked conflating a platform-level authorisation concern (Apple's) with a backend identity concern (Themis's); conflating them would misattribute a change in one system as an event in the other.
+- **Date:** 2026-09-28.
+
+**DEC-55 — Apple's own Billing Grace Period (16 days) replaces the custom subscription grace model; closes OQ-38 (25_SUBSCRIPTIONS_AND_BILLING.md §25.2, 20_STATE_MACHINES.md §20.10).**
+- **Status:** Confirmed V1 commercial policy.
+- **Decision:** Themis Family enables Apple's App Store **Billing Grace Period**, configured at **16 days** for both monthly and annual subscriptions (subject to final App Store configuration validation). During the Grace Period, all features and enforcement remain fully active with a calm billing warning and no child-facing blame. If the Grace Period expires without recovery, the household moves to `Protection Expired` and restrictions are actively cleared — Themis does not continue full paid functionality merely because Apple's own billing retries continue past the Grace Period. Voluntary cancellation instead runs full service to the paid-through date, with advance notice, then the same `Protection Expired` clearing; no additional custom grace period follows a voluntary cancellation.
+- **Rationale:** a Themis-invented custom grace window layered on top of Apple's own billing-retry schedule risked either granting free service for too long or creating ambiguity over which system's timing governed; using Apple's own mechanism removes that ambiguity.
+- **Date:** 2026-09-28. **Supersedes:** DEC-51's proposed custom 7-day grace window.
+
+**DEC-56 — No partial/reduced-enforcement subscription tier; closes OQ-39 (25_SUBSCRIPTIONS_AND_BILLING.md §25.2a).**
+- **Status:** Confirmed.
+- **Decision:** The subscription-enforcement model remains binary: entitled or within the Apple Billing Grace Period means full protection and management; not entitled after the Grace Period (or after voluntary cancellation's paid period) means Themis-managed restrictions are cleared. No reduced/partial-enforcement middle tier is created for V1.
+- **Rationale:** keeps the model conceptually simple and avoids an under-specified middle state; essential OS-level safety (BR-222) remains governed by the device regardless of subscription state either way.
+- **Date:** 2026-09-28.
+
+**DEC-57 — Resubscription after Protection Expired requires explicit parent-confirmed reactivation (25_SUBSCRIPTIONS_AND_BILLING.md §25.6, 20_STATE_MACHINES.md §20.10).**
+- **Status:** Confirmed, new this round.
+- **Decision:** A household that resubscribes after reaching `Protection Expired` is not automatically re-locked. The parent is shown "Ready to turn protection back on?", reviews the existing (potentially stale) rules, and explicitly confirms reactivation before the child device syncs the new Local Enforcement Plan, with "Reactivation sent" → "Protection active on device" UI feedback.
+- **Rationale:** avoids unexpectedly reactivating months-old restrictions on a device the instant payment resumes, without the parent having had a chance to review whether those restrictions still make sense.
+- **Date:** 2026-09-28.
+
+**DEC-58 — Support scope narrowed: support diagnoses, does not parent the child or rewrite billing state; account-deletion-through-support requires verification (30_ADMIN_AND_SUPPORT.md §30.3a/§30.3b/§30.5a/§30.6).**
+- **Status:** Confirmed, narrows the original Phase 6 draft.
+- **Decision:** Ordinary support staff cannot create/edit/delete family rules, approve/reject tasks or requests, grant/revoke Free Passes, manually change restrictions, impersonate a parent, or manually rewrite Apple's subscription source-of-truth state. Support may diagnose, trigger safe resyncs that don't change rule intent, revoke compromised sessions/devices, assist with restore-purchases and account recovery, and — after strong Owner-identity verification, with irreversibility explained and no requirement to browse child content first — perform a support-assisted account deletion.
+- **Rationale:** the original draft's examples ("support-initiated rule fix," "manual subscription adjustment") were too broad for V1 and risked support tooling becoming a backdoor around parental authority and Apple's own billing source of truth.
+- **Date:** 2026-09-28. **Supersedes:** the original §30.6 examples.
+
+**DEC-59 — Category-based data retention periods finalised, replacing open-ended "while the household exists" (23_PRIVACY_AND_CHILD_SAFETY.md §23.5).**
+- **Status:** Confirmed V1 retention direction, subject to final DPIA/legal review before launch.
+- **Decision:** Structured Rule/Task/Request/Grant/Session history: 12-month rolling retention. Free-text child/parent content (request reasons, clarification text, rejection notes): 90-day rolling retention (structured outcome metadata kept separately under the 12-month rule). Abandoned EngagementSession partial/checkpoint data: 90-day maximum. Security/audit logs: 12-month rolling retention. Household deletion cascades per the documented deletion process; backup-deletion periods are deferred to infrastructure selection.
+- **Rationale:** "retained while the household exists" was too broad a default for routine child behavioural history; bounded, category-specific windows are more defensible and more aligned with data-minimisation principles, while remaining subject to final legal sign-off.
+- **Date:** 2026-09-28.
+
+**Also confirmed in this review round, not requiring a standalone numbered decision:**
+- **Safeguarding is a launch-readiness requirement, not a FUTURE FEATURE** (`30_ADMIN_AND_SUPPORT.md` §30.5) — closes OQ-41 as a product requirement (named safeguarding owner, documented escalation procedure, staff guidance, minimum-necessary data-access rules, emergency-handling guidance, record-keeping, staff training, all required before public launch), while the detailed substantive policy itself remains an operational/legal task this specification does not author. Tracked in `38_DEFINITION_OF_DONE.md` (Phase 7) as "Safeguarding process approved for launch."
+- **OQ-07 (definitive UK school-platform list) is closed as a non-release-blocking item** (`13_SCHOOL_AND_ESSENTIAL_ACCESS.md`) — School Mode is confirmed platform-agnostic; the parent selects apps/sites/categories directly, optional suggested starter items are a UX-polish opportunity only, and an unknown school platform is added through the ordinary selection mechanism.
+- **NFR-007 corrected** (`07_NON_FUNCTIONAL_REQUIREMENTS.md`) — "unbounded-in-principle" household/device scale is replaced with a requirement that plan limits be server-configurable, not hard-coded; the actual commercial limit remains an unfixed Phase 7/commercial decision.
+- **NFR-012 accessibility target updated** to WCAG 2.2 AA principles (from 2.1 AA) with the founder's specific list (VoiceOver, Dynamic Type, touch targets, reduced motion, non-colour-only states, accessible child-facing language, Apple's own accessibility APIs/tools).
+- **OQ-40/SEC-016 kept explicitly OPEN**, per founder instruction not to invent a security control before the real-device spike establishes actual monotonic-clock/reboot trust behaviour — with the confirmed secure default that the trusted-time model must fail to "Timing could not be verified" rather than grant an enforcement-sensitive advantage on uncertain evidence.
+- **OQ-19, OQ-30, OQ-32, OQ-34, and OQ-40 are confirmed as remaining genuinely spike-dependent** and must not be resolved through documentation guesswork; `37_BUILD_SEQUENCE.md` (Phase 7) must place the real-device technical spike programme before production enforcement implementation.
+
+## Phase 6 amendment completion note (2026-09-28)
+
+Applies DEC-52 through DEC-59 across `23_PRIVACY_AND_CHILD_SAFETY.md`, `24_SECURITY_REQUIREMENTS.md`, `25_SUBSCRIPTIONS_AND_BILLING.md`, `30_ADMIN_AND_SUPPORT.md`, `07_NON_FUNCTIONAL_REQUIREMENTS.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, `19_DATA_MODEL.md`, `29_API_AND_BACKEND_REQUIREMENTS.md`, `16_DEVICE_ENFORCEMENT.md`, and `20_STATE_MACHINES.md` (§20.10 finalised, having been left explicitly incomplete after the Phase 5 amendment round). The re-run cross-check confirms: no lawful basis is silently assumed anywhere in the specification (DEC-52's matrix requirement is the explicit safeguard); no support role can alter family restrictions or rewrite billing state (DEC-58); and no subscription state can leave a child indefinitely restricted without parental control (DEC-55/DEC-56/DEC-57 together — the Apple Billing Grace Period, the binary no-partial-enforcement model, and the explicit reactivation flow all point the same direction as the original DEC-51 safety floor, now on a more robust mechanism). OQ-33, OQ-38, OQ-39, OQ-07, and OQ-41 are closed this round; OQ-40 is confirmed and deliberately kept open; OQ-19/OQ-30/OQ-32/OQ-34 remain open pending the real-device spike programme, unchanged in status from the Phase 5 amendment round.
+
+**Date:** 2026-09-28
+**Supersedes:** DEC-51's proposed 7-day custom grace window (superseded by DEC-55); the original Phase 6 draft's blanket-consent, FUTURE-FEATURE-safeguarding, and broad-support-power framings (superseded by DEC-52/DEC-58 and the safeguarding correction above).
+
+---
+
 ## Decisions still required from the founder before Phase 7 begins
 
-1. Confirm or revise the proposed 7-day subscription grace-window length (OQ-38), and decide whether a partial/reduced-enforcement middle state is wanted instead of the binary model in `25_SUBSCRIPTIONS_AND_BILLING.md` (OQ-39).
-2. Confirm the retention windows flagged as RECOMMENDATIONs in `23_PRIVACY_AND_CHILD_SAFETY.md` §23.5 (audit log retention, abandoned-session partial-data purge).
-3. Commission or confirm ownership of the safeguarding escalation process (`30_ADMIN_AND_SUPPORT.md` §30.5), which this specification deliberately does not design in full, being an operational/policy matter rather than a technical one.
-4. Continue to own the real-device technical spike commissioning from the Phase 5 amendment round, now also covering SEC-016 (monotonic-clock manipulation resilience, OQ-40) alongside the existing priority list.
-
-None of the above block Phase 7 from starting on the founder's authority, per the same working-unattended principle applied in earlier phases, but each should be resolved before the Phase 6 architecture they touch is treated as final for build sequencing (Phase 7 itself).
+None outstanding that block Phase 7 from starting. All sixteen amendment items from this review round are confirmed (DEC-52 through DEC-59, plus the unnumbered confirmations above). Phase 7 (Parent Experience, Child and Teen Experience, Notifications, Error/Edge Case Catalogue, Test Strategy, Traceability Matrix, MVP vs. Later Feature Matrix, Build Sequence, Definition of Done) proceeds next, carrying forward: the child-transparency requirement (DEC-53) into `15_CHILD_AND_TEEN_EXPERIENCE.md`; the safeguarding launch-readiness requirement into `38_DEFINITION_OF_DONE.md`; and the confirmed spike-before-build sequencing requirement into `37_BUILD_SEQUENCE.md`. Phase 7 must end with a GO/NO-GO readiness report per the founder's explicit ten-point structure, and must not mark the project READY TO BUILD merely because the documents are complete.

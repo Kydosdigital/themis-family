@@ -1,6 +1,6 @@
 # 19. Data Model
 
-**Status:** Phase 5, amended 2026-09-28 (founder review round — see `35_DECISION_LOG.md` Phase 5 amendment completion note)
+**Status:** Phase 5, amended 2026-09-28 (founder review round); Device entity further amended 2026-09-28 (Phase 6 review round, adds `device_credential_*` fields per DEC-52–DEC-59) — see `35_DECISION_LOG.md`
 **Depends on:** `06_FUNCTIONAL_REQUIREMENTS.md`, `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, `18_ROLES_AND_PERMISSIONS.md`, `27_APPLE_INTEGRATION_REQUIREMENTS.md`
 
 This document defines the logical entities the backend must persist and the fields each carries, derived directly from the confirmed Phase 3/4 business rules. It is a logical model (entities, relationships, key fields, ownership), not a physical schema (no column types/indices) — those are a Phase 6/7 or implementation-time concern. No production code accompanies this document per the standing engagement rule.
@@ -35,7 +35,9 @@ This document defines the logical entities the backend must persist and the fiel
 - `device_id` (PK)
 - `household_id` (FK)
 - `owned_by_member_id` (FK → Member; the child/teen whose device this is)
-- `platform_authorization_status` (mirrors Apple's `authorizationStatus`, cached; per §27.2 this can change externally and must be re-checked, never assumed)
+- `platform_authorization_status` (mirrors Apple's `authorizationStatus`, cached; per §27.2 this can change externally and must be re-checked, never assumed) — **this field remains a Family Controls/platform-level concern only; see `device_credential_*` fields below for the separate, Themis-level identity concept added this Phase 6 amendment round (`24_SECURITY_REQUIREMENTS.md` §24.5). The two are never conflated: a Device may hold one without the other, and each is checked/revoked independently.**
+- `device_credential_id` (Themis-issued, scoped device credential; issued at pairing per `16_DEVICE_ENFORCEMENT.md` §16.10a; carries only child-device permissions per `18_ROLES_AND_PERMISSIONS.md`)
+- `device_credential_issued_at`, `device_credential_revoked_at` (nullable; revocation is atomic with device removal, per SEC-002)
 - `last_synced_at` (drives the staleness detection in `16_DEVICE_ENFORCEMENT.md` §16.8)
 - `added_at`, `removed_at` (nullable; soft-delete, per FR-007/device replacement in §16.9)
 

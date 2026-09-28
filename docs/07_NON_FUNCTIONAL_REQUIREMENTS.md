@@ -1,7 +1,9 @@
 # 07. Non-Functional Requirements
 
-**Status:** Phase 6 draft
+**Status:** Phase 6, amended 2026-09-28 (founder review round — see `35_DECISION_LOG.md` DEC-52 through DEC-59)
 **Depends on:** `05_HIGH_LEVEL_REQUIREMENTS.md`, `16_DEVICE_ENFORCEMENT.md`, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md`, `27_APPLE_INTEGRATION_REQUIREMENTS.md`, `29_API_AND_BACKEND_REQUIREMENTS.md`
+
+**Amendment note (this round):** NFR-007 originally described household/device scale as "unbounded-in-principle," which the founder correctly identified as unnecessary framing — the actual requirement is that plan limits be server-configurable, not that they be limitless. NFR-012's accessibility target is also made more specific per the founder's detailed list. Both are corrected below.
 
 This document specifies quality attributes (performance, reliability, availability, scalability, maintainability, observability) as measurable targets, using `NFR-###` identifiers. Per the founder's end-of-Phase-6 instruction, every NFR below either carries a measurable target or is explicitly flagged as **NOT YET MEASURABLE** with the reason and the real-device spike or Phase 7 activity that will make it measurable.
 
@@ -23,7 +25,7 @@ This document specifies quality attributes (performance, reliability, availabili
 
 ## 7.3 Scalability
 
-**NFR-007. Household/device scale.** The backend's data model (`19_DATA_MODEL.md`) and API contracts (`29_API_AND_BACKEND_REQUIREMENTS.md`) must not assume a household size bound beyond what `18_ROLES_AND_PERMISSIONS.md` already confirms (one Owner + up to one Guardian, an unbounded-in-principle number of Children/Teens/Devices). **Status: CONFIRMED as an architectural constraint (no hard-coded household-size assumption); specific capacity targets (requests/second, concurrent devices) are a Phase 7 infrastructure-sizing exercise, not fixed here.**
+**NFR-007. Household/device scale — corrected this amendment round.** The original "unbounded-in-principle" framing is withdrawn as unnecessary and imprecise. **CONFIRMED REQUIREMENT:** household/member/device plan limits must be **server-configurable** and must not be hard-coded throughout the application (schema, API contracts, or client logic). This allows future commercial plans (e.g. up to N children, up to N managed devices, different family tiers) without a schema redesign, while not committing the architecture to literally unbounded scale. **The specific commercial limit itself is not chosen here** — that is a Phase 7/commercial decision — only the architectural requirement that whatever limit is chosen must be configurable, not baked into the code. **Status: CONFIRMED as an architectural constraint; specific capacity targets (requests/second, concurrent devices) remain a Phase 7 infrastructure-sizing exercise.**
 
 ## 7.4 Data integrity and consistency
 
@@ -39,7 +41,7 @@ This document specifies quality attributes (performance, reliability, availabili
 
 ## 7.6 Accessibility and localisation
 
-**NFR-012. Accessibility.** Parent- and child-facing UI must meet at minimum **WCAG 2.1 AA**-equivalent standards for mobile (dynamic type support, sufficient colour contrast, VoiceOver/accessibility-label coverage on all interactive elements, no colour-only status indicators — relevant given the multi-state protection-status model in `16_DEVICE_ENFORCEMENT.md` §16.8 uses colour and label together). **Status: CONFIRMED REQUIREMENT; specific audit is a Phase 7 activity.**
+**NFR-012. Accessibility — target updated this amendment round.** Parent- and child-facing UI must meet, at minimum, **WCAG 2.2 AA principles where applicable to native mobile UI** (updated from WCAG 2.1 AA per founder direction), specifically including: VoiceOver support; Dynamic Type support; adequate touch-target sizing; reduced-motion support where applicable; non-colour-only state indication (directly binding on the multi-state protection-status model in `16_DEVICE_ENFORCEMENT.md` §16.8, which must not rely on colour alone for its Protected/Offline/Needs Attention states); accessible, age-appropriate child-facing language (ties to `23_PRIVACY_AND_CHILD_SAFETY.md` §23.4b's transparency requirement, which must itself be delivered in accessible language); and use of Apple's platform accessibility APIs and testing tools rather than a custom accessibility layer. **Status: CONFIRMED REQUIREMENT; specific audit is a Phase 7 activity (`design:accessibility-review`-equivalent pass against this target).**
 
 **NFR-013. Localisation scope for V1.** UK English only for V1 (DEC-23); the data model and UI copy must not hard-code assumptions that would block later localisation (e.g. date/currency formatting is not hard-coded to a specific locale string where avoidable). **Status: CONFIRMED as an architectural constraint, not a V1 deliverable beyond UK English.**
 

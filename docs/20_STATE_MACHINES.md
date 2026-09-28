@@ -90,13 +90,19 @@ States: `Running` → `Completed`; alternate: `Running` → `Interrupted`
 - `Running` → `Completed`: session finishes with no disqualifying violation, continuing through backgrounding as designed (DEC-37 — this is the defining difference from Active Engagement Session).
 - `Running` → `Interrupted`: a violation occurs (per DEC-42's confirmed "Interrupted, no credit, neutral copy" handling). This is terminal — per BR-231, an interrupted Focus Session does not resume; if the child wants to try again, a new session is started (modelled as a new EngagementSession row, not a resume chain, since Focus Session's Interrupted state has no confirmed "resume" concept, unlike Active Engagement Session's TerminatedPendingResume).
 
-## 20.10 Subscription
+## 20.10 Subscription — FINALISED this amendment round (`25_SUBSCRIPTIONS_AND_BILLING.md`, DEC-51 as revised by DEC-52–DEC-59, closes OQ-33/OQ-38/OQ-39)
 
-States: `Active` → `Lapsed`; alternate (RECOMMENDATION only): `Lapsed` → `InGrace` → `Active`/`Enforcement Suspended`
+States, involuntary billing failure path: `Active` → `Apple Billing Grace Period` → `Recovered` | `Protection Expired`
+States, voluntary cancellation path: `Active` → `Cancelled (paid-through)` → `Protection Expired`
+Reactivation: `Protection Expired` → `Active` (explicit parent-confirmed reactivation only, never automatic — §25.6)
 
-- `Active` → `Lapsed`: payment fails or subscription is cancelled, reported by the App Store/payment processor.
-- **The `InGrace` state and its transitions are a Phase 5 RECOMMENDATION, not a confirmed requirement** (per `16_DEVICE_ENFORCEMENT.md` §16.10/OQ-33) — Phase 6's subscription document must confirm or reject this before it is treated as final. Shown here only to make explicit that this state machine is intentionally incomplete pending that decision, rather than silently omitted.
-- `Lapsed`/`InGrace` → `Active`: payment resumes successfully.
+- `Active` → `Apple Billing Grace Period`: a renewal payment fails, reported by the App Store. **Apple's own Billing Grace Period mechanism is used** (confirmed at 16 days for V1, `25_SUBSCRIPTIONS_AND_BILLING.md` §25.2) — this replaces the originally-sketched custom `Lapsed`/`InGrace` states, which risked layering a Themis-invented grace window on top of Apple's own billing-retry schedule.
+- `Apple Billing Grace Period` → `Recovered`: Apple reports successful payment within the Grace Period; enforcement was never interrupted.
+- `Apple Billing Grace Period` → `Protection Expired`: the Grace Period elapses without recovered payment; Themis-managed restrictions are actively cleared, regardless of whether Apple's own billing retries continue afterwards.
+- `Active` → `Cancelled (paid-through)`: the parent voluntarily cancels; full service continues until the existing paid-through date, with advance notice given before it ends.
+- `Cancelled (paid-through)` → `Protection Expired`: the paid-through date is reached with no active subscription; restrictions are actively cleared, identically to the involuntary-failure outcome. No additional custom grace period follows a voluntary cancellation.
+- `Protection Expired` → `Active`: **not automatic.** Confirmed as an explicit, parent-confirmed reactivation flow ("Ready to turn protection back on?" → parent reviews existing rules → parent confirms → child device syncs the new Local Enforcement Plan → "Reactivation sent" → "Protection active on device"), per `25_SUBSCRIPTIONS_AND_BILLING.md` §25.6 — this avoids silently re-locking a device under months-old restrictions the instant a lapsed household's payment resumes.
+- **No partial/reduced-enforcement middle state exists** (closes OQ-39, confirmed this amendment round): the model is deliberately binary (entitled-or-in-Grace-Period vs. Protection Expired), not a three-tier model with a reduced-enforcement middle state.
 
 ## 20.11 End-of-Phase-5 cross-check: transitions without requirements, requirements without transitions (re-run this amendment round)
 
@@ -104,8 +110,8 @@ States: `Active` → `Lapsed`; alternate (RECOMMENDATION only): `Lapsed` → `In
 - TemporaryAccessGrant `Active` → `Revoked` (§20.7) — **CONFIRMED, OQ-35 closed.**
 - EngagementSession `TerminatedPendingResume` → `Abandoned` (§20.8) — **CONFIRMED, OQ-36 closed.**
 
-**Still open, explicitly deferred rather than resolved:**
-- Subscription `InGrace` state entirely (§20.10, OQ-33) — per founder instruction, this is deliberately **not** finalised in Phase 5; it is carried into Phase 6's `25_SUBSCRIPTIONS_AND_BILLING.md`, subject to the confirmed safety principle that no lapse may leave a child indefinitely locked (`16_DEVICE_ENFORCEMENT.md` §16.10).
+**Resolved this amendment round (previously flagged as open):**
+- Subscription state machine (§20.10) — **now fully finalised**: Apple Billing Grace Period model (16 days), voluntary-cancellation path, binary no-partial-enforcement model, and explicit parent-confirmed reactivation flow. Closes OQ-33, OQ-38, OQ-39.
 
 **Requirements identified in Phase 3/4 with no corresponding state transition above (checked against `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, `18_ROLES_AND_PERMISSIONS.md`):**
 - **None identified.** Every confirmed FR/BR that describes a state change (approval, expiry, session outcome, device/household lifecycle, rule activation) was traced to a transition in §20.1–20.10 during this document's drafting. This is stated as a positive finding, not assumed by default — the cross-referencing was done document-by-document against the full list of confirmed DEC-##/BR-##/FR-## entries currently in `35_DECISION_LOG.md`.

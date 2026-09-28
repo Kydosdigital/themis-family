@@ -1,7 +1,9 @@
 # 13. School and Essential Access
 
-**Status:** Phase 3 draft
+**Status:** Phase 3, amended 2026-09-28 (Phase 6 founder review round — closes OQ-07, see `35_DECISION_LOG.md` DEC-52 through DEC-59)
 **Depends on:** `05_HIGH_LEVEL_REQUIREMENTS.md` HLR-010, HLR-011, `35_DECISION_LOG.md` DEC-18, DEC-26
+
+**Amendment note (this round):** OQ-07 (definitive UK school-platform list) is closed as a non-blocking research item — see the correction to FR-051 below. School Mode was already designed as platform-agnostic in the original draft; this amendment confirms that explicitly as policy rather than leaving it framed as a pending research dependency.
 
 ---
 
@@ -28,11 +30,11 @@
 - **Actor:** Owner or Guardian
 - **Trigger:** Parent sets up School Mode, typically during onboarding or from Settings
 - **Preconditions:** None
-- **Happy path:** Parent configures: (a) Always Allowed apps/sites that specifically represent school tools (Google Classroom, Teams, a school portal, etc. — the definitive UK default list is pending research, OQ-07), (b) a school-hours schedule during which entertainment categories are restricted, (c) confirmation that temporary educational access requests are enabled (they are, by default, in V1 — see FR-052).
-- **Failure paths:** Parent's child's school uses a platform not in the suggested list → parent manually adds it via the picker; the product does not require every possible school platform to be pre-catalogued to function, only to be convenient.
+- **Happy path:** Parent configures: (a) Always Allowed apps/sites that represent school tools, selected by the parent themselves via Apple's picker — **CONFIRMED this amendment round: School Mode is platform-agnostic and does not depend on Themis maintaining a national school-app directory.** Themis may offer optional suggested starter items based on UK user research (e.g. Google Classroom, Microsoft Teams, Satchel One, Seneca — named here only as research/example items visible through Apple's picker, not a commitment to name-specific support), but the catalogue does not need to be exhaustive and Themis does not guarantee support for every UK school platform by name; (b) a school-hours schedule during which entertainment categories are restricted; (c) confirmation that temporary educational access requests are enabled (they are, by default, in V1 — see FR-052).
+- **Failure paths:** Parent's child's school uses a platform not in any suggested list → parent adds it through the normal selection mechanism (the picker), exactly as any other Always Allowed item; this is the ordinary path, not an exception requiring product-level accommodation.
 - **Business rules:** BR-221 (capability-honesty requirement — see below)
 - **Release:** V1 / Must
-- **Open questions:** OQ-07 (definitive UK school-platform list, still open — research task, does not block this FR's implementation)
+- **Open questions:** **OQ-07 [RESOLVED — see `35_DECISION_LOG.md` DEC-52 through DEC-59]. Closed as a non-release-blocking item.** School Mode's core function does not depend on a definitive, exhaustive UK school-platform catalogue; an unknown/new school platform is added through the normal parent-driven selection mechanism. Optional suggested starter items remain a UX-polish opportunity for Phase 7, not a release blocker.
 
 **BR-221 (capability honesty — restates DEC-18 as a binding rule, not just a positioning note).** Nowhere in the product's UI, onboarding copy, help content, or marketing material may School Mode be described as able to distinguish educational from entertainment content *within* the same app or website (the canonical example being YouTube). Every description of School Mode must be limited to: Always Allowed apps/sites, a school access list, a school-hours schedule, and time-boxed temporary educational access requests. This is a release-blocking documentation/copy constraint, not merely a technical footnote — Phase 6's privacy/marketing-facing documents must inherit this constraint directly.
 

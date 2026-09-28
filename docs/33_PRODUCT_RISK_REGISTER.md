@@ -76,12 +76,12 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Technical lead
 - **Validation method:** Offline test scenarios in `31_TEST_STRATEGY.md` (later phase)
 
-## RISK-11: Privacy complaint or regulatory issue (UK ICO Children's Code, COPPA if US expansion occurs)
+## RISK-11: Privacy complaint or regulatory issue (UK ICO Children's Code, COPPA if US expansion occurs) — mitigation sharpened, Phase 6 founder review round, 2026-09-28
 - **Likelihood:** Low-Medium
 - **Impact:** Critical — this is a child-data product
-- **Mitigation:** DPIA before launch; specialist legal review; privacy-by-design principles already adopted in brief (no message reading, no browsing diary, minimal retention).
+- **Mitigation, sharpened this round:** the original mitigation's reference to "privacy-by-design principles already adopted" risked implying that data-minimisation design work alone satisfies the lawful-basis question. It does not — data minimisation and lawful basis are separate legal concerns. **Corrected mitigation:** DPIA before launch; specialist legal review; the required **Lawful Basis Matrix** (`23_PRIVACY_AND_CHILD_SAFETY.md` §23.4a, DEC-52), covering every processing purpose with a documented (not assumed) lawful basis, necessity, and retention; specific UK requirements around consent, age, and parental authorisation for an information society service offered directly to a child, assessed as part of that legal review rather than presumed satisfied by the parent being the account holder; privacy-by-design principles (no message reading, no browsing diary, category-specific bounded retention per §23.5/DEC-59) as a complementary, not substitute, mitigation.
 - **Owner:** Founder + legal counsel (external)
-- **Validation method:** Completed DPIA; legal sign-off
+- **Validation method:** Completed DPIA; legal sign-off on the Lawful Basis Matrix specifically, not merely on the product's data-minimisation design
 
 ## RISK-12: Subscription churn after novelty decay
 - **Likelihood:** Medium-High (named pattern across chore/habit apps generally)

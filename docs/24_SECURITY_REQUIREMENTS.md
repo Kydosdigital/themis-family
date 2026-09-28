@@ -1,7 +1,9 @@
 # 24. Security Requirements
 
-**Status:** Phase 6 draft
-**Depends on:** `29_API_AND_BACKEND_REQUIREMENTS.md` §29.7/§29.8, `18_ROLES_AND_PERMISSIONS.md`, `23_PRIVACY_AND_CHILD_SAFETY.md`, `27_APPLE_INTEGRATION_REQUIREMENTS.md`
+**Status:** Phase 6, amended 2026-09-28 (founder review round — see `35_DECISION_LOG.md` DEC-52 through DEC-59)
+**Depends on:** `29_API_AND_BACKEND_REQUIREMENTS.md` §29.7/§29.8, `18_ROLES_AND_PERMISSIONS.md`, `23_PRIVACY_AND_CHILD_SAFETY.md`, `27_APPLE_INTEGRATION_REQUIREMENTS.md`, `19_DATA_MODEL.md`
+
+**Amendment note (this round):** SEC-014 originally risked conflating Apple's Family Controls `.child` authorisation (a separate, platform-level concern) with Themis's own backend authentication. §24.5 is rewritten below to separate these explicitly and confirm a device-pairing model for the child device that does not require a child-held Apple ID sign-in to Themis's backend.
 
 ## 24.1 Purpose
 
@@ -36,7 +38,19 @@ Per the founder's explicit list (`29_API_AND_BACKEND_REQUIREMENTS.md` §29.8), t
 
 ## 24.5 Authentication and session management
 
-**SEC-014. Member authentication** uses the platform's standard secure mechanism (RECOMMENDATION: Sign in with Apple or equivalent, consistent with the `.child`/Family Sharing model already assumed in `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.2) — not a Themis-built password system for child accounts, consistent with `23_PRIVACY_AND_CHILD_SAFETY.md` §23.4's age-appropriate account model principle.
+**SEC-014. Member authentication — CONFIRMED V1 ARCHITECTURE, rewritten this amendment round to separate two distinct concerns that the original draft risked conflating: Apple's Family Controls `.child` authorisation (§27.2, a platform-level, per-device concern) and Themis's own backend identity/authentication (a Themis concern). These are not the same mechanism and must not be modelled as one.**
+
+- **Owner/Guardian authentication.** The Owner and Guardian authenticate to Themis's backend using a normal secure consumer identity flow. **Preferred V1 option: Sign in with Apple**, consistent with the product being an iOS app; the exact final identity provider may remain an implementation decision if necessary, but is not a Themis-built password system.
+- **Child/Teen device authentication — does not require the child to sign in with Apple or hold a separate Themis account.** The child does not need an independent Apple ID sign-in or a Themis account simply to operate the managed child experience. Instead, confirmed V1 flow:
+  1. The parent creates the child's Member profile in Themis.
+  2. The parent initiates device pairing for that Member.
+  3. The child's device receives a one-time pairing code, QR code, or equivalent secure enrolment flow (exact mechanism is an implementation decision, not fixed here).
+  4. The backend issues a **scoped device credential** tied to the household, the specific child Member record, and the specific enrolled device.
+  5. That device credential carries **only child-device permissions** (per `18_ROLES_AND_PERMISSIONS.md`) — it is not a general-purpose account credential.
+  6. The device credential is **revocable server-side** (supports SEC-002).
+  7. Removing the device revokes its credential **atomically** as part of the same operation, consistent with SEC-002's immediate-loss-of-access requirement.
+- **Family Controls `.child` authorisation is separate and unaffected.** Apple's `.child`/Family Sharing authorisation (§27.2) still occurs through Apple's own framework, on-device, independent of the above. **The device credential described above is never derived from, or treated as equivalent to, Family Controls authorisation** — one is Themis's backend identity for the device, the other is Apple's platform permission for Family Controls APIs; a device can hold one without the other, and confusing them would misattribute a platform-level authorisation change as a Themis identity event or vice versa.
+- Affected documents updated for consistency this round: `19_DATA_MODEL.md` (Device entity's credential fields, distinct from `platform_authorization_status`), `29_API_AND_BACKEND_REQUIREMENTS.md` (device-credential issuance/revocation as its own concern, not layered on Family Controls state), and relevant device-onboarding requirements (`16_DEVICE_ENFORCEMENT.md` pairing flow references).
 
 **SEC-015. Session/token expiry and revocation** — sessions must be revocable server-side (supports SEC-002) and expire on a defined schedule (RECOMMENDATION, not yet founder-confirmed: 30-day sliding expiry for parent/guardian sessions, shorter for child-device sessions given the higher adversarial-use assumption per SEC-001).
 
@@ -46,7 +60,7 @@ A review of §24.2–24.5 against the confirmed threat model found no control li
 
 One item is flagged as the reverse gap — a threat without full identified controls, carried forward:
 
-- **SEC-016 [OPEN].** The trusted-time model (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a) itself depends on the device's monotonic clock being difficult to manipulate; if a jailbroken or otherwise compromised device could falsify monotonic-clock readings, the trusted-time reconciliation could be defeated. This is a NEEDS REAL-DEVICE TECHNICAL SPIKE item (related to OQ-32) rather than a control that can be specified without that research, and is recorded here as an open item rather than a control this document invents a false sense of completeness around.
+- **SEC-016 [OPEN, kept open this amendment round per explicit founder instruction — do not invent a control before the spike].** The trusted-time model (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a) itself depends on the device's monotonic clock being difficult to manipulate; if a jailbroken or otherwise compromised device could falsify monotonic-clock readings, the trusted-time reconciliation could be defeated. This is a NEEDS REAL-DEVICE TECHNICAL SPIKE item (tracked as **OQ-40**, related to OQ-32) rather than a control that can be specified without that research, and is recorded here as an open item rather than a control this document invents a false sense of completeness around. **Confirmed secure default in the meantime:** where the trusted-time model's integrity evidence is uncertain, it must fail to the **"Timing could not be verified"** escalation (§17.7a) rather than granting an enforcement-sensitive advantage (i.e. crediting a submission as on-time) on unverified evidence. Degrading to human judgement on uncertain evidence, never defaulting to the more permissive outcome, is the standing behaviour until the spike resolves what can actually be trusted.
 
 ## 24.7 Summary: security controls with no threat vs. threats with no control
 

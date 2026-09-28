@@ -48,10 +48,9 @@ Format: ID | Question | Why it matters | Recommended default | Blocks
 
 ## School Mode
 
-**OQ-07.** What is the definitive list of UK school platforms/apps that Always-Allowed and School Mode must support out of the box (Google Classroom, Microsoft Teams, SIMS, Satchel/Show My Homework, Century, Seneca, specific exam-board portals, etc.)?
-- *Why it matters:* This is a release-blocking research task, not a design decision — the product cannot claim "School Mode" without knowing which real apps/sites it protects.
-- *Recommended default:* None yet — this requires primary research (parent/teacher interviews or a UK schools app-usage survey) before `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` can be finalised.
-- *Blocks:* `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`
+**OQ-07 [RESOLVED — see `35_DECISION_LOG.md` DEC-52 through DEC-59, "Also confirmed" note; closed Phase 6 founder review round, 2026-09-28].** What is the definitive list of UK school platforms/apps that Always-Allowed and School Mode must support out of the box?
+- *Resolution:* Closed as a non-release-blocking item. School Mode is confirmed **platform-agnostic**: the parent selects the apps, websites, and categories their child needs via the normal picker mechanism. Themis may offer optional suggested starter items based on UK user research (e.g. Google Classroom, Microsoft Teams, Satchel One, Seneca, named only as research/example items visible through Apple's picker), but the catalogue does not need to be exhaustive, Themis does not guarantee support for every UK school platform by name, and an unknown/new platform is added through the ordinary selection mechanism. The core School Mode product does not depend on maintaining a national school-app directory.
+- *Blocks (now unblocked):* `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` is finalised on this point; optional starter-item research remains a Phase 7 UX-polish opportunity, not a dependency.
 
 **OQ-08. [RESOLVED — see DEC-18]** How should the product handle an app/site that is legitimately both educational and entertainment-distracting (YouTube, Safari, Chrome), given Apple's shielding operates at app/domain level, not content level?
 - *Resolution:* Do not attempt content-level classification in V1. Rely on parent-configured Always Allowed apps/sites, a school access list, and time-boxed parent-approved temporary educational access requests. The product must explicitly state this limitation wherever School Mode is described — it must never imply it can tell educational from entertainment content within the same app.
@@ -90,7 +89,7 @@ Format: ID | Question | Why it matters | Recommended default | Blocks
 Remaining open items and their status:
 
 - **OQ-03a, OQ-04a [NEW]** — technical/parameter detail spun off from the resolved decisions above; do not block Phase 2, must close before Phase 5 state machines and Phase 3 approval spec respectively.
-- **OQ-07** (definitive UK school platform list) — research task, must close before `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` is finalised. Does not block Phase 2.
+- **OQ-07** (definitive UK school platform list) — research task at the time of this Phase 2 snapshot; **since RESOLVED in Phase 6** (see the OQ-07 entry above) — School Mode confirmed platform-agnostic, not a release blocker. Did not block Phase 2 either.
 - **OQ-08** — RESOLVED (DEC-18).
 - **OQ-09** (technical feasibility of category-level/cross-device reporting) — technical spike, must close before `22_REPORTING_AND_ANALYTICS.md` and `27_APPLE_INTEGRATION_REQUIREMENTS.md`. Does not block Phase 2.
 - **OQ-10** (App and Website Usage entitlement) — deferred decision, must close before `27_APPLE_INTEGRATION_REQUIREMENTS.md`. Does not block Phase 2.
@@ -219,9 +218,9 @@ Remaining open items and their status:
 - *Recommended default:* Treat as UNKNOWN; **Priority 6** on the real-device technical spike list (§27.8), including device-reboot scenarios per the founder's explicit instruction.
 - *Blocks:* Real-device spike; not a Phase 5 blocker.
 
-**OQ-33 [RESOLVED — see DEC-51].** What exactly happens to enforcement when a household's subscription lapses?
-- *Resolution:* A three-state model — `Active` → `BillingRetry` (enforcement unchanged, parent warned) → `Lapsed` (enforcement continues through a bounded, communicated grace window) → `RestrictionsCleared` (restrictions actively removed once the grace window expires unpaid). Rule definitions are never deleted, so enforcement resumes automatically if payment resumes. Directly implements the confirmed safety principle: no indefinite lockout. See `25_SUBSCRIPTIONS_AND_BILLING.md`, `20_STATE_MACHINES.md` §20.10.
-- *Blocks (now unblocked):* `20_STATE_MACHINES.md` §20.10 is now complete; the exact grace-window length is a separate, still-open question (OQ-38).
+**OQ-33 [RESOLVED — see DEC-51, as revised by DEC-55/DEC-56/DEC-57].** What exactly happens to enforcement when a household's subscription lapses?
+- *Resolution, as finalised in the Phase 6 founder review round:* the originally-proposed custom three-state model (with a Themis-invented 7-day grace figure) is superseded. The confirmed model instead uses **Apple's own Billing Grace Period (16 days)** for involuntary billing failure (`Active` → `Apple Billing Grace Period` → `Recovered`/`Protection Expired`), a separate voluntary-cancellation path (`Active` → `Cancelled (paid-through)` → `Protection Expired`), a confirmed **binary, no-partial-enforcement** model, and an explicit **parent-confirmed reactivation flow** after `Protection Expired`. Rule definitions are never deleted, so enforcement resumes only once the parent explicitly reactivates. Directly implements the confirmed safety principle: no indefinite lockout. See `25_SUBSCRIPTIONS_AND_BILLING.md`, `20_STATE_MACHINES.md` §20.10.
+- *Blocks:* None — resolved and finalised, including the sub-questions originally spun off as OQ-38/OQ-39 (both now closed, see below).
 
 **OQ-34 [ADDRESSED via the trusted-time model, not independently closed].** If a device never reconnects before an EngagementSession's linked Task/context expires server-side, does a very-late outcome submission still get honoured?
 - *Resolution approach:* `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a's trusted-time model (monotonic-clock-anchored elapsed-time estimation, reconciled against server-received time) applies to this case by direct analogy to the Deadline Lock submission case it was designed for: if trustworthy timing evidence establishes the outcome genuinely occurred within the valid context, it is reconciled as on-time; otherwise it is surfaced to the parent as "Timing could not be verified" for an explicit decision, rather than silently auto-credited or silently rejected.
@@ -245,22 +244,19 @@ Remaining open items and their status:
 
 ## Questions raised during Phase 6 (2026-09-28)
 
-**OQ-38 [NEW].** What is the exact subscription grace-window length (`Lapsed` → `RestrictionsCleared`)?
-- *Why it matters:* DEC-51 confirms the state model and the no-indefinite-lockout principle, but not the specific duration, which affects both user experience (how long a lapsed household keeps protection) and revenue-recovery design.
-- *Recommended default:* 7 days, proposed as a RECOMMENDATION only in `25_SUBSCRIPTIONS_AND_BILLING.md` §25.2/§25.3, not founder-confirmed.
-- *Blocks:* Founder confirmation needed before Phase 7 build sequencing treats this number as final.
+**OQ-38 [RESOLVED — see DEC-55, Phase 6 founder review round, 2026-09-28].** What is the exact subscription grace-window length?
+- *Resolution:* The custom 7-day figure is withdrawn. Themis Family instead enables **Apple's own App Store Billing Grace Period, configured at 16 days** for both monthly and annual subscriptions (subject to final App Store configuration validation at implementation time). See `25_SUBSCRIPTIONS_AND_BILLING.md` §25.2.
+- *Blocks:* None — resolved. App Store configuration validation remains an implementation-time confirmation step, not an open product decision.
 
-**OQ-39 [NEW].** Should a partial/reduced-enforcement middle state exist during a subscription lapse (e.g. Essential/Always-Allowed-only enforcement continuing indefinitely), rather than the binary full-enforcement-then-cleared model?
-- *Why it matters:* A more nuanced middle state is a legitimate design alternative to the current binary model and was not ruled out, only not chosen by default in `25_SUBSCRIPTIONS_AND_BILLING.md` §25.3.
-- *Recommended default:* None proposed; the binary model is simplest and satisfies the safety floor, but the founder may prefer otherwise.
-- *Blocks:* `25_SUBSCRIPTIONS_AND_BILLING.md` finalisation; does not block Phase 6 sign-off.
+**OQ-39 [RESOLVED — see DEC-56, Phase 6 founder review round, 2026-09-28].** Should a partial/reduced-enforcement middle state exist during a subscription lapse?
+- *Resolution:* No. Confirmed as a deliberately binary model: entitled (or within the Apple Billing Grace Period) means full protection and management; not entitled after the Grace Period (or after voluntary cancellation's paid period) means restrictions are cleared. No reduced-enforcement middle tier is created for V1. See `25_SUBSCRIPTIONS_AND_BILLING.md` §25.2a.
+- *Blocks:* None — resolved.
 
-**OQ-40 [NEW, SEC-016].** Can a compromised or jailbroken device falsify monotonic-clock readings to defeat the trusted-time model (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a)?
+**OQ-40 [STILL OPEN, kept open deliberately — see DEC-59's "Also confirmed" note].** Can a compromised or jailbroken device falsify monotonic-clock readings to defeat the trusted-time model (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a)?
 - *Why it matters:* The trusted-time model's fairness guarantee depends on the monotonic clock being difficult to manipulate; if it can be falsified, the model's protection against unfair "late" determinations could also be exploited to falsely claim on-time completion.
-- *Recommended default:* Treat as NEEDS REAL-DEVICE TECHNICAL SPIKE, related to OQ-32; add to the real-device spike programme.
-- *Blocks:* `24_SECURITY_REQUIREMENTS.md` SEC-016; not a Phase 6 sign-off blocker.
+- *Founder direction this round:* explicitly **do not invent a security control before the real-device spike** establishes what monotonic-clock and reboot behaviour can actually be trusted. **Confirmed secure default in the meantime:** the trusted-time model must fail to "Timing could not be verified" rather than grant an enforcement-sensitive advantage when its integrity evidence is uncertain — see `24_SECURITY_REQUIREMENTS.md` SEC-016.
+- *Blocks:* Real-device spike (related to OQ-32); `37_BUILD_SEQUENCE.md` (Phase 7) must place this spike before production enforcement implementation. Not a Phase 6 sign-off blocker.
 
-**OQ-41 [NEW].** What is the detailed safeguarding escalation process for child-safety concerns raised through support channels (`30_ADMIN_AND_SUPPORT.md` §30.5)?
-- *Why it matters:* This is an operational/policy process (who reviews, what triggers escalation, what follow-up occurs), not a technical specification item, and this document deliberately does not design it in full.
-- *Recommended default:* None proposed here; requires founder/operations ownership, likely involving legal/child-safety-policy expertise beyond this BA/architecture engagement's scope.
-- *Blocks:* Operational readiness before launch (Phase 7's Definition of Done should reference this); does not block Phase 6 document sign-off.
+**OQ-41 [RESOLVED AS A PRODUCT REQUIREMENT — see DEC-58's "Also confirmed" note, Phase 6 founder review round, 2026-09-28; detailed policy content remains a separate operational task].** What is the detailed safeguarding escalation process for child-safety concerns raised through support channels (`30_ADMIN_AND_SUPPORT.md` §30.5)?
+- *Resolution:* **Not a FUTURE FEATURE** (the original Phase 6 draft's characterisation is withdrawn). Confirmed as a launch-readiness requirement: before public launch, Themis Family must have a named safeguarding owner, a documented escalation procedure, staff guidance for child-safety disclosures, clear separation between ordinary support and safeguarding cases, minimum-necessary data-access rules, emergency/immediate-risk handling guidance reviewed by appropriate legal/safeguarding expertise, documented record-keeping and access controls, and role-appropriate staff training. **This specification does not author the substantive safeguarding policy itself** — that remains an operational/legal task requiring expertise beyond this BA/architecture engagement — but the requirement that it exist before launch is now confirmed product scope, not a deferred nice-to-have.
+- *Blocks:* Tracked as a launch-readiness gate in `38_DEFINITION_OF_DONE.md` ("Safeguarding process approved for launch"), Phase 7. Does not block Phase 6 document sign-off; does block public launch.
