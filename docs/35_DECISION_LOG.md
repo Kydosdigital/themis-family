@@ -414,3 +414,34 @@ Applies DEC-40 through DEC-45 across `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK
 ## Decisions still required from the founder before Phase 5 begins (updated)
 
 None. All six items from the founder's Phase 4 review are now Confirmed (DEC-40 through DEC-45). Only OQ-30 (Apple picker/ManagedSettings technical validation) remains genuinely open among items surfaced so far, and it is explicitly a technical-spike output, not a product decision — it does not block Phase 5 from starting, though `27_APPLE_INTEGRATION_REQUIREMENTS.md` must classify it honestly per the founder's Phase 5 four-status capability rule. Phase 5 (Device Enforcement, Offline/Sync Behaviour, Data Model, State Machines, Apple Integration Requirements, API/Backend Requirements) proceeds next.
+
+---
+
+## Phase 5 completion note (2026-09-28)
+
+Phase 5 produced six documents: `27_APPLE_INTEGRATION_REQUIREMENTS.md`, `16_DEVICE_ENFORCEMENT.md`, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md`, `19_DATA_MODEL.md`, `20_STATE_MACHINES.md`, `29_API_AND_BACKEND_REQUIREMENTS.md`. `27_APPLE_INTEGRATION_REQUIREMENTS.md` was written first and grounds the rest, since it establishes which Apple platform capabilities may be assumed (VERIFIED), which must wait for a real-device spike (NEEDS REAL-DEVICE TECHNICAL SPIKE), and which remain genuinely unknown (UNKNOWN), per the founder's explicit Phase 5 rule against turning assumptions into architecture.
+
+**Material findings requiring founder attention before this baseline is treated as final:**
+
+1. **Correction to an earlier claim (not yet applied to the source document, pending founder confirmation).** `10_RULE_ENGINE_SPECIFICATION.md` FR-010 currently states the ~50-app/50-domain shield limit is "Apple's documented ManagedSettings limits." Phase 5 research (official Apple documentation plus a developer forum thread cited in `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.3/§27.6) found this limit is **not documented by Apple at all** — it is a community-reported, undocumented behaviour. **Recommended correction:** amend FR-010's wording to "an undocumented behaviour reported by developers (~50 tokens per shield property), to be confirmed via real-device spike," removing the word "documented." This correction is not applied automatically in this round, since editing an already-approved Phase 3 document without explicit founder sign-off would itself breach the standing process; the founder should confirm this correction explicitly, after which it will be applied with its own commit.
+2. **OQ-09 materially advanced.** Official Apple documentation confirms cross-device usage reporting is natively supported by `DeviceActivityReport`, but the report extension's sandbox permanently prevents any usage data from reaching Themis Family's own backend. This is a hard architectural ceiling, not a policy choice, and should inform Phase 6's `22_REPORTING_AND_ANALYTICS.md` scope directly.
+3. **OQ-30 remains genuinely unresolved** (whether Phone/Messages/Maps can be excluded from a shield at all) and is the single highest-priority item for the eventual real-device technical spike, given its direct bearing on BR-222's hard safety principle.
+4. **New open questions raised (OQ-31 through OQ-37, `34_OPEN_QUESTIONS.md`)** cover: on-device vs backend-computed shield resolution; device clock tampering resilience; subscription-lapse enforcement behaviour; late offline-session outcome handling; early Free Pass revocation; abandoned Active Engagement Session resume handling; and API-level abuse protection against the child as a sometimes-adversarial party. None of these block Phase 5 sign-off; each is scoped to the specific later document it affects.
+5. **New risk (RISK-25, `33_PRODUCT_RISK_REGISTER.md`):** an offline connectivity gap can cause a genuinely on-time task submission to be recorded as late, since the automated Provisional Approval Grace Period (DEC-40) must key off server-received time, not device-local time (the latter being untrusted per the device-clock-tampering concern, OQ-32). A transparency mitigation (surfacing both timestamps to the human approver) is recommended but not yet founder-confirmed.
+6. **State-machine and race-condition cross-check (full detail in `20_STATE_MACHINES.md` §20.11 and `29_API_AND_BACKEND_REQUIREMENTS.md` §29.9):** no confirmed Phase 3/4 requirement was found lacking a state representation. Three transitions were identified as reasonable but not yet backed by any confirmed requirement (Free Pass early revocation, OQ-35; abandoned Active-Engagement-Session resume handling, OQ-36; the Subscription `InGrace` state, OQ-33) and are flagged rather than assumed. The primary backend race condition (concurrent approvals) is resolved via an atomic version-increment mechanism (`16_DEVICE_ENFORCEMENT.md` §16.7, `29_API_AND_BACKEND_REQUIREMENTS.md` §29.4); a second, newly identified race (a scheduled expiry job firing at the same instant as a manual approval) is resolved by the same mechanism (§29.9 item 3).
+
+No Phase 3 or Phase 4 document was edited during Phase 5 beyond the tracking documents (`33_PRODUCT_RISK_REGISTER.md`, `34_OPEN_QUESTIONS.md`, this log, and `README.md`) — the FR-010 correction above is deliberately left pending rather than silently applied.
+
+**Date:** 2026-09-28
+**Supersedes:** N/A — phase-completion record.
+
+---
+
+## Decisions still required from the founder before Phase 6 begins
+
+1. Confirm (or reject) the FR-010 correction described above, so it can be applied to `10_RULE_ENGINE_SPECIFICATION.md` with its own commit.
+2. Confirm or revise the 72-hour device-staleness threshold proposed in `16_DEVICE_ENFORCEMENT.md` §16.8 (OQ-19).
+3. Confirm whether an Owner/Guardian can revoke an active Free Pass early (OQ-35), whether an abandoned Active Engagement Session should fall back to `Pending`/expire (OQ-36), and whether the on-device-resolution-primary approach to shield computation (OQ-31) is acceptable, or whether backend-side computation should be pursued despite its limited latency benefit.
+4. Commission the real-device technical spike covering, at minimum and in priority order: (a) whether Phone/Messages/Maps can be excluded from a `ManagedSettingsStore` shield at all (OQ-30); (b) the ~50-token shield limit; (c) shield persistence across force-quit/restart/uninstall; (d) `DeviceActivityMonitor` callback timing precision; (e) device-clock-tampering resilience (OQ-32); (f) extension memory-constraint behaviour under load.
+
+None of the above block Phase 6 from starting on the founder's authority, per the same working-unattended principle applied in earlier phases, but each should be resolved before the Phase 5 architecture they touch is treated as final for build sequencing (Phase 7).

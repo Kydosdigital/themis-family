@@ -174,6 +174,14 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Product
 - **Validation method:** Review onboarding copy for honesty on this point before launch; monitor support tickets post-launch for split-custody requests
 
+## RISK-25: Offline connectivity gap can cause an on-time task submission to be recorded as late through no fault of the child
+- **Likelihood:** Medium — dependent on real-world connectivity patterns (poor signal, airplane mode, school Wi-Fi restrictions) rather than any product defect
+- **Impact:** Medium-High — directly undermines fairness in the Deadline Lock mechanic (the product's hero mechanic, DEC-02/DEC-17) in a way that is functionally similar to RISK-23's exploit concern but in the opposite direction — a genuinely compliant child penalised by connectivity rather than a non-compliant child evading enforcement
+- **Source:** Identified during Phase 5 offline/sync architecture work (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7): device-local time cannot be trusted for automatic grace-period decisions (per RISK on device clock tampering, OQ-32), so the backend must key off server-received time for the automatic Provisional Approval Grace Period (DEC-40) mechanics; a submission that is genuinely on-time by the device's local clock but delayed in transit past the 30-minute grace window by an offline gap will be treated as unresolved/late by the automatic system.
+- **Mitigation (RECOMMENDATION, not yet founder-confirmed):** surface both the device-local submission timestamp and the server-received timestamp to the human approver, so a parent/guardian can make an informed manual judgement call even when the automatic system has already moved the task into `ExpiredUnresolved` — this does not change the automated mechanics (which must remain server-time-based for integrity) but adds a transparency measure for the human-in-the-loop path.
+- **Owner:** Product/Founder (mitigation approach requires founder confirmation before Phase 6/7 build)
+- **Validation method:** Scenario testing simulating an offline gap that spans a Deadline Lock's grace period, confirming both timestamps are correctly captured and surfaced to the approver
+
 ---
 
 ## Register maintenance note

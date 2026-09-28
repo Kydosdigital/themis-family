@@ -1,7 +1,7 @@
 # Themis Family — Product Documentation
 
 **Repository:** [Kydosdigital/themis-family](https://github.com/Kydosdigital/themis-family)
-**Status: PHASE 4 OF 7 COMPLETE AND FOUNDER-APPROVED (amended 2026-09-28); PHASE 5 IN PROGRESS.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
+**Status: PHASE 5 OF 7 COMPLETE; AWAITING FOUNDER REVIEW.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
 
 ---
 
@@ -39,7 +39,13 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 | 35_DECISION_LOG.md | Complete (Phase 1–3, amended 2026-09-28) — will grow in later phases |
 | 08_EPICS_AND_USER_STORIES.md | Complete (Phase 4, amended 2026-09-28 — approved) |
 | 09_ACCEPTANCE_CRITERIA.md | Complete (Phase 4, amended 2026-09-28 — approved) |
-| All other documents (07, 14–17, 19–32, 36–38) | Not yet started |
+| 27_APPLE_INTEGRATION_REQUIREMENTS.md | Complete (Phase 5, 2026-09-28 — awaiting founder review) |
+| 16_DEVICE_ENFORCEMENT.md | Complete (Phase 5, 2026-09-28 — awaiting founder review) |
+| 17_OFFLINE_AND_SYNC_BEHAVIOUR.md | Complete (Phase 5, 2026-09-28 — awaiting founder review) |
+| 19_DATA_MODEL.md | Complete (Phase 5, 2026-09-28 — awaiting founder review) |
+| 20_STATE_MACHINES.md | Complete (Phase 5, 2026-09-28 — awaiting founder review) |
+| 29_API_AND_BACKEND_REQUIREMENTS.md | Complete (Phase 5, 2026-09-28 — awaiting founder review) |
+| All other documents (07, 14–15, 21–26, 28, 30–32, 36–38) | Not yet started |
 
 ## Phase plan
 
@@ -47,7 +53,7 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 2. **Phase 2 (complete and founder-approved, amended 2026-09-28):** Personas, User Journeys, Scope and Release Strategy, High-Level Requirements.
 3. **Phase 3 (complete and founder-approved, amended 2026-09-28):** Functional Requirements, Business Rules, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions.
 4. **Phase 4 (complete and founder-approved, amended 2026-09-28):** Epics and User Stories, Acceptance Criteria.
-5. **Phase 5 (in progress):** Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour.
+5. **Phase 5 (complete, 2026-09-28; awaiting founder review):** Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour.
 6. **Phase 6:** Privacy and Child Safety, Security, Reporting and Analytics, Subscriptions and Billing, Admin and Support.
 7. **Phase 7:** Error/Edge Case Catalogue, Test Strategy, Traceability Matrix, Build Sequence, MVP vs. Later Feature Matrix, Definition of Ready/Done.
 
@@ -97,9 +103,23 @@ The founder's review amended six areas (DEC-40 through DEC-45, `35_DECISION_LOG.
 
 The re-run cross-check (full detail in `35_DECISION_LOG.md` and `09_ACCEPTANCE_CRITERIA.md` §9.7) found no new orphan FRs, no new unbacked stories, and no new contradictions. Only one AC-level dependency remains genuinely open: US-CHILD-014 AC3 on OQ-30 (Apple technical validation), which does not block Phase 5.
 
+## Phase 5 status
+
+Phase 5 is complete as of 2026-09-28 and awaiting founder review (not yet approved). It produced six documents, researched and written in this order so later documents could rely on the first: `27_APPLE_INTEGRATION_REQUIREMENTS.md`, `16_DEVICE_ENFORCEMENT.md`, `17_OFFLINE_AND_SYNC_BEHAVIOUR.md`, `19_DATA_MODEL.md`, `20_STATE_MACHINES.md`, `29_API_AND_BACKEND_REQUIREMENTS.md`. No production code was written.
+
+Per the founder's explicit instruction, every Apple/platform capability referenced anywhere in this phase is classified into exactly one of four statuses — VERIFIED FROM APPLE DOCUMENTATION, NEEDS REAL-DEVICE TECHNICAL SPIKE, UNSUPPORTED/NOT AVAILABLE, or UNKNOWN — with citations for every VERIFIED claim, in `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.7's summary table. Headline findings:
+
+- **Cross-device usage reporting is architecturally possible** (a parent's device can natively render a report of a child's device activity, VERIFIED from Apple's own `DeviceActivityReport` documentation) **but the underlying usage data can never reach Themis Family's own backend** — the reporting extension is sandboxed with no network access. This materially advances long-open OQ-09 and sets a hard scope boundary for Phase 6's reporting document.
+- **A previously-stated claim is flagged as a correction, not yet applied:** `10_RULE_ENGINE_SPECIFICATION.md` FR-010 describes the ~50-app/50-domain shield limit as "Apple's documented" limit; Phase 5 research found this is in fact undocumented by Apple, community-reported only. The correction is proposed but withheld pending explicit founder confirmation (see `35_DECISION_LOG.md` Phase 5 completion note), since amending an already-approved document without sign-off would itself breach the standing process.
+- **OQ-30 (whether Phone/Messages/Maps can be excluded from a shield at all) remains genuinely UNKNOWN** and is the top-priority item for the eventual real-device technical spike, given its direct bearing on the essential-access hard safety principle (BR-222).
+- Architecture was defined for: authoritative source of truth per entity, local vs. server-owned state, sync conflict rules, idempotency, offline queues, atomic approval handling, local/device-clock handling, stale-device detection, protection-status derivation, rule evaluation via a device-local "Resolved Shield List," temporary grants, the Provisional Approval Grace Period, device replacement, revoked-permission detection, and subscription-lapse effects (the last left partially open pending Phase 6).
+- Ten state machines were specified (Household, Device Protection Status, Rule, Task, Approval, Request, Temporary Access/Free Pass, Active Engagement Session, Focus Session, Subscription); the end-of-phase cross-check found no confirmed Phase 3/4 requirement lacking a state representation, three plausible-but-unconfirmed transitions flagged rather than assumed (OQ-33, OQ-35, OQ-36), and two backend race conditions identified and resolved via an atomic version-increment mechanism (concurrent approvals; a scheduled expiry racing a manual approval).
+
+Seven new open questions were raised (OQ-31 through OQ-37, `34_OPEN_QUESTIONS.md`) and one new risk (RISK-25, `33_PRODUCT_RISK_REGISTER.md`: an offline connectivity gap can cause a genuinely on-time task submission to be automatically treated as late, since the automated grace-period mechanics must trust server-received time over an untrusted device clock). None of these block Phase 5 sign-off; each is scoped to the specific later document or real-device spike it affects. Full detail in `35_DECISION_LOG.md`'s Phase 5 completion note, including the four items recommended for founder decision before Phase 6 begins.
+
 ## Known contradictions / things to watch
 
-See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, verification type, launch region, age-segment selection method, the onboarding-must-verify-protection requirement; from the Phase 3 founder review — OQ-05, OQ-18, OQ-22 through OQ-28 (rule conflict precedence, request clarification, time zones, Automatic Verification backgrounding, rejection notes, request expiry, Free Pass scope, essential-access policy); and from the Phase 4 founder review — OQ-04a (reminder interval), OQ-20 (Owner exit path), OQ-29 (Focus Session violation handling). From the Phase 2 amendment round, still open: OQ-17 (shared-device scenarios — explicitly out of V1, needs separate research), OQ-19 (exact protection-status staleness thresholds — for Phase 5). Still open from Phase 3: OQ-21 (Teen elevated permissions — FUTURE-leaning, non-blocking), OQ-30 (Apple picker/ManagedSettings validation for Phone/Messages/Maps — genuinely open, gates only the strength of the emergency-access claim, not Phase 5's start). Still open from earlier phases: the definitive UK school-platform list (OQ-07), technical feasibility of cross-device usage reporting (OQ-09), the App and Website Usage entitlement decision (OQ-10), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12). None of these block Phase 5.
+See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, verification type, launch region, age-segment selection method, the onboarding-must-verify-protection requirement; from the Phase 3 founder review — OQ-05, OQ-18, OQ-22 through OQ-28 (rule conflict precedence, request clarification, time zones, Automatic Verification backgrounding, rejection notes, request expiry, Free Pass scope, essential-access policy); and from the Phase 4 founder review — OQ-04a (reminder interval), OQ-20 (Owner exit path), OQ-29 (Focus Session violation handling). From the Phase 2 amendment round: OQ-17 (shared-device scenarios — explicitly out of V1, needs separate research), OQ-19 (staleness threshold — Phase 5 proposed 72 hours as a RECOMMENDATION, not yet founder-confirmed). From Phase 3: OQ-21 (Teen elevated permissions — FUTURE-leaning, non-blocking). From Phase 5: OQ-09 materially advanced (cross-device reporting architecturally resolved, hard sandboxing ceiling confirmed); OQ-10 likely moot pending founder confirmation; OQ-30 remains genuinely open (top real-device-spike priority); OQ-31 through OQ-37 newly raised, none blocking. Still open from earlier phases: the definitive UK school-platform list (OQ-07), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12). None of these block Phase 6.
 
 ## Process note
 
