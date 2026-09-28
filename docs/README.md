@@ -1,7 +1,7 @@
 # Themis Family — Product Documentation
 
 **Repository:** [Kydosdigital/themis-family](https://github.com/Kydosdigital/themis-family)
-**Status: PHASE 3 OF 7 COMPLETE AND FOUNDER-APPROVED (amended 2026-09-28); PHASE 4 IN PROGRESS.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
+**Status: PHASE 4 OF 7 COMPLETE (2026-09-28); AWAITING FOUNDER REVIEW BEFORE PHASE 5 BEGINS.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
 
 ---
 
@@ -37,8 +37,8 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 | 33_PRODUCT_RISK_REGISTER.md | Complete (Phase 1–3, amended 2026-09-28) — will grow in later phases |
 | 34_OPEN_QUESTIONS.md | Complete (Phase 1–3, amended 2026-09-28) — will grow in later phases |
 | 35_DECISION_LOG.md | Complete (Phase 1–3, amended 2026-09-28) — will grow in later phases |
-| 08_EPICS_AND_USER_STORIES.md | Phase 4 in progress |
-| 09_ACCEPTANCE_CRITERIA.md | Phase 4 in progress |
+| 08_EPICS_AND_USER_STORIES.md | Complete (Phase 4, 2026-09-28) — awaiting founder review |
+| 09_ACCEPTANCE_CRITERIA.md | Complete (Phase 4, 2026-09-28) — awaiting founder review |
 | All other documents (07, 14–17, 19–32, 36–38) | Not yet started |
 
 ## Phase plan
@@ -46,7 +46,7 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 1. **Phase 1 (complete, amended 2026-09-28):** Product Overview, Vision, Risks, Open Questions, Decision Log.
 2. **Phase 2 (complete and founder-approved, amended 2026-09-28):** Personas, User Journeys, Scope and Release Strategy, High-Level Requirements.
 3. **Phase 3 (complete and founder-approved, amended 2026-09-28):** Functional Requirements, Business Rules, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions.
-4. **Phase 4 (in progress):** Epics and User Stories, Acceptance Criteria.
+4. **Phase 4 (complete, 2026-09-28 — awaiting founder review):** Epics and User Stories, Acceptance Criteria.
 5. **Phase 5:** Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour.
 6. **Phase 6:** Privacy and Child Safety, Security, Reporting and Analytics, Subscriptions and Billing, Admin and Support.
 7. **Phase 7:** Error/Edge Case Catalogue, Test Strategy, Traceability Matrix, Build Sequence, MVP vs. Later Feature Matrix, Definition of Ready/Done.
@@ -81,6 +81,12 @@ The founder's review round amended four of the six documents (DEC-32 through DEC
 - **Request expiry (FR-043/BR-229)** replaced a flat window with a context-based model (expires when the underlying rule/context ends, or after a 4-hour backstop, whichever comes first).
 
 The end-of-Phase-3 cross-check (re-run after amendments; full detail in `35_DECISION_LOG.md`) found no orphan FRs, no unresolved contradictions, and confirmed all five previously-flagged pending items are now resolved. Two narrower, Phase-5-appropriate technical questions were raised by the amendments themselves (OQ-29: Focus Session violation handling; OQ-30: Apple picker/ManagedSettings validation for Phone/Messages/Maps) — neither blocks Phase 4.
+
+## Phase 4 status
+
+Phase 4 is complete as of 2026-09-28 and is now awaiting founder review before Phase 5 begins. It produced `08_EPICS_AND_USER_STORIES.md` (seven epics covering every Phase 3 requirement, with each story tracing HLR → FR/BR → User Story) and `09_ACCEPTANCE_CRITERIA.md` (Given/When/Then criteria per story, including the multi-rule status scenarios and the six request-expiry edge cases the founder specifically asked for). No production code was written.
+
+The end-of-Phase-4 cross-check (full detail in `35_DECISION_LOG.md`, Phase 4 completion note, and `09_ACCEPTANCE_CRITERIA.md` §9.6) found: no FRs without a user story (two explicitly-noted, deliberate exceptions); no stories without an FR; four acceptance criteria whose exact pass condition depends on an already-tracked open question (OQ-04a, OQ-20, OQ-29, OQ-30), each written to hold under either resolution; one accepted exception where a story's failure modes are covered elsewhere rather than duplicated (US-CHILD-003); and no contradictions. None of this blocks Phase 5 from starting once the founder reviews Phase 4.
 
 ## Known contradictions / things to watch
 

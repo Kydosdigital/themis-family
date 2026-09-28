@@ -326,3 +326,30 @@ None of the above block Phase 4 from starting (they are all flagged, bounded REC
 ## Decisions still required from the founder before Phase 4 begins
 
 None. All items flagged in the Phase 3 completion note above (BR-211, BR-219, FR-042/OQ-18, OQ-24, OQ-28) are now resolved by DEC-32 through DEC-39. Two new, narrower open questions were raised by these same decisions (OQ-29: Focus Session violation handling; OQ-30: technical validation of Apple's picker/ManagedSettings support for Phone/Messages/Maps) — neither blocks Phase 4; both are tracked in `34_OPEN_QUESTIONS.md` against the Phase 5 documents they affect. Phase 4 (Epics and User Stories, Acceptance Criteria) proceeds next.
+
+---
+
+## Phase 4 completion note (2026-09-28)
+
+Phase 4 produced `08_EPICS_AND_USER_STORIES.md` (seven epics, grouping every Phase 3 FR/BR into user stories tracing HLR → FR/BR → User Story) and `09_ACCEPTANCE_CRITERIA.md` (Given/When/Then acceptance criteria per story). No production code was written.
+
+**Documentation approach flagged, not silently decided:** Owner and Guardian share identical permissions for every action except the Owner-only administrative set (§18.2). Rather than duplicating every shared-action story under both role tags, `08_EPICS_AND_USER_STORIES.md` writes them once as US-OWNER-### with an explicit "(Guardian: identical)" note, and gives Guardian its own story ID only where behaviour genuinely differs (e.g. US-GUARDIAN-001, accepting an invitation). This is recorded as a RECOMMENDATION in the document itself, not assumed silently.
+
+**End-of-Phase-4 cross-check (per founder instruction) — findings, full detail in `09_ACCEPTANCE_CRITERIA.md` §9.6:**
+
+- **FRs without a user story:** None, with two explicitly-noted exceptions: FR-001 is folded into US-OWNER-001 rather than duplicated, and pure System-actor infrastructure FRs (e.g. FR-017) are represented by their observable-consequence story rather than a story with no independent human want/benefit.
+- **Stories not backed by an FR:** None — every story traces to a specific HLR and FR/BR pairing.
+- **Acceptance criteria depending on unresolved questions:** Four identified and explicitly flagged (not silently assumed): US-CHILD-006 AC1 (OQ-04a, reminder interval), US-CHILD-008 AC3 (OQ-29, Focus Session violation handling), US-CHILD-014 AC3 (OQ-30, Apple picker/ManagedSettings validation), US-OWNER-024 AC2 (OQ-20, Owner-exit-with-no-Guardian path). Each AC is written to hold under either resolution of its open question, so none block Phase 5.
+- **Missing negative/failure scenarios:** None found beyond one accepted, explicitly-noted exception (US-CHILD-003, Earn First — its failure modes are already covered by the task-approval stories in Epic C rather than needing a duplicate).
+- **Contradictions:** None — Phase 4 was built directly on the fully-amended, founder-approved Phase 3 baseline.
+
+No new Open Questions, Risks, or Decisions were required by this cross-check beyond what Phase 3 already tracks (OQ-04a, OQ-20, OQ-29, OQ-30 all pre-exist Phase 4 and are simply cross-referenced here, not newly raised).
+
+**Date:** 2026-09-28
+**Supersedes:** N/A — phase-completion record.
+
+---
+
+## Decisions still required from the founder before Phase 5 begins
+
+None outstanding that block Phase 5 (Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour) from starting, once the founder reviews and approves Phase 4. The four AC-level dependencies noted in the Phase 4 completion note above (OQ-04a, OQ-20, OQ-29, OQ-30) should be resolved before the specific Phase 5 documents they affect are finalised, per the "Blocks" column already recorded for each in `34_OPEN_QUESTIONS.md`.
