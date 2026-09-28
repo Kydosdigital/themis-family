@@ -135,3 +135,52 @@ Remaining open items and their status:
 - *Why it matters:* DEC-27 establishes the principle (no implied real-time state, must show last-verified time, stale state must not display as Protected indefinitely) but not the specific time thresholds.
 - *Recommended default:* Defer exact thresholds to `16_DEVICE_ENFORCEMENT.md` (Phase 5), informed by the technical spike's findings on realistic sync frequency. Do not guess a number in Phase 3.
 - *Blocks:* `16_DEVICE_ENFORCEMENT.md` (Phase 5)
+
+---
+
+## Questions raised during Phase 3 (2026-09-28)
+
+**OQ-20 [NEW — from `18_ROLES_AND_PERMISSIONS.md`].** BR-101 requires ownership transfer to go only to an existing Guardian. What happens if the Owner wants to leave the household (e.g. divorce, family breakup) and there is no Guardian to transfer to?
+- *Why it matters:* A household cannot be left ownerless (BR-101), but no path is defined for an Owner who wants to exit with no successor.
+- *Recommended default:* Require the Owner to either invite a Guardian and transfer to them first, or delete the household outright. No "orphaned household" state is supported in V1. Revisit if V1 usage shows this is a common, painful scenario.
+- *Blocks:* `20_STATE_MACHINES.md` (Phase 5) — household lifecycle state machine.
+
+**OQ-21 [NEW — from `18_ROLES_AND_PERMISSIONS.md`].** Can a Teen ever be granted any elevated permission (e.g. approving a younger sibling's task) as a trust-building feature, or is that permanently out of scope?
+- *Why it matters:* A natural future extension of the "trust increases over time" positioning (review dates, negotiation), not raised in the original brief.
+- *Recommended default:* FUTURE FEATURE, explicitly not V1. No architecture decision needs to be made now beyond not hard-coding "only Owner/Guardian can ever approve" at a level that would make this impossible later.
+- *Blocks:* None for V1.
+
+**OQ-22 [NEW — from `10_RULE_ENGINE_SPECIFICATION.md`].** Should Scheduled Rule times follow the device's current time zone (shift with travel) or stay fixed to the time zone in which the household was set up?
+- *Why it matters:* A travelling family could see their bedtime rule apply at a confusing local time, or apply at the "wrong" local time if fixed to the home zone.
+- *Recommended default:* Follow the device's current time zone (BR-205). Flag for user testing given international travel is a real scenario for some households.
+- *Blocks:* `19_DATA_MODEL.md`, `20_STATE_MACHINES.md` (Phase 5)
+
+**OQ-23 [NEW — from `10_RULE_ENGINE_SPECIFICATION.md`].** BR-211 puts Scheduled Rule above Deadline Lock and Earn First in precedence — is this the right call, or should Deadline Lock (the hero mechanic) take precedence over a generic schedule?
+- *Why it matters:* A real scenario (bedtime schedule vs. an unresolved homework Deadline Lock both applying to the same app at 9pm) makes the precedence choice visible to the child in what message they see, even where the practical restriction outcome is the same.
+- *Recommended default:* None recommended — needs founder judgement informed by realistic scenario walkthroughs, not architectural tidiness alone.
+- *Blocks:* `20_STATE_MACHINES.md` (Phase 5)
+
+**OQ-24 [NEW — from `11_TASK_AND_APPROVAL_SPECIFICATION.md`].** Does an in-app timer/focus session pause when the app is backgrounded or the device is locked, or does it continue counting?
+- *Why it matters:* Directly affects whether Automatic Verification evidence is genuinely deterministic (BR-209) — if the timer keeps running while the child does something else, "the timer completed" stops being meaningful evidence.
+- *Recommended default:* Pause on background/lock, resume on foreground; do not count backgrounded time. The more conservative, defensible interpretation of DEC-28's "deterministic system evidence" standard, though it has UX trade-offs worth testing.
+- *Blocks:* `10_RULE_ENGINE_SPECIFICATION.md` / `20_STATE_MACHINES.md` (Phase 5) — the Task state machine's in-progress-timer sub-states.
+
+**OQ-25 [NEW — from `11_TASK_AND_APPROVAL_SPECIFICATION.md`].** When a Reject ("Needs work") decision is made, is a note from the approver to the child mandatory, optional, or absent in V1?
+- *Why it matters:* An unexplained rejection undermines the "agreement, not punishment" positioning.
+- *Recommended default:* Optional but strongly encouraged (UI defaults to an open note field, not required to submit). Do not make it mandatory in V1.
+- *Blocks:* `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` (related but distinct from the bounded clarification exchange, DEC-29).
+
+**OQ-26 [NEW — from `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`].** What is the exact request-expiry window (FR-043)?
+- *Recommended default:* 4 hours from submission, or the end of the current day, whichever is sooner.
+- *Blocks:* `20_STATE_MACHINES.md` (Phase 5)
+
+**OQ-27 [NEW — from `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`].** Should a Free Pass default to a single pre-selected scope, or require the parent to select scope every time?
+- *Recommended default:* Require explicit scope selection, no unscoped default (BR-219). Flagged for founder confirmation given the safety/simplicity trade-off.
+- *Blocks:* `15_CHILD_AND_TEEN_EXPERIENCE.md` / `14_PARENT_EXPERIENCE.md` (later phases) — affects the Free Pass UI design directly.
+
+**OQ-28 [NEW — from `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`].** What exactly is in the hard-coded, non-configurable minimum essential set (BR-222) — just Phone/Emergency calling, or also a default Maps/location-sharing-for-safety capability?
+- *Why it matters:* Too narrow relies entirely on parent configuration for basic safety; too broad removes parental choice and could itself be seen as overreach.
+- *Recommended default:* Keep the hard-coded minimum to Phone/emergency calling only; treat Messages and Maps as strongly-recommended, pre-selected Always Allowed defaults (configurable, but defaulted on).
+- *Blocks:* `13_SCHOOL_AND_ESSENTIAL_ACCESS.md` (written assuming this recommendation); `24_SECURITY_REQUIREMENTS.md` / `26_ERROR_AND_EDGE_CASE_CATALOGUE.md` (Phase 6/7) should confirm before final.
+
+**OQ-18 [STATUS UPDATE — not closed].** OQ-18 asked for the simplest viable structure for the request-clarification mechanism. `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md` FR-042/BR-218 now defines that structure in full (one prompt, one reply). This is carried forward as still technically open, pending founder confirmation, rather than closed unilaterally — see the priority list below.

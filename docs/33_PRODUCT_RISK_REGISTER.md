@@ -132,6 +132,34 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Product/Technical lead
 - **Validation method:** Explicit test scenarios forcing a device to go quiet and confirming the UI downgrades from Protected within the defined threshold
 
+## RISK-19: Rule conflict precedence order ships unresolved or wrong (BR-211)
+- **Likelihood:** Medium
+- **Impact:** High — an incorrect precedence order produces a confusing or unfair enforcement outcome in a visible, recurring scenario (e.g. bedtime vs. an unresolved homework deadline)
+- **Mitigation:** BR-211 (`10_RULE_ENGINE_SPECIFICATION.md`) is explicitly flagged as an unapproved hypothesis, not a final rule; must be confirmed or amended by the founder, informed by realistic scenario walkthroughs, before Phase 5 state machines are finalised (OQ-05, OQ-23).
+- **Owner:** Product/Founder
+- **Validation method:** Scenario walkthrough sign-off before Phase 5; later, user testing of the shipped precedence order
+
+## RISK-20: Free Pass granted with an unintentionally broad scope
+- **Likelihood:** Low-Medium
+- **Impact:** Medium — an unscoped Free Pass could unlock more than the parent intended, undermining trust in a "reliable enforcement" product
+- **Mitigation:** BR-219 (`12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`) recommends mandatory explicit scope selection with no unscoped default; flagged as OQ-27 pending founder confirmation.
+- **Owner:** Product
+- **Validation method:** UX review of the Free Pass creation flow before Phase 5
+
+## RISK-21: Automatic Verification evidence standard undermined by timer backgrounding behaviour
+- **Likelihood:** Medium
+- **Impact:** Medium-High — if a timer counts time while the app is backgrounded or the device is locked, "the timer completed" stops being deterministic evidence of anything (directly weakens DEC-28/BR-209's capability-honesty standard)
+- **Mitigation:** Recommended default is pause-on-background/lock, resume-on-foreground (OQ-24); must be confirmed before Phase 5's Task state machine is finalised.
+- **Owner:** Technical lead
+- **Validation method:** Device testing of timer behaviour across backgrounding/locking scenarios
+
+## RISK-22: Non-configurable essential-access minimum set is too narrow or too broad
+- **Likelihood:** Low-Medium
+- **Impact:** Medium — too narrow relies entirely on correct parent configuration for basic safety functionality; too broad removes parental choice and risks an overreach perception
+- **Mitigation:** BR-222 (`13_SCHOOL_AND_ESSENTIAL_ACCESS.md`) recommends Phone/emergency calling only as the hard-coded floor, with Messages/Maps as strongly-recommended configurable defaults; flagged as OQ-28 pending confirmation.
+- **Owner:** Product/Founder
+- **Validation method:** Founder/legal confirmation before Phase 6 security requirements finalise the essential-access floor
+
 ---
 
 ## Register maintenance note

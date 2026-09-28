@@ -234,3 +234,35 @@ None outstanding from the original priority list — OQ-01 through OQ-04 and OQ-
 ## Decisions still required from the founder before Phase 3 begins
 
 None. Phase 2 is approved subject to the amendments above (DEC-23 through DEC-31), which are being applied to the affected documents in this same commit round. Phase 3 (Functional Requirements, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions) proceeds next.
+
+---
+
+## Phase 3 completion note (2026-09-28)
+
+Phase 3 produced `06_FUNCTIONAL_REQUIREMENTS.md`, `10_RULE_ENGINE_SPECIFICATION.md`, `11_TASK_AND_APPROVAL_SPECIFICATION.md`, `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`, `13_SCHOOL_AND_ESSENTIAL_ACCESS.md`, and `18_ROLES_AND_PERMISSIONS.md`. No user stories and no production code were written, per the founder's explicit Phase 3 instruction.
+
+**End-of-Phase-3 cross-check (per founder instruction) — findings:**
+
+- **FR → HLR traceability:** Every FR defined in Phase 3 (FR-001 through FR-054) traces to a specific HLR. No orphan FRs were found. Full index in `06_FUNCTIONAL_REQUIREMENTS.md` §6.2.
+- **HLRs not yet decomposed into FRs:** HLR-012 (Website control) is only partially decomposed (folded into Rule Engine's Controlled Targets concept, no dedicated FR). HLR-013 (Protection status) has no dedicated FR beyond its role as a precondition in FR-006/FR-008 — full specification is correctly deferred to `16_DEVICE_ENFORCEMENT.md` (Phase 5), as the founder's own Phase 3 document list did not include a device-enforcement document. HLR-015 (Reporting), HLR-016 (Privacy), HLR-017 (Subscriptions), and HLR-019 (Age-segmented experience) are correctly deferred to Phase 5/6 documents also absent from the Phase 3 list — this is scope-as-planned, not a gap. See `06_FUNCTIONAL_REQUIREMENTS.md` §6.2/§6.4 for the full breakdown.
+- **Contradictions found across the five new documents:** None identified that required rework. One internal tension is flagged rather than silently resolved: BR-211 (`10_RULE_ENGINE_SPECIFICATION.md`) proposes Scheduled Rule outranking Deadline Lock and Earn First in conflict precedence; this is explicitly marked as an unapproved, weakest-justified hypothesis (see OQ-23) rather than a settled rule, and must not be treated as final by Phase 5.
+- **Cross-cutting rules formalised:** Two business rules already established in single documents (BR-221's capability-honesty requirement, DEC-31's platform-honesty requirement) are restated in `06_FUNCTIONAL_REQUIREMENTS.md` §6.3 as BR-224/BR-225 — general rules applying to all documentation from Phase 3 onward, not confined to the document that first introduced them.
+
+**Items requiring founder sign-off before Phase 4/5 treat them as final (not decided unilaterally in Phase 3):**
+
+- **BR-211 (rule conflict precedence order)** — `10_RULE_ENGINE_SPECIFICATION.md`. Positions 4–6 (Scheduled Rule vs. Deadline Lock vs. Earn First) are the weakest-justified part of the proposal (OQ-05, OQ-23).
+- **BR-219 (Free Pass default scope)** — `12_REQUESTS_AND_EXCEPTIONS_SPECIFICATION.md`. Recommends mandatory explicit scope selection, no unscoped default (OQ-27).
+- **OQ-18's resolution via FR-042** — the bounded clarification mechanism (one prompt, one reply) is fully specified but not yet founder-confirmed as final before Phase 4 acceptance criteria are written.
+- **OQ-24 (Automatic Verification timer backgrounding behaviour)** — recommends pause-on-background, not yet confirmed.
+- **OQ-28 (exact essential-access minimum set)** — recommends Phone/emergency calling only as the hard-coded floor, not yet confirmed.
+
+None of the above block Phase 4 from starting (they are all flagged, bounded RECOMMENDATIONs, not silent decisions), but they should be confirmed or amended by the founder before Phase 5's state machines and data model treat them as fixed.
+
+**Date:** 2026-09-28
+**Supersedes:** N/A — this is a phase-completion record, not a decision reversal.
+
+---
+
+## Decisions still required from the founder before Phase 4 begins
+
+None outstanding that block starting Phase 4 (User Stories and Acceptance Criteria). The five items listed in the Phase 3 completion note above should be confirmed before Phase 5 (Data Model, State Machines) treats them as final, but Phase 4 may proceed against the Phase 3 documents as written.
