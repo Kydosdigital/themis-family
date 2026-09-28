@@ -500,3 +500,42 @@ Applies DEC-46 through DEC-50 across `27_APPLE_INTEGRATION_REQUIREMENTS.md`, `16
 ## Decisions still required from the founder before Phase 6 begins (updated)
 
 None outstanding that block Phase 6 from starting. The founder has confirmed all amendment items from this review round (DEC-46 through DEC-50). Phase 6 (Non-Functional Requirements, Reporting and Analytics, Privacy and Child Safety, Security Requirements, Subscriptions and Billing, Admin and Support) proceeds next, carrying forward: the UK-only App and Website Usage limitation (into `22_REPORTING_AND_ANALYTICS.md`); the never-indefinitely-locked subscription-lapse principle (into `25_SUBSCRIPTIONS_AND_BILLING.md`); and the child-as-potentially-adversarial API design principle (into `24_SECURITY_REQUIREMENTS.md`).
+
+---
+
+## DEC-51 — Subscription-lapse enforcement model, closes OQ-33
+
+- **Status:** Confirmed (Phase 6 draft; grace-window length not yet founder-confirmed, see below).
+- **Decision:** A three-state subscription enforcement model is adopted: `Active` (normal enforcement) → `BillingRetry` (enforcement continues unchanged; parent warned) → `Lapsed` (enforcement continues through a defined, communicated grace window) → `RestrictionsCleared` (restrictions actively removed once the grace window expires with no payment). Rule definitions are never deleted by a lapse, so enforcement resumes automatically if payment resumes at any point. This directly implements the founder's confirmed safety principle: a child is never left indefinitely locked because a subscription expired and the parent can no longer manage the rules.
+- **Not yet confirmed:** the exact grace-window length (7 days proposed as a RECOMMENDATION only) and whether a partial/reduced-enforcement middle state should exist instead of the binary full-enforcement/then-cleared model. Both are explicitly flagged in `25_SUBSCRIPTIONS_AND_BILLING.md` §25.3 as open, not decided by default.
+- **Rationale:** the alternative (indefinite enforcement with a lapsed subscription and no parental control path) was explicitly considered and rejected as worse than a clearly-communicated, bounded protection stop, per the founder's own stated principle.
+- **Date:** 2026-09-28. **Supersedes:** OQ-33's "carried forward, not finalised" status — the state model is now finalised; only the numeric grace-window length remains open.
+
+## Phase 6 completion note (2026-09-28)
+
+Phase 6 produced six documents: `07_NON_FUNCTIONAL_REQUIREMENTS.md`, `22_REPORTING_AND_ANALYTICS.md`, `23_PRIVACY_AND_CHILD_SAFETY.md`, `24_SECURITY_REQUIREMENTS.md`, `25_SUBSCRIPTIONS_AND_BILLING.md`, `30_ADMIN_AND_SUPPORT.md`. No production code was written.
+
+**End-of-Phase-6 cross-check findings (per the founder's explicit instructions):**
+
+1. **Privacy data with no purpose:** none identified. Every field specified in `23_PRIVACY_AND_CHILD_SAFETY.md` §23.3 traces to a confirmed Phase 3–5 feature; no speculative data collection was introduced.
+2. **Security controls with no threat:** none identified (`24_SECURITY_REQUIREMENTS.md` §24.6). One reverse gap was found instead — a threat without a full identified control: **SEC-016**, the trusted-time model's dependence on an unmanipulated device monotonic clock, which a compromised/jailbroken device could potentially defeat. Recorded as a NEEDS REAL-DEVICE TECHNICAL SPIKE item (related to OQ-32), not papered over with an invented control.
+3. **Metrics requiring prohibited/unavailable child data:** the one class identified is anything requiring `approvedWithDataAccess`-level non-tokenised data (raw bundle IDs, visited domains), which is explicitly excluded from V1 scope by `22_REPORTING_AND_ANALYTICS.md` §22.1/§22.4, not silently designed around.
+4. **Subscription states that could leave a child unexpectedly locked:** the `RestrictionsCleared` transition (DEC-51) is the direct, confirmed answer — no state in the finalised Subscription machine results in indefinite enforcement without a current subscription.
+5. **Support/admin capability exposing more child data than necessary:** identified and corrected. `30_ADMIN_AND_SUPPORT.md` §30.4 rejects a general "view any household's full data" admin tool in favour of scenario-scoped support views, since the original engineering-convenience assumption would have exposed materially more child data than any actual support scenario requires.
+6. **NFRs without measurable targets:** `07_NON_FUNCTIONAL_REQUIREMENTS.md` §7.7 lists four — local shield-application latency (NFR-001), remote-unlock propagation time (NFR-002, deliberately unfixed per the founder's own instruction not to claim "instant unlock" before the spike), foreground-correction-pass execution time (NFR-004), and specific availability/capacity numbers (NFR-005/NFR-007, pending Phase 7 infrastructure decisions). None are invented numbers; all are tied to a specific spike or later-phase activity that will make them measurable.
+
+**New open items raised this phase (added to `34_OPEN_QUESTIONS.md`):** OQ-38 (subscription grace-window length), OQ-39 (partial/reduced-enforcement middle state during lapse), OQ-40 (SEC-016, monotonic-clock manipulation resilience), OQ-41 (safeguarding escalation process detail, `30_ADMIN_AND_SUPPORT.md` §30.5, deferred as an operational-policy item outside this technical specification's scope).
+
+**Date:** 2026-09-28
+**Supersedes:** N/A — phase-completion record.
+
+---
+
+## Decisions still required from the founder before Phase 7 begins
+
+1. Confirm or revise the proposed 7-day subscription grace-window length (OQ-38), and decide whether a partial/reduced-enforcement middle state is wanted instead of the binary model in `25_SUBSCRIPTIONS_AND_BILLING.md` (OQ-39).
+2. Confirm the retention windows flagged as RECOMMENDATIONs in `23_PRIVACY_AND_CHILD_SAFETY.md` §23.5 (audit log retention, abandoned-session partial-data purge).
+3. Commission or confirm ownership of the safeguarding escalation process (`30_ADMIN_AND_SUPPORT.md` §30.5), which this specification deliberately does not design in full, being an operational/policy matter rather than a technical one.
+4. Continue to own the real-device technical spike commissioning from the Phase 5 amendment round, now also covering SEC-016 (monotonic-clock manipulation resilience, OQ-40) alongside the existing priority list.
+
+None of the above block Phase 7 from starting on the founder's authority, per the same working-unattended principle applied in earlier phases, but each should be resolved before the Phase 6 architecture they touch is treated as final for build sequencing (Phase 7 itself).

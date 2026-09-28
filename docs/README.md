@@ -1,7 +1,7 @@
 # Themis Family — Product Documentation
 
 **Repository:** [Kydosdigital/themis-family](https://github.com/Kydosdigital/themis-family)
-**Status: PHASE 5 OF 7 COMPLETE AND FOUNDER-APPROVED (amended 2026-09-28); PHASE 6 IN PROGRESS.** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
+**Status: PHASE 6 OF 7 COMPLETE, AWAITING FOUNDER REVIEW (2026-09-28).** This is a discovery/specification exercise. No production code is to be written until the founder explicitly says: **"Requirements approved. Begin implementation."**
 
 ---
 
@@ -45,7 +45,13 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 | 19_DATA_MODEL.md | Complete (Phase 5, amended 2026-09-28 — approved; DOB/Apple-account-ID/picker-label fields corrected) |
 | 20_STATE_MACHINES.md | Complete (Phase 5, amended 2026-09-28 — approved; OQ-35/OQ-36 closed) |
 | 29_API_AND_BACKEND_REQUIREMENTS.md | Complete (Phase 5, amended 2026-09-28 — approved; OQ-37 confirmed at policy level) |
-| All other documents (07, 14–15, 21–26, 28, 30–32, 36–38) | Not yet started |
+| 07_NON_FUNCTIONAL_REQUIREMENTS.md | Complete (Phase 6, 2026-09-28 — awaiting founder review) |
+| 22_REPORTING_AND_ANALYTICS.md | Complete (Phase 6, 2026-09-28 — awaiting founder review; binds the Category A/Category B reporting-data split) |
+| 23_PRIVACY_AND_CHILD_SAFETY.md | Complete (Phase 6, 2026-09-28 — awaiting founder review) |
+| 24_SECURITY_REQUIREMENTS.md | Complete (Phase 6, 2026-09-28 — awaiting founder review; SEC-016 flagged as an open threat without a full control) |
+| 25_SUBSCRIPTIONS_AND_BILLING.md | Complete (Phase 6, 2026-09-28 — awaiting founder review; closes OQ-33 via DEC-51) |
+| 30_ADMIN_AND_SUPPORT.md | Complete (Phase 6, 2026-09-28 — awaiting founder review; rejects a general "view household" admin tool in favour of scenario-scoped views) |
+| All other documents (14–15, 21, 26, 28, 31–32, 36–38) | Not yet started |
 
 ## Phase plan
 
@@ -54,7 +60,7 @@ Start with `00_PRODUCT_OVERVIEW.md` and `01_PRODUCT_VISION_AND_GOALS.md`. Every 
 3. **Phase 3 (complete and founder-approved, amended 2026-09-28):** Functional Requirements, Business Rules, Rule Engine Specification, Task and Approval Specification, Requests and Exceptions Specification, School and Essential Access, Roles and Permissions.
 4. **Phase 4 (complete and founder-approved, amended 2026-09-28):** Epics and User Stories, Acceptance Criteria.
 5. **Phase 5 (complete and founder-approved, amended 2026-09-28):** Data Model, State Machines, Backend/API Requirements, Apple Integration Requirements, Device Enforcement, Offline/Sync Behaviour.
-6. **Phase 6 (in progress):** Non-Functional Requirements, Reporting and Analytics, Privacy and Child Safety, Security Requirements, Subscriptions and Billing, Admin and Support.
+6. **Phase 6 (complete, awaiting founder review, 2026-09-28):** Non-Functional Requirements, Reporting and Analytics, Privacy and Child Safety, Security Requirements, Subscriptions and Billing, Admin and Support.
 7. **Phase 7:** Error/Edge Case Catalogue, Test Strategy, Traceability Matrix, Build Sequence, MVP vs. Later Feature Matrix, Definition of Ready/Done.
 
 After each phase, the Risk Register, Open Questions and Decision Log are revisited and updated — they are living documents, not one-off outputs.
@@ -122,9 +128,24 @@ The founder's review round independently re-checked Apple's current documentatio
 
 Full detail, including the revised real-device spike priority list (entitlement approval; remote-unlock propagation; Phone/Messages/Maps shielding; scheduled-transition reliability; exceeded shield-limit behaviour; shield persistence; clock/timezone tampering; extension memory behaviour; cross-device reporting), is in `35_DECISION_LOG.md`'s Phase 5 amendment completion note.
 
+## Phase 6 status
+
+Phase 6 is complete and awaiting founder review as of 2026-09-28. It produced six documents: `07_NON_FUNCTIONAL_REQUIREMENTS.md`, `22_REPORTING_AND_ANALYTICS.md`, `23_PRIVACY_AND_CHILD_SAFETY.md`, `24_SECURITY_REQUIREMENTS.md`, `25_SUBSCRIPTIONS_AND_BILLING.md`, `30_ADMIN_AND_SUPPORT.md`. No production code was written.
+
+The founder's Phase 6 instruction asked for six specific end-of-phase cross-check findings; all six were addressed explicitly within the documents themselves rather than deferred:
+
+- **Privacy data with no purpose:** `23_PRIVACY_AND_CHILD_SAFETY.md` §23.3's data-collected table ties every collected field to a stated purpose; nothing is collected speculatively.
+- **Security controls with no threat:** `24_SECURITY_REQUIREMENTS.md` §24.6 found none — every SEC control traces to a named threat. The reverse gap was found instead: **SEC-016**, the trusted-time model's dependency on a tamper-resistant monotonic clock, is a threat without a fully specified control, pending real-device research (tracked as new **OQ-40** and new **RISK-26**).
+- **Metrics requiring prohibited/unavailable child data:** `22_REPORTING_AND_ANALYTICS.md` binds all V1 reporting to Category A (Themis-owned) data; no metric depends on Category B (Apple-sandboxed, display-only) data or on the EU-only App and Website Usage capability ruled out in Phase 5.
+- **Subscription states that could leave a child unexpectedly locked:** `25_SUBSCRIPTIONS_AND_BILLING.md` §25.2 finalises the `Active → BillingRetry → Lapsed → RestrictionsCleared` model (**DEC-51, closes OQ-33**) specifically to satisfy the founder's safety-floor principle — no state results in indefinite lockout. The exact grace-window length (new **OQ-38**) and whether a partial-enforcement middle state should exist instead of the binary model (new **OQ-39**) remain open, but the safety principle itself does not depend on either being resolved.
+- **Support/admin capability exposing more child data than necessary:** `30_ADMIN_AND_SUPPORT.md` §30.4 explicitly rejects a general "view any household's full data" admin tool in favour of scenario-scoped views (device-status, subscription, rule-diagnostic), the specific finding the founder's instruction asked this document to surface.
+- **NFRs without measurable targets:** `07_NON_FUNCTIONAL_REQUIREMENTS.md` §7.7 flags the ones deliberately left unfixed pending real-device measurement (local shield latency, remote unlock propagation, foreground pass time, availability/capacity numbers) rather than inventing numbers.
+
+Four new open questions were raised and added to `34_OPEN_QUESTIONS.md`: **OQ-38** (subscription grace-window length), **OQ-39** (partial-enforcement middle state during lapse), **OQ-40** (SEC-016 monotonic-clock manipulation resilience), **OQ-41** (safeguarding escalation process detail — an operational/policy item explicitly out of this technical specification's scope). One new risk was added to `33_PRODUCT_RISK_REGISTER.md`: **RISK-26** (monotonic-clock manipulation on a compromised device could defeat the trusted-time model), directly tied to SEC-016/OQ-40.
+
 ## Known contradictions / things to watch
 
-See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, verification type, launch region, age-segment selection method, the onboarding-must-verify-protection requirement; from the Phase 3 founder review — OQ-05, OQ-18, OQ-22 through OQ-28; from the Phase 4 founder review — OQ-04a, OQ-20, OQ-29; and from the Phase 5 founder review — **OQ-10** (App and Website Usage entitlement, confirmed EU-only and irrelevant to UK V1), **OQ-31** (shield-resolution authority: backend for business state, device for enforcement execution), **OQ-35** (early Free Pass revocation confirmed), **OQ-36** (abandoned session handling confirmed), **OQ-37** (child-side API abuse protection confirmed at policy level). From the Phase 2 amendment round: OQ-17 (shared-device scenarios — explicitly out of V1). Still genuinely open: **OQ-19** (staleness threshold — deliberately left unfixed pending real-device measurement, must be server-configurable), **OQ-21** (Teen elevated permissions — FUTURE-leaning, non-blocking), **OQ-30** (Phone/Messages/Maps shielding — top real-device-spike priority after entitlement/unlock-propagation), **OQ-32** (device clock tampering — spike item), **OQ-33** (subscription lapse — explicitly carried into Phase 6, not a Phase 5 gap), **OQ-34** (addressed via the trusted-time model, pending spike validation of the monotonic-clock approach). Still open from earlier phases: the definitive UK school-platform list (OQ-07), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12). None of these block Phase 6.
+See `34_OPEN_QUESTIONS.md` for the full, current list. Resolved as of 2026-09-28: age segmentation, Household Mode scope, second-guardian model, approval-delay policy, verification type, launch region, age-segment selection method, the onboarding-must-verify-protection requirement; from the Phase 3 founder review — OQ-05, OQ-18, OQ-22 through OQ-28; from the Phase 4 founder review — OQ-04a, OQ-20, OQ-29; from the Phase 5 founder review — **OQ-10** (App and Website Usage entitlement, confirmed EU-only and irrelevant to UK V1), **OQ-31** (shield-resolution authority: backend for business state, device for enforcement execution), **OQ-35** (early Free Pass revocation confirmed), **OQ-36** (abandoned session handling confirmed), **OQ-37** (child-side API abuse protection confirmed at policy level); and from Phase 6 — **OQ-33** (subscription lapse model finalised via DEC-51 — no state leaves a child indefinitely locked). From the Phase 2 amendment round: OQ-17 (shared-device scenarios — explicitly out of V1). Still genuinely open: **OQ-19** (staleness threshold — deliberately left unfixed pending real-device measurement, must be server-configurable), **OQ-21** (Teen elevated permissions — FUTURE-leaning, non-blocking), **OQ-30** (Phone/Messages/Maps shielding — top real-device-spike priority after entitlement/unlock-propagation), **OQ-32** (device clock tampering — spike item), **OQ-34** (addressed via the trusted-time model, pending spike validation of the monotonic-clock approach), **OQ-38** (subscription grace-window length, new this phase), **OQ-39** (partial-enforcement middle state during lapse, new this phase), **OQ-40** (SEC-016 monotonic-clock manipulation resilience, new this phase, related to OQ-32), **OQ-41** (safeguarding escalation process detail, new this phase, deferred as operational policy). Still open from earlier phases: the definitive UK school-platform list (OQ-07), final pricing (OQ-11), Kids Category exclusion confirmation (OQ-12). None of these block Phase 7.
 
 ## Process note
 

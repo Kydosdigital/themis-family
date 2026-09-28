@@ -183,6 +183,14 @@ Format: ID | Risk | Likelihood | Impact | Mitigation | Owner | Validation method
 - **Owner:** Product/Founder (mechanism confirmed; real-device validation still required before Phase 6/7 build treats it as final)
 - **Validation method:** Scenario testing simulating an offline gap that spans a Deadline Lock's grace period, including a device reboot during the gap, confirming the trusted-time reconciliation behaves as specified and the "Timing could not be verified" escalation fires correctly when it cannot
 
+## RISK-26: Monotonic-clock manipulation on a compromised device could defeat the trusted-time model — NEW, Phase 6, 2026-09-28
+- **Likelihood:** Low-Medium — requires a jailbroken or otherwise compromised device, which is a smaller population than ordinary offline-connectivity gaps (RISK-25), but not negligible given the product's core function invites circumvention attempts (RISK-05)
+- **Impact:** Medium — if defeatable, a child could falsify timing evidence to have a late submission auto-reconciled as on-time, undermining the same Deadline Lock fairness guarantee that RISK-25's mitigation was designed to protect, though in the opposite direction (false on-time claim rather than unfair late marking)
+- **Source:** Identified in `24_SECURITY_REQUIREMENTS.md` §24.6 as SEC-016, a threat without a fully specified control, flagged as the reverse gap in the Phase 6 end-of-phase security cross-check; tracked as OQ-40 in `34_OPEN_QUESTIONS.md`, related to OQ-32 (device clock/timezone tampering, already a Priority 6 real-device spike item per `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.8)
+- **Mitigation (not yet specified — this is the open item):** no control can be specified without real-device research into how resistant iOS's monotonic clock (`mach_absolute_time`/`ProcessInfo.systemUptime` or equivalent) actually is to manipulation on a compromised device, and what detection signals (if any) are available to the app. Until that research exists, the trusted-time model's existing degrade-safely behaviour (RISK-25's "Timing could not be verified" escalation to the parent) remains the only backstop — it does not prevent falsification but ensures ambiguous cases still reach human judgement rather than being silently auto-credited.
+- **Owner:** Engineering/Security (pending real-device spike; no control owner assigned until findings exist)
+- **Validation method:** Real-device spike on a jailbroken/compromised test device attempting to falsify monotonic-clock readings during an offline gap, assessing whether the trusted-time reconciliation can be tricked into crediting a late submission as on-time
+
 ---
 
 ## Register maintenance note

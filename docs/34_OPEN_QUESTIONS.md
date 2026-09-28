@@ -198,7 +198,7 @@ Remaining open items and their status:
 - *Remaining open element:* exact UI/UX integration of the embedded native report view is a Phase 6 (`22_REPORTING_AND_ANALYTICS.md`) design question, not resolved here.
 - *Blocks:* `22_REPORTING_AND_ANALYTICS.md` (Phase 6) — now substantially unblocked at the architecture level.
 
-**OQ-10 [RESOLVED — see DEC-46].** Should the product pursue the separate "App and Website Usage" entitlement?
+**OQ-10 [RESOLVED — see `35_DECISION_LOG.md`, "Also confirmed in this review round" note following DEC-46 through DEC-50; not itself a standalone numbered decision].** Should the product pursue the separate "App and Website Usage" entitlement?
 - *Resolution:* Founder's re-check of Apple documentation located the capability under its actual name: `AuthorizationStatus.approvedWithDataAccess`, granted via the separate `com.apple.developer.family-controls.app-and-website-usage` entitlement. Apple's documentation confirms, verbatim, that customer installations can only achieve this status on devices located in the EU with an EU Apple Account. Since Themis Family V1 is UK-first (DEC-23), this capability **cannot be used by normal V1 customers regardless of entitlement outcome** and must not be part of the UK V1 architecture. Standard `DeviceActivityReport` under ordinary `.approved` authorization remains the V1 reporting path (OQ-09). Documented as a possible FUTURE FEATURE for an eventual EU-market expansion only.
 - *Blocks (now unblocked):* `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.5a; `22_REPORTING_AND_ANALYTICS.md` (Phase 6) must preserve the Themis-owned/Apple-owned reporting separation and incorporate this UK limitation explicitly.
 
@@ -219,9 +219,9 @@ Remaining open items and their status:
 - *Recommended default:* Treat as UNKNOWN; **Priority 6** on the real-device technical spike list (§27.8), including device-reboot scenarios per the founder's explicit instruction.
 - *Blocks:* Real-device spike; not a Phase 5 blocker.
 
-**OQ-33 [CARRIED FORWARD TO PHASE 6, per explicit founder instruction — not finalised in Phase 5].** What exactly happens to enforcement when a household's subscription lapses?
-- *Founder direction:* do not finalise this inside Phase 5. Carry into Phase 6's `25_SUBSCRIPTIONS_AND_BILLING.md`, preserving the confirmed safety principle: **Themis must never leave a child indefinitely locked because a subscription expired and the parent can no longer manage the rules.** Phase 6 must define active paid entitlement, App Store billing retry/grace state, expired entitlement, parent warnings, local expiry behaviour, and eventual clearing of Themis-managed restrictions — no indefinite post-subscription enforcement.
-- *Blocks:* `25_SUBSCRIPTIONS_AND_BILLING.md` (Phase 6, to be produced this phase); `20_STATE_MACHINES.md` §20.10 remains explicitly incomplete pending this.
+**OQ-33 [RESOLVED — see DEC-51].** What exactly happens to enforcement when a household's subscription lapses?
+- *Resolution:* A three-state model — `Active` → `BillingRetry` (enforcement unchanged, parent warned) → `Lapsed` (enforcement continues through a bounded, communicated grace window) → `RestrictionsCleared` (restrictions actively removed once the grace window expires unpaid). Rule definitions are never deleted, so enforcement resumes automatically if payment resumes. Directly implements the confirmed safety principle: no indefinite lockout. See `25_SUBSCRIPTIONS_AND_BILLING.md`, `20_STATE_MACHINES.md` §20.10.
+- *Blocks (now unblocked):* `20_STATE_MACHINES.md` §20.10 is now complete; the exact grace-window length is a separate, still-open question (OQ-38).
 
 **OQ-34 [ADDRESSED via the trusted-time model, not independently closed].** If a device never reconnects before an EngagementSession's linked Task/context expires server-side, does a very-late outcome submission still get honoured?
 - *Resolution approach:* `17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a's trusted-time model (monotonic-clock-anchored elapsed-time estimation, reconciled against server-received time) applies to this case by direct analogy to the Deadline Lock submission case it was designed for: if trustworthy timing evidence establishes the outcome genuinely occurred within the valid context, it is reconciled as on-time; otherwise it is surfaced to the parent as "Timing could not be verified" for an explicit decision, rather than silently auto-credited or silently rejected.
@@ -240,3 +240,27 @@ Remaining open items and their status:
 - *Blocks:* `24_SECURITY_REQUIREMENTS.md` (Phase 6, to be produced this phase) for the exact control specification.
 
 **Correction applied (not a standing open question — resolved and applied directly to source documents this round, per DEC-46 in `35_DECISION_LOG.md`):** the original Phase 5 draft's proposed correction to `10_RULE_ENGINE_SPECIFICATION.md` FR-010 (describing the ~50-item shield limit as wholly undocumented) was itself found incorrect on re-verification against Apple's current documentation. FR-010 has been corrected in this amendment round to state the four exact, independently-documented per-property limits (50 applications; 50 web domains; 50 categories +50 exceptions for app categories; 50 categories +50 exceptions for web-domain categories) as VERIFIED FROM APPLE DOCUMENTATION, with only the exceeded-limit failure behaviour remaining NEEDS REAL-DEVICE TECHNICAL SPIKE. See `27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.3/§27.6/§27.7 and `10_RULE_ENGINE_SPECIFICATION.md` §10.8.
+
+---
+
+## Questions raised during Phase 6 (2026-09-28)
+
+**OQ-38 [NEW].** What is the exact subscription grace-window length (`Lapsed` → `RestrictionsCleared`)?
+- *Why it matters:* DEC-51 confirms the state model and the no-indefinite-lockout principle, but not the specific duration, which affects both user experience (how long a lapsed household keeps protection) and revenue-recovery design.
+- *Recommended default:* 7 days, proposed as a RECOMMENDATION only in `25_SUBSCRIPTIONS_AND_BILLING.md` §25.2/§25.3, not founder-confirmed.
+- *Blocks:* Founder confirmation needed before Phase 7 build sequencing treats this number as final.
+
+**OQ-39 [NEW].** Should a partial/reduced-enforcement middle state exist during a subscription lapse (e.g. Essential/Always-Allowed-only enforcement continuing indefinitely), rather than the binary full-enforcement-then-cleared model?
+- *Why it matters:* A more nuanced middle state is a legitimate design alternative to the current binary model and was not ruled out, only not chosen by default in `25_SUBSCRIPTIONS_AND_BILLING.md` §25.3.
+- *Recommended default:* None proposed; the binary model is simplest and satisfies the safety floor, but the founder may prefer otherwise.
+- *Blocks:* `25_SUBSCRIPTIONS_AND_BILLING.md` finalisation; does not block Phase 6 sign-off.
+
+**OQ-40 [NEW, SEC-016].** Can a compromised or jailbroken device falsify monotonic-clock readings to defeat the trusted-time model (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.7a)?
+- *Why it matters:* The trusted-time model's fairness guarantee depends on the monotonic clock being difficult to manipulate; if it can be falsified, the model's protection against unfair "late" determinations could also be exploited to falsely claim on-time completion.
+- *Recommended default:* Treat as NEEDS REAL-DEVICE TECHNICAL SPIKE, related to OQ-32; add to the real-device spike programme.
+- *Blocks:* `24_SECURITY_REQUIREMENTS.md` SEC-016; not a Phase 6 sign-off blocker.
+
+**OQ-41 [NEW].** What is the detailed safeguarding escalation process for child-safety concerns raised through support channels (`30_ADMIN_AND_SUPPORT.md` §30.5)?
+- *Why it matters:* This is an operational/policy process (who reviews, what triggers escalation, what follow-up occurs), not a technical specification item, and this document deliberately does not design it in full.
+- *Recommended default:* None proposed here; requires founder/operations ownership, likely involving legal/child-safety-policy expertise beyond this BA/architecture engagement's scope.
+- *Blocks:* Operational readiness before launch (Phase 7's Definition of Done should reference this); does not block Phase 6 document sign-off.
