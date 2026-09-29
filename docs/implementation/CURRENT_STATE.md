@@ -1,16 +1,17 @@
 # Themis Family Implementation State
 
-Status: READY
+Status: BLOCKED
 Mode: UI_IMPLEMENTATION
-Current objective: Begin approved native SwiftUI UI implementation from the final Claude Design handoff.
-Active slice: UI-01 Design System Foundation
+Current objective: Verify UI-01 Design System Foundation on macOS/Xcode, then continue with UI-02 Parent Home.
+Active slice: UI-01 Design System Foundation (source complete; compile and Simulator verification pending)
 Allowed scope: semantic design tokens, typography API, reusable primitives, shared status system, Parent/Child/Teen navigation shell, tests and local Xcode verification. Continue later in small slices following the approved handoff order.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md
-Last verification: Pass 5 final prototype, Design System and Engineering Handoff reviewed and approved. Production Apple enforcement remains spike-gated.
-Next action: Hand docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md to Claude Code and execute UI-01 locally on macOS/Xcode.
+Last verification: UI-01 source written in a Linux cloud session. All Swift files pass a tree-sitter syntax parse and `scripts/validate_claude_workflow.py` passes. SwiftUI has NOT been compiled: no macOS/Xcode was available.
+Blocked on: a macOS/Xcode run of `bash scripts/verify_ios.sh`, the unit tests, and a Simulator screenshot comparison of the component previews against the Design System board.
+Next action: On a Mac, run `bash scripts/verify_ios.sh` and the `ThemisFamily` test scheme, fix any compile errors, compare previews with the approved board at default and one accessibility size, then set UI-01 COMPLETE and start UI-02 Parent Home.
 
 ## Current readiness
 
@@ -23,6 +24,18 @@ Next action: Hand docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md to
 - SwiftUI UI implementation: READY
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
+
+## UI-01 progress
+
+Source complete (see BUILD_LOG 2026-09-29 "UI-01 Design System Foundation" and IMP-UI-001):
+- semantic colour, spacing, radius, border, shadow, touch-size and audience tokens
+- Manrope-ready typography API with a documented system-font fallback
+- shared status system covering every approved status, with StatusBadge and StatusHeader
+- reusable primitives, AgreementTimeline and StackedTimelineList
+- Parent and Child/Teen navigation shells with iPad split view
+- unit tests for status mappings, timeline model, tokens and tabs
+
+Pending: macOS/Xcode compile, unit-test run and Simulator visual comparison.
 
 ## First implementation slice
 
