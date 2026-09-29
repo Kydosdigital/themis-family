@@ -69,7 +69,8 @@ jobs:
           xcrun simctl io "$DEVICE_ID" screenshot "$RUNNER_TEMP/themis-visual-review/P-023-canonical.png"
 
           # Capture the same screen at a large accessibility content size.
-          xcrun simctl ui "$DEVICE_ID" content_size accessibility-extra-extra-extra-large || true
+          # The approved QA target is about 170%, not the maximum accessibility size.
+          xcrun simctl ui "$DEVICE_ID" content_size accessibility-large || true
           xcrun simctl terminate "$DEVICE_ID" com.kydosdigital.themisfamily.dev || true
           xcrun simctl launch "$DEVICE_ID" com.kydosdigital.themisfamily.dev
           sleep 4
