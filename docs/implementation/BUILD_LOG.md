@@ -130,7 +130,7 @@ Work:
 
 Shared UI-01 corrections (see IMP-UI-002):
 - `ThemisRow` stacks status/value under the subtitle at accessibility sizes.
-- `StatusBadge` wraps long labels at accessibility sizes instead of overflowing; one line at standard sizes.
+- `StatusBadge` remains single-line at all sizes, as approved; `ThemisRow` moves the whole status chip under the subtitle at accessibility sizes so long labels are not squeezed.
 - `AvatarTile` gains a 40 pt `.large` size.
 - Tokens added from the prototype: `ThemisColor.dockSecondary`, `ThemisRadius.dockButton`, `ThemisSize.avatarLarge`.
 - `ShellPlaceholderView` can be pushed with a working Back.
