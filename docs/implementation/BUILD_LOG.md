@@ -89,3 +89,26 @@ Verification:
 - Existing iOS source, frozen requirements and native design progress remain unchanged.
 
 Pending launch work and verification limits are recorded in WEB_STATE.md and apps/web/QA.md.
+
+## 2026-09-29: UI-01 Design System Foundation
+
+Status: Source complete; macOS/Xcode compile, unit-test run and visual comparison pending.
+
+Source of truth: final Claude Design package (Themis Design System, Engineering Handoff token sheet and component inventory, `ThemisScreen` prototype component).
+
+Work:
+- Replaced the scaffold tokens with the approved token sheet: brand, ink, grounds and surfaces, status fills and tints, timeline tones, lines, shadows, radii, spacing, touch heights and Parent / Child / Teen variants (`ThemisAudience`, `ThemisGround`).
+- Added the typography API (`ThemisTextRole`, `.themisFont`) with every approved role, audience sizes, tracking and Dynamic Type scaling. Manrope is picked up automatically once bundled; system font until then (IMP-UI-001).
+- Added the shared status system (`StatusKind`, `StatusTone`, `ThemisStatus`) covering all 36 approved statuses, each with glyph and label, plus `StatusBadge` and `StatusHeader`. `ProtectionStatusBadge` now uses it.
+- Added primitives: ThemisButton (primary, secondary, tertiary, destructive, destructive confirm, loading, disabled, audience sizing, press motion and haptic), ThemisCard, ThemisGroupedSection, ThemisRow, AvatarTile, SectionHeader, InlineBanner, ConsequenceNote, KeyValueList (stacks at accessibility sizes), ChecklistList, ReasonField, ChoiceChips, SegmentedChoice, TimeSelection, ChildSelector, StepProgress, CountdownRing, EmptyStateView, LoadingStateView, ErrorStateView and a native confirmation sheet.
+- Added `AgreementTimeline` and `StackedTimelineList` on one shared model, with Welcome reveal progress support and Reduce Motion aware motion tokens (`ThemisMotion`).
+- Added navigation shells: Parent TabView (Home, Rules, Activity, Settings) with iPad NavigationSplitView, Child/Teen TabView (Home, My Rules, Requests), PageHeader and BellButton. Later-slice tabs show a screen-ID placeholder, not an invented layout.
+- Moved the Debug scenario switcher to a `demoControls()` modifier on each tab root.
+- Added `DesignSystemTests.swift`: approved status coverage, glyph and label for every status, protection mapping, Approved versus Applied distinction, timeline formatting and stacked rows, audience metrics, touch targets, type scale, Reduce Motion alternatives, a no-purple palette check and tab IA.
+
+Verification:
+- Tree-sitter Swift syntax parse: 0 errors across all iOS source and test files.
+- `python3 scripts/validate_claude_workflow.py` passed.
+- NOT run: Xcode build, XCTest, Simulator screenshots. This session ran on Linux without a Swift toolchain. UI-01 must not be marked complete until these pass on macOS.
+
+Not changed: frozen requirements, product behaviour, Apple enforcement gates, backend wiring.

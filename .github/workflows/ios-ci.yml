@@ -1,0 +1,55 @@
+name: iOS build and tests
+
+on:
+  pull_request:
+    paths:
+      - "apps/ios/**"
+      - "scripts/verify_ios.sh"
+      - ".github/workflows/ios-ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/ios/**"
+      - "scripts/verify_ios.sh"
+      - ".github/workflows/ios-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build iOS app
+        run: bash scripts/verify_ios.sh
+
+      - name: Select an available iPhone simulator
+        id: simulator
+        shell: bash
+        run: |
+          DEVICE_ID="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next(d["udid"] for devices in data.get("devices", {}).values() for d in devices if d.get("isAvailable") and d.get("name", "").startswith("iPhone")))')"
+          echo "device_id=$DEVICE_ID" >> "$GITHUB_OUTPUT"
+          echo "Using simulator $DEVICE_ID"
+
+      - name: Run unit tests
+        working-directory: apps/ios
+        run: |
+          xcodegen generate
+          xcrun simctl boot "${{ steps.simulator.outputs.device_id }}" || true
+          xcrun simctl bootstatus "${{ steps.simulator.outputs.device_id }}" -b
+          xcodebuild \
+            -project ThemisFamily.xcodeproj \
+            -scheme ThemisFamily \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.device_id }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            test

@@ -7,8 +7,12 @@ This directory now contains the frontend-first SwiftUI foundation for Themis Fam
 Implemented as mock-driven UI foundation:
 
 - XcodeGen project specification
-- semantic design tokens
-- reusable cards, buttons, section headers and protection-status badge
+- UI-01 design-system foundation from the approved Engineering Handoff:
+  - semantic tokens (`Core/DesignSystem`): colours, spacing, radii, borders, shadows, touch sizes, motion, and Parent / Child / Teen audience variants
+  - typography roles applied with `.themisFont(_:)`, scaled with Dynamic Type
+  - shared status system (`Core/Status`): every approved status with glyph and label
+  - reusable primitives (`Core/Components`), including AgreementTimeline with its stacked accessibility fallback
+  - Parent and Child/Teen navigation shells (`Core/Navigation`), with iPad split view for Parent
 - parent/child domain models
 - repository protocols that keep the UI independent of Supabase
 - deterministic mock repositories
@@ -21,6 +25,14 @@ Implemented as mock-driven UI foundation:
 Production Family Controls / ManagedSettings / DeviceActivity enforcement is NOT implemented here. Those behaviours remain gated by the entitlement and real-device spike programme.
 
 Supabase is also not wired into the frontend yet. Future Supabase repositories will conform to the same repository protocols used by the mock layer.
+
+## Using the design system
+
+- Colours: `ThemisColor.*` semantic names only. No raw hex in feature views.
+- Text: `.themisFont(.body)`, `.themisFont(.pageTitle)` and so on. The audience comes from the environment.
+- Audience and ground: set `.themisAudience(.child)` on a subtree and `.themisGround(.warm)` on a screen. Components pick the right surface, radius and heights.
+- Status: `StatusBadge(.syncPending)` or `StatusBadge(ThemisStatus(.approved, label: "Completed"))`. Never show status by colour alone.
+- Manrope: add the licensed font files to the target and list them under `UIAppFonts`. `.themisFont` switches to Manrope automatically.
 
 ## Generate the Xcode project
 

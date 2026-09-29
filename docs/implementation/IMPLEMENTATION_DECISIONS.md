@@ -71,3 +71,24 @@ Forms have provider-independent services and a development-only local adapter. P
 The 3D scene is dynamically imported on capable pointer devices. Touch, reduced-motion and constrained devices receive a complete static illustration by default, with an explicit motion control. Demand rendering stops after transitions and while off-screen. This preserves the required WebGL storytelling without making it a prerequisite to read or use the website.
 
 Legal text and article examples remain clearly labelled drafts. No price, launch date, permanent logo, customer endorsement or verified Apple behaviour is invented. Public app-launch gates remain unchanged.
+
+## IMP-UI-001: UI-01 design-system foundation implementation choices
+
+Date: 2026-09-29
+Status: Implemented; awaiting local Xcode verification and design review
+
+Source: final Claude Design Engineering Handoff (token sheet, component inventory, SF Symbols map, motion spec, state matrix) and the `ThemisScreen` prototype component.
+
+Decisions made where the handoff leaves an implementation choice:
+
+1. **Typography fallback.** Manrope font files are not in the repository (asset register: "Required · licence check (SIL OFL)"). `ThemisTextRole` implements every approved role at its exact Parent / Child / Teen size, weight and tracking, scaled with `@ScaledMetric(relativeTo:)` against the documented text style. Until the font files are bundled and listed under `UIAppFonts`, the system font renders those metrics. When `Manrope-Bold` becomes available at runtime it is used automatically with no call-site change. No other brand font is substituted.
+2. **Status labels in sentence case.** The prototype and state matrix use "Sync pending", "Device offline" and so on. `ProtectionStatus.title` now delegates to the shared status system, replacing the scaffold's title-case labels. Shield-shaped glyphs were replaced by the handoff SF Symbols map (no generic shield motif).
+3. **Status label overrides.** The state matrix reuses a kind's glyph and tone under another label (for example "Unconfirmed" uses Device offline; "Approved, timing unverified" uses Approved). These are modelled as `ThemisStatus(kind, label:)` presets, so a label can never drift to a different colour meaning.
+4. **Page header in content.** Tab-root frames set a small subtitle above the large page title with the bell beside it. The native large title cannot do this, so `PageHeader` is drawn in content and tab roots hide the navigation bar. Pushed screens keep the native navigation bar.
+5. **Bell glyph.** The frame shows a plain bell with a cobalt count pill. `bell` is used in both states; `bell.badge` plus a count would double-badge.
+6. **iPad split view on iOS 17.** The deployment target is iOS 17, so `TabView(.sidebarAdaptable)` is unavailable. `ParentTabShell` uses `NavigationSplitView` when the horizontal size class is regular and falls back to `TabView` at compact width or at accessibility text sizes. This follows the system size class; there is no custom width threshold, as the Pass 4 review asked.
+7. **Timeline fallback trigger.** `AgreementTimeline` switches to `StackedTimelineList` when `dynamicTypeSize.isAccessibilitySize`, as specified by `variant.accessibilitySizes`. The same trigger stacks `KeyValueList` rows.
+8. **Legacy aliases.** The pre-handoff Parent Home and Child Home views keep compiling through documented aliases (`ThemisColor.actionPrimary`, `ThemisSpacing.md`, `ThemisTypography.body` and similar). They are removed when UI-02 and UI-03 rebuild those screens against the approved frames.
+9. **Shell placeholders.** Tabs whose screens belong to later slices show `ShellPlaceholderView` with the screen ID, rather than an invented layout.
+
+Product impact: none. No product behaviour, copy rule or requirement changed.

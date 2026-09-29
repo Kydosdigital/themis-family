@@ -1,16 +1,11 @@
 import SwiftUI
 
+/// Protection status chip. A thin wrapper over the shared `StatusBadge`
+/// so every protection surface uses the one approved status system.
 struct ProtectionStatusBadge: View {
     let status: ProtectionStatus
 
     var body: some View {
-        Label(status.title, systemImage: status.symbolName)
-            .font(ThemisTypography.caption)
-            .foregroundStyle(ThemisColor.textPrimary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .background(ThemisColor.status(status).opacity(0.22))
-            .clipShape(Capsule())
-            .accessibilityLabel("Protection status: \(status.title)")
+        StatusBadge(status.themisStatus, accessibilityContext: "Protection status")
     }
 }
