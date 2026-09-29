@@ -24,6 +24,7 @@ DerivedData/
 .build/
 xcuserdata/
 *.xcuserstate
+apps/ios/ThemisFamily.xcodeproj/
 
 # OS/editor noise
 .DS_Store
