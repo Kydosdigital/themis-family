@@ -3,13 +3,13 @@
 Status: IDLE
 Mode: FOUNDATION
 Commit required: NO
-Current objective: Establish the implementation operating layer, then begin Stage 0 and foundation engineering on explicit tasks.
+Current objective: Validate the Claude Code operating layer locally, then begin Stage 0 and foundation engineering on explicit tasks.
 Active slice: None
 Requirement refs: docs/37_BUILD_SEQUENCE.md; docs/38_DEFINITION_OF_DONE.md
 Allowed scope: Foundation engineering and technical-spike harnesses. Production Apple enforcement remains gated.
-Last verification: Workflow committed in GitHub. Local Claude Code hook execution still requires first-run validation.
-Last commit: Pending workflow commit
-Next action: Validate Claude Code settings/hooks locally, then choose the first Stage 0/Foundation task.
+Last verification: GitHub main contains the Claude Code operating layer at 6712acc7d9cb19828cc5d44cbf384d5429eb6a62; key settings and hooks were re-read remotely. Local hook execution is still pending first-run validation.
+Last commit: Use git log -1 for current HEAD. Workflow baseline commit: 6712acc7d9cb19828cc5d44cbf384d5429eb6a62
+Next action: Pull main locally, run the validation steps in docs/implementation/CLAUDE_CODE_WORKFLOW.md, then start the first Stage 0/Foundation task.
 
 ## Current readiness
 

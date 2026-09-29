@@ -35,6 +35,18 @@ def normalise(project, raw):
 def approved_doc_path(rel):
     return rel.startswith("docs/") and not rel.startswith("docs/implementation/")
 
+def shell_looks_like_spec_write(command):
+    patterns = [
+        r"(?:>|>>)\s*docs/(?!implementation/)",
+        r"\btee\b[^\n]*\sdocs/(?!implementation/)",
+        r"\bsed\s+-i\b[^\n]*docs/(?!implementation/)",
+        r"\bperl\s+-pi\b[^\n]*docs/(?!implementation/)",
+        r"\b(?:cp|mv)\b[^\n]*\sdocs/(?!implementation/)",
+        r"write_text\([^\n]*docs/(?!implementation/)",
+        r"writeFile[^\n]*docs/(?!implementation/)"
+    ]
+    return any(re.search(pattern, command, flags=re.IGNORECASE) for pattern in patterns)
+
 def main():
     try:
         payload = json.load(sys.stdin)
@@ -62,10 +74,9 @@ def main():
 
     if tool == "Bash":
         command = str(tool_input.get("command", ""))
-        write_markers = r"(?:>|>>|\btee\b|\bsed\s+-i\b|\bperl\s+-pi\b|\bcp\b|\bmv\b|write_text|writeFile|open\([^\n]*['\"]w)"
-        if re.search(r"docs/(?!implementation/)", command) and re.search(write_markers, command, flags=re.IGNORECASE):
+        if shell_looks_like_spec_write(command):
             print(
-                "Approved requirements are frozen. Blocked a shell command that appears to modify docs/. "
+                "Approved requirements are frozen. Blocked a shell command that appears to write into docs/. "
                 "Use docs/implementation/ for implementation records, or start an explicitly authorised "
                 "spec-amendment session with THEMIS_SPEC_AMENDMENT=1.",
                 file=sys.stderr,
