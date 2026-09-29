@@ -1,16 +1,16 @@
 # Themis Family Implementation State
 
-Status: COMPLETE
+Status: READY
 Mode: UI_IMPLEMENTATION
-Current objective: UI-01 is verified and ready to merge. Next implementation slice is UI-02 Parent Home.
-Active slice: UI-01 Design System Foundation — COMPLETE
-Allowed scope: semantic design tokens, typography API, reusable primitives, shared status system, Parent/Child/Teen navigation shell, tests and macOS CI verification. Continue later in small slices following the approved handoff order.
+Current objective: Implement UI-02 Parent Home from the approved P-023 design and states.
+Active slice: UI-02 Parent Home — READY
+Allowed scope: P-023 Parent Home and approved Parent Home states, Parent Home-specific presentation components, mock/display-state extensions, tests, previews/review harness, and verification. Do not begin UI-03.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
-Implementation prompt: docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md
-Last verification: UI-01 compiles successfully with Xcode on GitHub macOS CI and its unit tests pass. The implementation was reviewed against the approved token/component/navigation handoff. A true Simulator screenshot comparison is not available from the current web-only workflow, so representative screenshot QA is carried forward into UI-02 where the first complete production screen will be reviewed and any shared-token corrections can be fed back safely. Production Apple enforcement remains spike-gated.
-Next action: Merge PR #6, then start UI-02 Parent Home. UI-02 must implement P-023 and approved Parent Home states only, then stop for verification.
+Implementation prompt: docs/implementation/CLAUDE_CODE_UI02_PARENT_HOME_PROMPT.md
+Last verification: UI-01 Design System Foundation merged through PR #6. The SwiftUI app compiled successfully with Xcode on GitHub macOS CI and unit tests passed. Representative screenshot QA is carried into UI-02 because the implementation session is web-only. Production Apple enforcement remains spike-gated.
+Next action: Give Claude Code docs/implementation/CLAUDE_CODE_UI02_PARENT_HOME_PROMPT.md and implement UI-02 on a focused branch. Stop after P-023 and its approved states for review.
 
 ## Current readiness
 
@@ -24,7 +24,7 @@ Next action: Merge PR #6, then start UI-02 Parent Home. UI-02 must implement P-0
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
-## First implementation slice
+## Completed implementation slice
 
 UI-01 Design System Foundation:
 - tokens
@@ -37,7 +37,24 @@ UI-01 Design System Foundation:
 - structural/design-spec review against approved Design System
 - representative Simulator screenshot QA carried into UI-02
 
-Do not attempt all 216 screens in one context.
+UI-01 is merged. Do not attempt all 216 screens in one context.
+
+## Current implementation slice
+
+UI-02 Parent Home:
+- P-023 canonical needs-attention state
+- nothing-pending state
+- setup-incomplete state
+- protection-problem state
+- NeedsYouCard
+- GraceBar
+- ChildStatusRow
+- QuickActionDock
+- deterministic previews/review states
+- Parent Home presentation/state tests
+- GitHub macOS CI verification
+
+Stop after UI-02.
 
 ## Production gates
 
