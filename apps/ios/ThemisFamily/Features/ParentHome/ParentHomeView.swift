@@ -106,7 +106,11 @@ struct ParentHomeContentView: View {
             }
         case .quickActions:
             if dockIsInline {
-                QuickActionDock(actions: state.quickActions, placement: .inline, perform: perform)
+                VStack(alignment: .leading, spacing: ThemisSpacing.inline8) {
+                    SectionHeader(title: "Quick actions")
+                        .padding(.horizontal, 4)
+                    QuickActionDock(actions: state.quickActions, placement: .inline, perform: perform)
+                }
             }
         }
     }
