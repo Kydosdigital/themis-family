@@ -1,25 +1,57 @@
 # Themis Family Implementation State
 
-Status: IDLE
-Mode: DESIGN_REVIEW
-Current objective: Review and approve the Claude Design Engineering Handoff board before production UI implementation begins.
-Active slice: Claude Design Pass 5 final handoff review
-Allowed scope: Engineering Handoff board review, traceability cleanup, and requirements clarification for any implementation-blocking inconsistency. No production SwiftUI or backend implementation yet.
-Last verification: Final prototype and final Design System reviewed and approved. Prototype reports 216 screens/states, 28 critical paths, 0 broken links and 0 unreachable screens. Engineering Handoff board has not yet been available in the uploaded review files.
-Next action: Export/upload Themis Engineering Handoff.dc.html (preferably PDF) for final review.
+Status: READY
+Mode: UI_IMPLEMENTATION
+Current objective: Begin approved native SwiftUI UI implementation from the final Claude Design handoff.
+Active slice: UI-01 Design System Foundation
+Allowed scope: semantic design tokens, typography API, reusable primitives, shared status system, Parent/Child/Teen navigation shell, tests and local Xcode verification. Continue later in small slices following the approved handoff order.
+Behaviour source of truth: approved requirements baseline.
+Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
+Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
+Implementation prompt: docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md
+Last verification: Pass 5 final prototype, Design System and Engineering Handoff reviewed and approved. Production Apple enforcement remains spike-gated.
+Next action: Hand docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md to Claude Code and execute UI-01 locally on macOS/Xcode.
 
-## Current design status
+## Current readiness
 
-- Information architecture: APPROVED
-- Low-fi: APPROVED
+- Specification ready: YES
+- Mobile UX architecture: APPROVED
 - Visual direction: APPROVED
-- Design system: APPROVED
-- High-fidelity core journeys: APPROVED
-- Pass 4 supporting areas: APPROVED
+- Design System: APPROVED
 - Final prototype: APPROVED
-- Engineering Handoff board: PENDING REVIEW
-- Claude Code production UI implementation: BLOCKED pending handoff approval
+- Engineering Handoff: APPROVED
+- SwiftUI UI implementation: READY
+- Production Apple enforcement: NO, spike-gated
+- Public launch: NO
 
-## Known implementation clarification
+## First implementation slice
 
-ST-011 household deletion currently needs an explicit requirements clarification separating Themis household/internal entitlement termination from App Store subscription auto-renewal behaviour. Do not silently resolve this during implementation.
+UI-01 Design System Foundation:
+- tokens
+- typography API
+- reusable primitives
+- status system
+- navigation shell
+- tests
+- local Xcode verification
+
+Do not attempt all 216 screens in one context.
+
+## Production gates
+
+Remain unresolved:
+- Family Controls production entitlement
+- Priority 1 remote decision -> applied timing
+- Priority 2 Phone / Messages / Maps shield behaviour
+- terminated-app scheduled transitions
+- shield persistence/removal
+- Apple Screen Time report availability on parent device
+- OQ-19 staleness threshold
+- OQ-34 trusted-time reliability
+- OQ-40 compromised-device timing integrity
+
+## Required clarification before ST-011 production billing wiring
+
+Household deletion UI may be implemented, but production billing side-effects must not be finalised until the requirements explicitly distinguish:
+1. Themis household/internal entitlement termination
+2. App Store subscription auto-renewal management
