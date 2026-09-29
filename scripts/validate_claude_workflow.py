@@ -57,6 +57,7 @@ REQUIRED = [
     "supabase/seed.sql",
     "apps/ios/README.md",
     "scripts/verify.sh",
+    "scripts/verify_ios.sh",
 ]
 
 def fail(message: str) -> None:

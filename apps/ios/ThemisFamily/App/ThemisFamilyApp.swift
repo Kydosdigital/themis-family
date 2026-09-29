@@ -1,6 +1,7 @@
 import SwiftUI
 
 @main
+@MainActor
 struct ThemisFamilyApp: App {
     @StateObject private var container = AppContainer.preview()
 

@@ -47,3 +47,25 @@ Verification:
 Pending:
 - Local Claude Code first-run validation.
 - Dedicated Themis Supabase project provisioning and MCP authentication.
+
+
+## 2026-09-29: Mock-driven SwiftUI frontend foundation
+
+Status: Source implementation complete; local Xcode compile validation pending.
+
+Work:
+- Added XcodeGen project definition for an iOS 17+ SwiftUI app and unit-test target.
+- Added a semantic Themis design system using the approved cobalt/mint/aqua/peach direction with no purple.
+- Kept Manrope as the approved future font while using a documented system-font fallback until the actual font asset is added.
+- Added Parent Home and Child/Teen Home screens.
+- Added honest five-state protection status UI and child transparency copy.
+- Added repository protocols so SwiftUI remains independent of Supabase.
+- Added deterministic mock repositories and demo family data for Sarah, Sam and Maya.
+- Added Debug-only scenario switching for overdue homework, approval grace, multiple restrictions, offline/sync/protection states, Free Pass, subscription states, no children/rules, and request states.
+- Added unit tests around critical demo-state behaviour.
+- Added macOS/Xcode build-verification script using XcodeGen.
+
+Verification:
+- GitHub Actions run 36529764176 passed for commit 1607c59df58e21df306c0f64d8529dd6361275b0.
+- CI is Linux-based and cannot compile SwiftUI.
+- Local macOS/Xcode verification remains required before the frontend foundation is marked compile-verified.

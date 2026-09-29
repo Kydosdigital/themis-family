@@ -40,3 +40,21 @@ Supabase provides the PostgreSQL database, authentication primitives, server-sid
 
 Product impact:
 None to the approved user-facing requirements. This chooses the implementation platform used to satisfy them.
+
+
+## IMP-003: Frontend-first repository abstraction and XcodeGen project source
+
+Date: 2026-09-29
+Status: Confirmed implementation architecture decision
+
+Decision:
+Build the iOS frontend against small repository protocols and deterministic mock implementations before connecting Supabase. Keep the Xcode project structure source-controlled as `apps/ios/project.yml` using XcodeGen rather than hand-maintaining a generated pbxproj in Git.
+
+Rationale:
+This allows the Parent/Child experiences and state handling to be implemented and reviewed now without coupling SwiftUI to an unfinished backend. Supabase implementations can later conform to the same repository protocols. XcodeGen keeps project structure reviewable and avoids fragile manual pbxproj edits from remote tooling.
+
+Boundary:
+Mock data represents UI states only and must never be described as evidence that Apple enforcement, device sync, approvals or Supabase persistence have occurred.
+
+Product impact:
+None. This is an implementation-structure decision that preserves the approved product behaviour.
