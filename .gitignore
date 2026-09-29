@@ -2,10 +2,28 @@
 .claude/settings.local.json
 .claude/runtime/
 
-# Secrets
+# Environment/secrets
 .env
 .env.*
 !.env.example
+*.p8
+*.p12
+*.pem
+*.key
+*.cer
+*.mobileprovision
+*.provisionprofile
+GoogleService-Info.plist
+
+# Supabase local/generated state
+supabase/.temp/
+supabase/.branches/
+
+# Xcode / Swift generated state
+DerivedData/
+.build/
+xcuserdata/
+*.xcuserstate
 
 # OS/editor noise
 .DS_Store

@@ -1,0 +1,4 @@
+-- Themis Family local development seed data.
+--
+-- Keep this file free of real child/family personal data.
+-- Add deterministic synthetic fixtures only after the first schema migrations exist.

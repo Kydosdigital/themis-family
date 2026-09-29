@@ -12,7 +12,7 @@ description: Implement one bounded Themis vertical slice from traced requirement
 7. Implement the smallest complete vertical slice.
 8. Add/update tests without weakening existing tests.
 9. Run relevant checks.
-10. Use QA/security reviewers where warranted.
+10. Run the code-reviewer for non-trivial code, plus QA/security reviewers where warranted.
 11. Review git diff against requirements.
 12. Update BUILD_LOG and IMPLEMENTATION_DECISIONS if needed.
 13. Set CURRENT_STATE to COMPLETE only after verification.
