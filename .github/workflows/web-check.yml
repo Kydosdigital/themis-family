@@ -1,0 +1,34 @@
+name: Website checks
+on:
+  pull_request:
+    paths: ['apps/web/**', 'scripts/verify_web.sh', '.github/workflows/web-check.yml']
+  push:
+    branches: [main]
+    paths: ['apps/web/**', 'scripts/verify_web.sh', '.github/workflows/web-check.yml']
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run verify
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: website-browser-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

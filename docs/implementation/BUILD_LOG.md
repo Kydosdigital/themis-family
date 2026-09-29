@@ -69,3 +69,23 @@ Verification:
 - GitHub Actions run 36529764176 passed for commit 1607c59df58e21df306c0f64d8529dd6361275b0.
 - CI is Linux-based and cannot compile SwiftUI.
 - Local macOS/Xcode verification remains required before the frontend foundation is marked compile-verified.
+
+## 2026-09-29: Themis Family pre-launch public website
+
+Status: Implemented for draft review; no deployment or app-launch readiness change.
+
+Work:
+- Added the isolated Next.js website in apps/web with all requested routes, local MDX examples, licensed photography and claims traceability.
+- Added accessible product previews, finite WebGL storytelling and complete static fallbacks.
+- Added validated development-only form services; production collection remains unavailable until an approved backend is connected.
+- Added consent-gated optional analytics, origin-gated SEO, draft legal content and launch configuration documentation.
+- Integrated website checks with repository verification and path-scoped CI.
+
+Verification:
+- TypeScript, ESLint, production build and 15 unit/integration tests pass.
+- 70 Playwright tests pass, including 48 page accessibility scans, navigation, forms, links, responsive widths and WebGL failure paths.
+- Reviewed mobile/desktop page screenshots and image licence records.
+- Lighthouse mobile lab performance: 93 Home, 95 Privacy, 91 Waitlist; CLS 0. Home/Waitlist LCP approximately 2.8s remains above the 2.5s target.
+- Existing iOS source, frozen requirements and native design progress remain unchanged.
+
+Pending launch work and verification limits are recorded in WEB_STATE.md and apps/web/QA.md.

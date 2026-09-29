@@ -9,6 +9,8 @@ python3 scripts/validate_claude_workflow.py
 
 echo "== iOS frontend ==\n"
 bash scripts/verify_ios.sh
+echo "== Public website =="
+bash scripts/verify_web.sh
 
 # Future application scaffolds add their checks here.
 # Keep this command stable so the pre-commit hook has one verification entry point.
