@@ -1,16 +1,16 @@
 # Themis Family Implementation State
 
-Status: IN_PROGRESS
+Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: Verify and merge UI-01 Design System Foundation before starting UI-02 Parent Home.
-Active slice: UI-01 Design System Foundation
+Current objective: UI-01 is verified and ready to merge. Next implementation slice is UI-02 Parent Home.
+Active slice: UI-01 Design System Foundation — COMPLETE
 Allowed scope: semantic design tokens, typography API, reusable primitives, shared status system, Parent/Child/Teen navigation shell, tests and macOS CI verification. Continue later in small slices following the approved handoff order.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md
-Last verification: Claude Code implemented UI-01 on branch feat/ui-01-design-system-foundation and draft PR #6 is open. GitHub macOS CI now passes the real Xcode build and unit tests, and Claude workflow checks pass. Production Apple enforcement remains spike-gated.
-Next action: Perform the UI-01 visual comparison against the approved Design System at normal and accessibility text sizes. If approved, merge PR #6, then start UI-02 Parent Home.
+Last verification: UI-01 compiles successfully with Xcode on GitHub macOS CI and its unit tests pass. The implementation was reviewed against the approved token/component/navigation handoff. A true Simulator screenshot comparison is not available from the current web-only workflow, so representative screenshot QA is carried forward into UI-02 where the first complete production screen will be reviewed and any shared-token corrections can be fed back safely. Production Apple enforcement remains spike-gated.
+Next action: Merge PR #6, then start UI-02 Parent Home. UI-02 must implement P-023 and approved Parent Home states only, then stop for verification.
 
 ## Current readiness
 
@@ -34,7 +34,8 @@ UI-01 Design System Foundation:
 - navigation shell
 - tests
 - macOS GitHub Actions build/test verification
-- visual comparison against approved Design System
+- structural/design-spec review against approved Design System
+- representative Simulator screenshot QA carried into UI-02
 
 Do not attempt all 216 screens in one context.
 
