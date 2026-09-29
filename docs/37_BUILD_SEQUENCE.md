@@ -35,7 +35,7 @@ This document sequences implementation work, with the founder's explicit, standi
 ## 37.5 Stage 3 — Child-device enforcement (production code)
 
 - Local Enforcement Plan generation and application, foreground correction pass, staleness detection — **gated on Stage 1 Priorities 0, 1, 3, 4, 5, 7** being resolved (or explicitly accepted as open risks with founder sign-off, per §37.7).
-- Device pairing/credential flow (DEC-54), independent of Family Controls specifics and thus not gated on the spike programme.
+- Device pairing/credential flow (DEC-54) and the one-household-binding invariant (DEC-60 / SEC-017), including normal-transfer and recovery-path implementation for device re-pairing across households. This implementation must satisfy the confirmed product requirement (DEC-60) and pass the test scenarios listed in `31_TEST_STRATEGY.md` item 6 (test cases A–J). While the pairing scaffolding is independent of the spike programme, the production transfer/recovery path must include DEC-60/SEC-017 enforcement before this stage is considered complete.
 
 ## 37.6 Stage 4 — Parent/child experience, notifications, reporting
 

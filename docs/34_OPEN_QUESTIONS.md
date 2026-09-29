@@ -265,7 +265,6 @@ Remaining open items and their status:
 
 ## Questions raised during Phase 7 (2026-09-28)
 
-**OQ-42 [NEW].** Can a child device already paired to one household be paired to a second household, and if so, what happens to the original household's access?
-- *Why it matters:* The device-pairing/credential model was introduced in Phase 6 (DEC-54) without considering device re-pairing; a naive implementation could silently move a device away from its original household's control without that household being informed, undermining SEC-002's immediate-loss-of-access principle in the opposite direction (the *original* household unexpectedly losing access, not a removed party retaining it).
-- *Recommended default:* RECOMMENDATION — re-pairing a device already paired elsewhere should require de-authorising it from the prior household first, with that household notified, mirroring SEC-002. Not founder-confirmed.
-- *Blocks:* `37_BUILD_SEQUENCE.md` Stage 3 (child-device pairing implementation). Does not block Phase 7 document sign-off.
+**OQ-42 [RESOLVED — see DEC-60, Phase 7 founder review round, 2026-09-28].** Can a child device already paired to one household be paired to a second household, and if so, what happens to the original household's access?
+- *Resolution:* Confirmed as a binding invariant (DEC-60): one device, one active Themis household binding at any time. A device cannot be silently re-paired to a new household. Normal transfer requires explicit removal from the prior household with that household notified; recovery cases (prior household unreachable) require secure authorised-adult re-pairing without silent reassignment. See `35_DECISION_LOG.md` DEC-60, `24_SECURITY_REQUIREMENTS.md` SEC-017, `26_ERROR_AND_EDGE_CASE_CATALOGUE.md` EC-05 (updated).
+- *Blocks (now unblocked):* `37_BUILD_SEQUENCE.md` Stage 3 implementation may now proceed against a confirmed, binding invariant rather than a TBD design question.

@@ -620,12 +620,20 @@ Phase 7 produced nine documents: `14_PARENT_EXPERIENCE.md`, `15_CHILD_AND_TEEN_E
 
 ---
 
+## DEC-60 — Device re-pairing / one-household binding invariant (Phase 7 founder decision, 2026-09-28)
+
+- **Status:** Confirmed.
+- **Decision:** A managed child device can have only ONE active Themis household binding at a time. The backend must enforce this as an invariant. **Normal transfer flow (device moving from one household to another):** existing Owner/Guardian removes the device from its current household (step 1), existing child-device credential is revoked atomically (step 2), the current household records the removal (step 3), the current household's Owner/Guardian is notified (step 4), the old household binding is cleared (step 5), the device may then begin pairing with the new household (step 6), the new household receives a new scoped device credential (step 7), Family Controls authorisation is validated as required (step 8), the old household must no longer display the transferred device as Protected (step 9). **Recovery path (previous household cannot perform removal):** V1 must NOT silently overwrite the existing household binding. Instead: show a blocking state ("Device already belongs to another Themis household"), provide a deliberate secure recovery/reset flow, recovery must require authorised-adult verification (mere physical possession is not sufficient proof), the recovery action must be auditable, any previous device credential must be invalidated before a new household binding becomes active, the prior household must stop displaying the device as protected once transfer/recovery succeeds. Closes OQ-42.
+- **Rationale:** Founder decision. A device that can be silently re-paired to a new household without the original household's knowledge directly contradicts SEC-002's immediate-loss-of-access principle in the opposite direction (the original household loses access unexpectedly), undermining the reliability positioning and the fail-safe principle applied throughout this specification (`17_OFFLINE_AND_SYNC_BEHAVIOUR.md` §17.2).
+- **Date:** 2026-09-28. **Supersedes:** OQ-42's "Recommended default (not founder-confirmed)" status in `34_OPEN_QUESTIONS.md` §26.8 — the decision is now confirmed as final.
+
+---
+
 ## Decisions still required from the founder before implementation may begin in full
 
 1. Explicit authorisation to begin implementation ("Requirements approved. Begin implementation.") — the standing gate on all production code, unaffected by this specification being complete.
 2. Commission the real-device technical spike programme (`27_APPLE_INTEGRATION_REQUIREMENTS.md` §27.8, all nine priorities) — an engineering/resourcing decision, not a specification one.
 3. Commission the Lawful Basis Matrix/DPIA and specialist legal review (DEC-52) — a legal-engagement decision.
 4. Commission the safeguarding process (named owner, documented procedure — DEC-58/OQ-41) — an operations/legal-engagement decision.
-5. Resolve OQ-42 (device re-pairing across households) before Stage 3 pairing implementation begins.
 
 None of the above are specification gaps; all are resourcing/commissioning decisions or real-world dependencies (Apple's entitlement review process) outside this BA/product-architecture engagement's authority to resolve directly. Per the founder's standing instruction, no production code is written until "Requirements approved. Begin implementation." is explicitly given.

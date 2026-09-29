@@ -15,7 +15,7 @@ This document consolidates every failure path, race condition, and edge case alr
 | EC-02 | Family Controls authorisation revoked externally after activation (child ages to adult account, parent edits Settings directly) | CONFIRMED — detected next foreground check, not real-time (§27.2 VERIFIED); device moves to `ProtectionUnavailable` (§20.2/§16.8) |
 | EC-03 | Pairing code/QR expires before the child device completes enrolment | **[NEW, Phase 7]** RECOMMENDATION: code has a short validity window (implementation detail) and a clear re-generate path; not previously specified since the pairing model itself is new in Phase 6 (DEC-54) |
 | EC-04 | Guardian invited before Owner completes their own onboarding | **[NEW, Phase 7]** RECOMMENDATION: invitation is valid but the invited Guardian sees an appropriately incomplete household state, not an error |
-| EC-05 | Parent attempts to add a child device that is already paired to a different household | **[NEW, Phase 7]** NEEDS PRODUCT DECISION — not addressed in any prior phase; flagged as OQ-42 (§26.8) |
+| EC-05 | Parent attempts to add a child device that is already paired to a different household | **[RESOLVED — DEC-60, Phase 7]** CONFIRMED — the device cannot be silently re-paired. A blocking state is shown; the parent must perform a secure recovery flow requiring authorised-adult verification. See SEC-017 and the following edge cases (EC-05a–g). |
 
 ## 26.3 Rule engine and enforcement
 
@@ -72,14 +72,20 @@ This document consolidates every failure path, race condition, and edge case alr
 | EC-34 | Support attempts an action outside its confirmed scope (e.g. editing a rule) | CONFIRMED as a **prevented** case, not merely a documented one — server-side role/ownership validation (SEC-007) applies to staff tooling exactly as it does to household members, per the corrected §30.3a scope |
 | EC-35 | Owner attempts to leave a household with no other Guardian to transfer to | CONFIRMED — not a supported path; the only two V1 exit routes are transfer-then-leave or full household deletion (DEC-45) |
 | EC-36 | A removed/de-authorised device or Member attempts continued API access | CONFIRMED — must lose access immediately as part of the same atomic removal operation (SEC-002) |
+| EC-05a | Device re-pairing: normal transfer (old household removes device, new household pairs it) | CONFIRMED — atomic credential revocation, old household notified, old household binding cleared, device may then pair with new household (DEC-60, SEC-017) |
+| EC-05b | Device re-pairing: old household removes device while new household attempts pairing concurrently | CONFIRMED — only one binding becomes active; race resolved by atomic version-increment mechanism (similar to EC-14/EC-15) |
+| EC-05c | Device re-pairing: two households attempt pairing concurrently without prior removal | CONFIRMED — blocking state shown for whichever pairing attempt loses the race; system never permits simultaneous bindings |
+| EC-05d | Device re-pairing: transfer interrupted after old credential revocation but before new credential issuance | CONFIRMED — device is unbound but unable to progress to new household; explicit recovery/retry path required; no orphaned state persists indefinitely |
+| EC-05e | Device re-pairing: recovery attempted without sufficient authorised-adult verification | CONFIRMED — recovery flow fails; user may retry with correct verification or return to prior household's pairing flow |
+| EC-05f | Device re-pairing: recovery completes while old household device/dashboard is offline | CONFIRMED — the old household's device/dashboard detects binding loss on next sync (treated as a device-removal sync event); protection status clears |
+| EC-05g | Device re-pairing: new household pairing succeeds but old dashboard has stale "Protected" state | CONFIRMED — the old household's stale state is a manifestation of normal device-offline detection (EC-26), not a re-pairing-specific failure; next sync clears the stale state or the staleness threshold triggers a downgrade from Protected to Sync Pending |
 
 ## 26.8 New items surfaced by this cross-check
 
-**OQ-42 [NEW, Phase 7].** Can a child device already paired to one household be paired to a second household (e.g. a shared family device, or a device the child previously used in a different family arrangement)?
-- *Why it matters:* Not addressed by any prior phase's pairing model (introduced in Phase 6, DEC-54); a naive implementation could silently re-pair a device away from its original household without that household being informed.
-- *Recommended default:* RECOMMENDATION — re-pairing a device already paired elsewhere should require de-authorising it from the prior household first, with that household notified, consistent with SEC-002's immediate-loss-of-access principle. Not founder-confirmed.
-- *Blocks:* `37_BUILD_SEQUENCE.md`'s pairing implementation; does not block Phase 7 document sign-off.
+**OQ-42 [RESOLVED — DEC-60, Phase 7 founder review round, 2026-09-28].** Can a child device already paired to one household be paired to a second household?
+- *Resolution:* Confirmed as a binding invariant (DEC-60, SEC-017): a device cannot be silently re-paired. Normal transfer requires explicit removal from the prior household with notification; recovery cases require secure authorised-adult re-pairing without silent reassignment. Device re-pairing is confirmed as a Phase 7 product decision / Phase 7–8 implementation topic, not a Phase 7 blocker.
+- *Blocks:* None (resolved).
 
 ## 26.9 Cross-check
 
-Every edge case in §26.2–26.7 traces to an already-confirmed DEC/FR/BR/OQ from Phases 3–6, re-tagged here with its current resolution status for test-planning purposes; only EC-03, EC-04, EC-05, and OQ-42 are genuinely new observations arising from assembling this catalogue, and each is flagged as such rather than presented as previously decided.
+Every edge case in §26.2–26.7 traces to an already-confirmed DEC/FR/BR/OQ from Phases 3–6, re-tagged here with its current resolution status for test-planning purposes. EC-03, EC-04, EC-05, and its sub-cases (EC-05a–g) are genuinely new observations arising from assembling this catalogue, each flagged as such rather than presented as previously decided. OQ-42 is resolved (DEC-60).
