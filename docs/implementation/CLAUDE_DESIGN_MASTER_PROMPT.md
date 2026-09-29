@@ -17,6 +17,59 @@ The GitHub codebase `Kydosdigital/themis-family` is connected. Read it as produc
 
 Do not treat the current SwiftUI prototype as the design authority. It is a disposable frontend foundation/mock. The approved requirements and MOBILE_UX_BLUEPRINT are the source of truth.
 
+## Build the design in passes, not one giant generation
+
+This is one design project, but do not attempt to render every screen/state in one generation.
+
+Work in this order and keep the same screen IDs/components throughout:
+
+**Pass 1 — Architecture and low-fi**
+- information architecture
+- navigation
+- complete screen map
+- first-time setup flow
+- Deadline Lock core loop
+- requests/Free Pass/protection/subscription journey maps
+- low-fidelity wireframes for all primary screens
+
+STOP and present the architecture/wireframes for review before polishing everything.
+
+**Pass 2 — Visual direction**
+- create 2–3 visual explorations for P-002, P-023 and C-001
+- compare them
+- recommend one direction
+- apply founder feedback
+- lock the design system
+
+**Pass 3 — High-fidelity core journeys**
+- onboarding
+- Parent Home
+- Child and Teen Home
+- rules
+- tasks
+- approvals
+- requests
+- Free Pass
+- school/essential access
+
+**Pass 4 — States and supporting areas**
+- protection states and recovery
+- reporting
+- subscription
+- settings
+- loading/error/offline/empty states
+- iPad adaptations
+- accessibility stress tests
+
+**Pass 5 — Prototype QA and handoff**
+- connect all critical prototype paths
+- run your UX/accessibility critique
+- fix inconsistencies
+- prepare handoff to Claude Code
+
+Do not renumber frames between passes.
+
+
 ## Your role
 
 Act as a senior iOS product designer, UX architect, interaction designer and design-system lead.

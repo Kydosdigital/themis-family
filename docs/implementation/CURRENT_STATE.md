@@ -1,60 +1,45 @@
 # Themis Family Implementation State
 
 Status: IDLE
-Mode: FOUNDATION
+Mode: DESIGN_REVIEW
 Commit required: NO
-Current objective: Validate the mock-driven SwiftUI frontend in Xcode on macOS, then continue with the next bounded frontend slice while the dedicated Supabase project is provisioned separately.
-Active slice: None
-Requirement refs: docs/14_PARENT_EXPERIENCE.md; docs/15_CHILD_AND_TEEN_EXPERIENCE.md; docs/07_NON_FUNCTIONAL_REQUIREMENTS.md; docs/37_BUILD_SEQUENCE.md; docs/38_DEFINITION_OF_DONE.md
-Allowed scope: Foundation engineering, mock-driven frontend, Supabase backend foundation, and technical-spike harnesses. Production Apple enforcement remains gated.
-Last verification: GitHub Actions run 36529764176 passed on frontend commit 1607c59df58e21df306c0f64d8529dd6361275b0. Static workflow checks passed. SwiftUI compile/runtime verification still requires macOS/Xcode and is now wired into scripts/verify.sh for the first local Claude Code run.
-Last commit: Frontend foundation commit 1607c59df58e21df306c0f64d8529dd6361275b0; current HEAD will include implementation-log/verification wiring follow-up.
-Next action: Pull main on the Mac, install/use XcodeGen, run bash scripts/verify.sh, fix any compiler issue, then review Parent Home / Child Home in the simulator before the next UI slice.
+Current objective: Design and approve the complete native-mobile UX/UI journey in Claude Design before continuing production feature UI implementation.
+Active slice: Mobile UX/UI design approval
+Requirement refs: docs/04_USER_JOURNEYS.md; docs/14_PARENT_EXPERIENCE.md; docs/15_CHILD_AND_TEEN_EXPERIENCE.md; docs/21_NOTIFICATIONS.md; docs/23_PRIVACY_AND_CHILD_SAFETY.md; docs/36_MVP_VS_LATER_FEATURE_MATRIX.md
+Allowed scope: Design exploration, mobile information architecture, prototype review, foundation tooling and mock data. Do not continue production feature-screen implementation until the design gate is approved.
+Last verification: Mobile UX blueprint and Claude Design master prompt committed. Existing SwiftUI work remains a disposable/mock-driven foundation, not the UI design authority.
+Last commit: Design-workflow baseline will be the current Git HEAD after this update.
+Next action: Open Claude Design with the connected Kydosdigital/themis-family codebase, choose Mobile app design, use docs/implementation/CLAUDE_DESIGN_MASTER_PROMPT.md, and complete Pass 1 architecture/low-fi for founder review.
+
+## Design source of truth
+
+Before design approval:
+- approved product requirements remain authoritative for behaviour
+- MOBILE_UX_BLUEPRINT.md defines design coverage and screen IDs
+- Claude Design artifact is exploratory
+
+After founder design approval:
+- approved Claude Design frames become the visual/interaction source of truth
+- implementation tickets reference screen IDs and requirement IDs
+- Claude Code should not improvise approved layouts without raising a design constraint
 
 ## Current readiness
 
 - Specification ready: YES
+- Mobile UX architecture approved: NO
+- High-fidelity design approved: NO
 - Foundation engineering ready: YES
 - Production enforcement ready: NO
 - Public launch ready: NO
 
-## Frontend foundation
+## Existing frontend code
 
-Implemented in source:
-- SwiftUI application shell
-- XcodeGen project specification
-- semantic Themis design tokens and reusable components
-- parent/child domain models
-- repository protocols
-- deterministic mock repositories
-- Parent Home
-- Child/Teen Home
-- child transparency view
-- developer scenario switcher
-- mock-state unit tests
+The current SwiftUI shell, mock repositories and demo screens are retained as useful foundation/prototype code.
 
-Verification status:
-- GitHub/static workflow: PASS
-- Xcode compile/simulator: PENDING LOCAL MAC VALIDATION
-
-## Backend foundation
-
-- Backend platform: Supabase (IMP-002)
-- Project MCP: committed, project-scoped via SUPABASE_PROJECT_REF
-- Database rules: committed
-- Migration/function folders: committed
-- Supabase project: NOT YET PROVISIONED
+They must not constrain the design. If the approved Claude Design artifact differs, production SwiftUI should follow the approved design rather than preserve the existing mock layout.
 
 ## Production enforcement blockers
 
 - Family Controls production entitlement approval has not yet been evidenced in the project record.
-- Real-device spike programme Priorities 1-8 has not yet been completed and incorporated.
+- Real-device spike programme remains outstanding.
 - OQ-19, OQ-30, OQ-32, OQ-34 and OQ-40 remain spike-dependent.
-
-## Launch blockers
-
-- Lawful Basis Matrix, DPIA and legal review
-- safeguarding launch process
-- accessibility audit
-- App Store/Kids Category readiness
-- implementation/test completion
