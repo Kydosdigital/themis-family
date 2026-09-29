@@ -1,0 +1,17 @@
+# Local Claude Code state
+.claude/settings.local.json
+.claude/runtime/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# OS/editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# Python hook bytecode
+__pycache__/
+*.pyc
