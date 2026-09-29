@@ -1,16 +1,18 @@
 # Themis Family Implementation State
 
-Status: READY
+Status: BLOCKED
 Mode: UI_IMPLEMENTATION
-Current objective: Implement UI-02 Parent Home from the approved P-023 design and states.
-Active slice: UI-02 Parent Home — READY
+Current objective: Verify UI-02 Parent Home (P-023 and its approved states) on GitHub macOS CI and in visual review.
+Active slice: UI-02 Parent Home — source complete on branch feat/ui-02-parent-home; blocked on macOS CI and Simulator visual comparison
 Allowed scope: P-023 Parent Home and approved Parent Home states, Parent Home-specific presentation components, mock/display-state extensions, tests, previews/review harness, and verification. Do not begin UI-03.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI02_PARENT_HOME_PROMPT.md
 Last verification: UI-01 Design System Foundation merged through PR #6. The SwiftUI app compiled successfully with Xcode on GitHub macOS CI and unit tests passed. Representative screenshot QA is carried into UI-02 because the implementation session is web-only. Production Apple enforcement remains spike-gated.
-Next action: Give Claude Code docs/implementation/CLAUDE_CODE_UI02_PARENT_HOME_PROMPT.md and implement UI-02 on a focused branch. Stop after P-023 and its approved states for review.
+UI-02 web-session verification: all Swift files pass a tree-sitter syntax parse and `scripts/validate_claude_workflow.py` passes. This is not a SwiftUI compile. No Xcode, unit-test run or Simulator render happened in the web session.
+Blocked on: (1) GitHub macOS CI (`ios-ci.yml`) building the app and running the unit tests, including the new `ParentHomeTests`; (2) Simulator/preview comparison of the P-023 review previews against the approved frames at default and accessibility text sizes.
+Next action: Let macOS CI run on the UI-02 PR and fix any compile or test failure. Compare the `ParentHomeView.swift` previews with the approved P-023 frames. Then merge UI-02 and queue UI-03 Child + Teen Home. Do not start UI-03 before UI-02 review.
 
 ## Current readiness
 
@@ -53,6 +55,8 @@ UI-02 Parent Home:
 - deterministic previews/review states
 - Parent Home presentation/state tests
 - GitHub macOS CI verification
+
+Source status (web session): all items above implemented except GitHub macOS CI verification, which runs on the PR. See BUILD_LOG "UI-02 Parent Home" and IMP-UI-002.
 
 Stop after UI-02.
 

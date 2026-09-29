@@ -76,6 +76,9 @@ struct ThemisGroupedSection<Data: RandomAccessCollection, RowContent: View>: Vie
 
 /// Standard row inside a grouped section: optional avatar, title, subtitle, trailing
 /// status or value, and a disclosure chevron when it navigates.
+///
+/// At accessibility text sizes the status or value moves under the subtitle, so a
+/// long status such as "Protection unavailable" is never squeezed or clipped.
 struct ThemisRow: View {
     let title: String
     var subtitle: String? = nil
@@ -86,9 +89,11 @@ struct ThemisRow: View {
     var showsChevron: Bool = false
 
     @Environment(\.themisAudience) private var audience
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack(spacing: ThemisSpacing.inline12) {
+        let stacked = dynamicTypeSize.isAccessibilitySize
+        HStack(alignment: stacked ? .top : .center, spacing: ThemisSpacing.inline12) {
             if let avatar {
                 AvatarTile(initial: avatar.initial, tone: avatar.tone)
             }
@@ -96,27 +101,28 @@ struct ThemisRow: View {
                 Text(title)
                     .themisFont(.rowTitle)
                     .foregroundStyle(isLink ? ThemisColor.brandPrimary : ThemisColor.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let subtitle {
                     Text(subtitle)
                         .themisFont(.meta)
                         .foregroundStyle(ThemisColor.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if stacked {
+                    trailing(stacked: true)
+                        .padding(.top, 6)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if let status {
-                StatusBadge(status)
-            }
-            if let value {
-                Text(value)
-                    .themisFont(.secondary)
-                    .foregroundStyle(ThemisColor.textSecondary)
-                    .multilineTextAlignment(.trailing)
+            if !stacked {
+                trailing(stacked: false)
             }
             if showsChevron {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(ThemisColor.chevron)
                     .accessibilityHidden(true)
+                    .padding(.top, stacked ? 4 : 0)
             }
         }
         .padding(.vertical, ThemisSpacing.rowVertical)
@@ -125,14 +131,41 @@ struct ThemisRow: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
+
+    @ViewBuilder
+    private func trailing(stacked: Bool) -> some View {
+        if let status {
+            StatusBadge(status)
+        }
+        if let value {
+            Text(value)
+                .themisFont(.secondary)
+                .foregroundStyle(ThemisColor.textSecondary)
+                .multilineTextAlignment(stacked ? .leading : .trailing)
+        }
+    }
 }
 
-/// Initial on a tinted tile (avatars use `radius.sm`).
+/// Initial on a tinted tile (avatars use `radius.sm`). `.regular` 38 pt in rows,
+/// `.large` 40 pt at the head of a card.
 struct AvatarTile: View {
+    enum Size {
+        case regular
+        case large
+    }
+
     let initial: String
     let tone: ThemisTone
+    @ScaledMetric private var side: CGFloat
 
-    @ScaledMetric(relativeTo: .headline) private var side: CGFloat = ThemisSize.avatar
+    init(initial: String, tone: ThemisTone, size: Size = .regular) {
+        self.initial = initial
+        self.tone = tone
+        _side = ScaledMetric(
+            wrappedValue: size == .large ? ThemisSize.avatarLarge : ThemisSize.avatar,
+            relativeTo: .headline
+        )
+    }
 
     var body: some View {
         Text(initial)

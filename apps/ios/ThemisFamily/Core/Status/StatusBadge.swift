@@ -55,6 +55,7 @@ struct StatusBadge: View {
     var accessibilityContext: String? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .footnote) private var glyphChip: CGFloat = 22
     @ScaledMetric(relativeTo: .footnote) private var glyphCompact: CGFloat = 21
 
@@ -76,8 +77,10 @@ struct StatusBadge: View {
             Text(status.label)
                 .themisFont(.caption)
                 .foregroundStyle(ThemisColor.textPrimary)
-                .lineLimit(1)
-                .fixedSize(horizontal: true, vertical: false)
+                // Short labels never wrap ("Needs / you"). At accessibility sizes a long
+                // label may wrap instead of running past the edge and being clipped.
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: dynamicTypeSize.isAccessibilitySize)
         }
         .padding(.leading, size == .chip ? 4 : 3)
         .padding(.trailing, size == .chip ? 12 : 10)

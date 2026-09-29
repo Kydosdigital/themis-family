@@ -1,9 +1,12 @@
 import SwiftUI
 
+/// P-023 Parent Home. Loads its state from the repository and renders
+/// `ParentHomeContentView`, which previews and review states use directly.
 struct ParentHomeView: View {
     let scenario: DemoScenario
 
     @StateObject private var viewModel: ParentHomeViewModel
+    @State private var destination: ParentHomeRoute?
 
     init(repository: any ParentDashboardRepository, scenario: DemoScenario) {
         self.scenario = scenario
@@ -11,198 +14,206 @@ struct ParentHomeView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: ThemisSpacing.lg) {
-                if let dashboard = viewModel.dashboard {
-                    header(dashboard)
-
-                    if let subscriptionBanner = dashboard.subscriptionBanner {
-                        subscriptionBannerView(subscriptionBanner)
+        Group {
+            if let state = viewModel.state {
+                ParentHomeContentView(state: state, open: open)
+            } else if let errorMessage = viewModel.errorMessage {
+                ScrollView {
+                    ErrorStateView(title: errorMessage) {
+                        Task { await viewModel.load(scenario: scenario) }
                     }
-
-                    if dashboard.children.isEmpty {
-                        emptyFamily
-                    } else {
-                        childrenSection(dashboard.children)
-                    }
-
-                    pendingSection(dashboard.pendingRequests)
-
-                    ThemisSectionHeader(
-                        title: "Quick actions",
-                        subtitle: "Keep the family agreement clear and easy to adjust."
-                    )
-
-                    HStack(spacing: ThemisSpacing.sm) {
-                        quickAction("Add rule", icon: "plus.circle.fill")
-                        quickAction("Free Pass", icon: "ticket.fill")
-                    }
-                } else if viewModel.isLoading {
-                    ProgressView("Loading your family…")
-                        .frame(maxWidth: .infinity, minHeight: 240)
-                } else if let errorMessage = viewModel.errorMessage {
-                    ContentUnavailableView(
-                        "Couldn’t load family",
-                        systemImage: "wifi.exclamationmark",
-                        description: Text(errorMessage)
-                    )
+                    .padding(ThemisSpacing.screen)
                 }
+                .themisGround(.grouped)
+            } else {
+                LoadingStateView(label: "Loading your family")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .themisGround(.grouped)
             }
-            .padding(ThemisSpacing.md)
         }
-        .background(ThemisColor.surfaceMuted)
-        .navigationTitle("Home")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $destination) { route in
+            ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
+        }
         .task(id: scenario) {
             await viewModel.load(scenario: scenario)
         }
-        .refreshable {
-            await viewModel.load(scenario: scenario)
-        }
     }
 
-    private func header(_ dashboard: ParentDashboardData) -> some View {
-        VStack(alignment: .leading, spacing: ThemisSpacing.xs) {
-            Text("Good morning, \(dashboard.ownerName)")
-                .font(ThemisTypography.hero)
-                .foregroundStyle(ThemisColor.textPrimary)
-            Text("Here’s how your family’s digital agreement is looking.")
-                .font(ThemisTypography.body)
-                .foregroundStyle(ThemisColor.textSecondary)
-        }
-    }
-
-    private func subscriptionBannerView(_ message: String) -> some View {
-        ThemisCard {
-            HStack(alignment: .top, spacing: ThemisSpacing.sm) {
-                Image(systemName: "creditcard.trianglebadge.exclamationmark")
-                    .foregroundStyle(ThemisColor.attention)
-                Text(message)
-                    .font(ThemisTypography.body)
-                    .foregroundStyle(ThemisColor.textPrimary)
-            }
-        }
-    }
-
-    private func childrenSection(_ children: [ChildProfile]) -> some View {
-        VStack(alignment: .leading, spacing: ThemisSpacing.sm) {
-            ThemisSectionHeader(title: "Your family")
-
-            ForEach(children) { child in
-                ChildSummaryCard(child: child)
-            }
-        }
-    }
-
-    private func pendingSection(_ requests: [AccessRequest]) -> some View {
-        VStack(alignment: .leading, spacing: ThemisSpacing.sm) {
-            ThemisSectionHeader(
-                title: "Needs your attention",
-                subtitle: requests.isEmpty ? "Nothing waiting right now." : "Requests are waiting for a decision."
-            )
-
-            if requests.isEmpty {
-                ThemisCard {
-                    Label("You’re all caught up.", systemImage: "checkmark.circle.fill")
-                        .font(ThemisTypography.bodyStrong)
-                        .foregroundStyle(ThemisColor.textPrimary)
-                }
-            } else {
-                ForEach(requests) { request in
-                    ThemisCard {
-                        VStack(alignment: .leading, spacing: ThemisSpacing.sm) {
-                            Text("\(request.childName) sent a request")
-                                .font(ThemisTypography.bodyStrong)
-                            Text(request.summary)
-                                .font(ThemisTypography.body)
-                                .foregroundStyle(ThemisColor.textSecondary)
-                            Text(request.requestedDuration)
-                                .font(ThemisTypography.caption)
-                                .foregroundStyle(ThemisColor.textSecondary)
-
-                            HStack {
-                                Button("Decline") {}
-                                    .buttonStyle(.bordered)
-                                Button("Review") {}
-                                    .buttonStyle(.borderedProminent)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private var emptyFamily: some View {
-        ThemisCard {
-            VStack(alignment: .leading, spacing: ThemisSpacing.md) {
-                Image(systemName: "person.2.badge.plus")
-                    .font(.title)
-                    .foregroundStyle(ThemisColor.actionPrimary)
-                Text("Add your first child")
-                    .font(ThemisTypography.section)
-                Text("Create a child profile, pair their device, then set the first family rule.")
-                    .font(ThemisTypography.body)
-                    .foregroundStyle(ThemisColor.textSecondary)
-                ThemisButton(title: "Add child", systemImage: "plus") {}
-            }
-        }
-    }
-
-    private func quickAction(_ title: String, icon: String) -> some View {
-        ThemisCard {
-            VStack(alignment: .leading, spacing: ThemisSpacing.sm) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundStyle(ThemisColor.actionPrimary)
-                Text(title)
-                    .font(ThemisTypography.bodyStrong)
-            }
-        }
+    private func open(_ route: ParentHomeRoute) {
+        destination = route
     }
 }
 
-private struct ChildSummaryCard: View {
-    let child: ChildProfile
+/// The P-023 layout for a given state. No loading, no repository: deterministic
+/// for previews and review.
+///
+/// Fixed scan order: Needs You, children and protection, current agreements,
+/// quick actions. The quick-action dock floats above the tab bar at standard sizes
+/// and moves inline at accessibility text sizes and on iPad, so it never covers content.
+struct ParentHomeContentView: View {
+    let state: ParentHomeState
+    var open: (ParentHomeRoute) -> Void = { _ in }
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var dockIsInline: Bool {
+        dynamicTypeSize.isAccessibilitySize || horizontalSizeClass == .regular
+    }
 
     var body: some View {
-        ThemisCard {
-            VStack(alignment: .leading, spacing: ThemisSpacing.md) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: ThemisSpacing.xs) {
-                        Text(child.firstName)
-                            .font(ThemisTypography.section)
-                            .foregroundStyle(ThemisColor.textPrimary)
-                        Text(child.experienceSegment.rawValue + " experience")
-                            .font(ThemisTypography.caption)
-                            .foregroundStyle(ThemisColor.textSecondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: ThemisSpacing.block) {
+                PageHeader(title: state.parentName, subtitle: state.greeting) {
+                    BellButton(count: state.actionCentreCount) {
+                        open(.actionCentre)
                     }
-                    Spacer()
-                    ProtectionStatusBadge(status: child.protectionStatus)
                 }
 
-                HStack(spacing: ThemisSpacing.lg) {
-                    metric("\(child.activeRuleCount)", label: "Active rules")
-                    metric("\(child.pendingActionCount)", label: "Pending")
+                ForEach(state.sections, id: \.self) { section in
+                    sectionView(section)
                 }
+            }
+            .padding(.horizontal, horizontalSizeClass == .regular ? ThemisSpacing.screenPad : ThemisSpacing.screen)
+            .padding(.bottom, dockIsInline ? 40 : ThemisSpacing.block)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !dockIsInline {
+                QuickActionDock(actions: state.quickActions, placement: .floating, perform: perform)
+            }
+        }
+        .themisAudience(.parent)
+        .themisGround(.grouped)
+        .toolbar(navigationBarVisibility, for: .navigationBar)
+    }
 
-                if let lastVerified = child.lastVerified {
-                    Text("Last verified \(lastVerified.formatted(.relative(presentation: .named)))")
-                        .font(ThemisTypography.caption)
-                        .foregroundStyle(ThemisColor.textSecondary)
+    @ViewBuilder
+    private func sectionView(_ section: ParentHomeSection) -> some View {
+        switch section {
+        case .attention:
+            attention
+        case .children:
+            ThemisGroupedSection("Children", data: state.children) { child in
+                rowButton(destination: child.destination) {
+                    ChildStatusRow(child: child)
                 }
+            }
+        case .agreements:
+            ThemisGroupedSection("Agreements", data: state.agreements) { agreement in
+                rowButton(destination: agreement.destination) {
+                    ThemisRow(title: agreement.title, subtitle: agreement.detail, showsChevron: true)
+                }
+            }
+        case .quickActions:
+            if dockIsInline {
+                QuickActionDock(actions: state.quickActions, placement: .inline, perform: perform)
             }
         }
     }
 
-    private func metric(_ value: String, label: String) -> some View {
-        VStack(alignment: .leading, spacing: ThemisSpacing.xs) {
-            Text(value)
-                .font(ThemisTypography.title)
-                .foregroundStyle(ThemisColor.textPrimary)
-            Text(label)
-                .font(ThemisTypography.caption)
-                .foregroundStyle(ThemisColor.textSecondary)
+    @ViewBuilder
+    private var attention: some View {
+        switch state.attention {
+        case let .needsYou(content):
+            NeedsYouCard(content: content, open: open)
+        case let .setupIncomplete(content), let .protectionProblem(content):
+            HomeActionCard(content: content, open: open)
+        case .nothingPending:
+            InlineBanner(.success, "Nothing needs you right now")
+        case .noChildren:
+            // Not a drawn P-023 state. Onboarding (P-004 onwards) owns adding a child.
+            EmptyStateView(
+                title: "Add your first child",
+                message: "Create a child profile, pair their device, then set the first family rule.",
+                systemImage: "person.2"
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func rowButton<RowLabel: View>(destination: ParentHomeRoute?, @ViewBuilder label: () -> RowLabel) -> some View {
+        if let destination {
+            Button { open(destination) } label: { label() }
+                .buttonStyle(.plain)
+        } else {
+            label()
+        }
+    }
+
+    private func perform(_ action: ParentQuickAction) {
+        open(action.destination)
+    }
+
+    /// The page header replaces the navigation bar on this tab root. Debug builds keep
+    /// the bar so the demo scenario control stays reachable; review screenshots use the
+    /// previews below, which match Release.
+    private var navigationBarVisibility: Visibility {
+        #if DEBUG
+        return .automatic
+        #else
+        return .hidden
+        #endif
+    }
+}
+
+// MARK: - Review states (deterministic)
+
+#Preview("P-023 · Needs you") {
+    NavigationStack {
+        ParentHomeContentView(state: ParentHomeDemoData.canonical())
+            .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+#Preview("P-023 · Clear") {
+    NavigationStack {
+        ParentHomeContentView(state: ParentHomeDemoData.nothingPending)
+            .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+#Preview("P-023 · Setup incomplete") {
+    NavigationStack {
+        ParentHomeContentView(state: ParentHomeDemoData.setupIncomplete)
+            .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+#Preview("P-023 · Protection problem") {
+    NavigationStack {
+        ParentHomeContentView(state: ParentHomeDemoData.protectionProblem)
+            .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+#Preview("P-023 · Needs you · AX3") {
+    NavigationStack {
+        ParentHomeContentView(state: ParentHomeDemoData.canonical())
+            .toolbar(.hidden, for: .navigationBar)
+    }
+    .environment(\.dynamicTypeSize, .accessibility3)
+}
+
+#Preview("P-023 · Protection unavailable · AX5") {
+    NavigationStack {
+        ParentHomeContentView(
+            state: ParentHomeDemoData.canonical(
+                samProtection: .protectionUnavailable,
+                samEvidence: .noticed(minutesAgo: 10)
+            )
+        )
+        .toolbar(.hidden, for: .navigationBar)
+    }
+    .environment(\.dynamicTypeSize, .accessibility5)
+}
+
+#Preview("P-023 · In tab shell") {
+    ParentTabShell(selection: .constant(.home)) { tab in
+        if tab == .home {
+            ParentHomeContentView(state: ParentHomeDemoData.canonical())
+                .toolbar(.hidden, for: .navigationBar)
+        } else {
+            ShellPlaceholderView(title: tab.title, screenID: tab.rootScreenID)
         }
     }
 }
