@@ -1,16 +1,16 @@
 # Themis Family Implementation State
 
-Status: READY
+Status: IN_PROGRESS
 Mode: UI_IMPLEMENTATION
-Current objective: Begin approved native SwiftUI UI implementation from the final Claude Design handoff.
+Current objective: Verify and merge UI-01 Design System Foundation before starting UI-02 Parent Home.
 Active slice: UI-01 Design System Foundation
-Allowed scope: semantic design tokens, typography API, reusable primitives, shared status system, Parent/Child/Teen navigation shell, tests and local Xcode verification. Continue later in small slices following the approved handoff order.
+Allowed scope: semantic design tokens, typography API, reusable primitives, shared status system, Parent/Child/Teen navigation shell, tests and macOS CI verification. Continue later in small slices following the approved handoff order.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md
-Last verification: Pass 5 final prototype, Design System and Engineering Handoff reviewed and approved. Production Apple enforcement remains spike-gated.
-Next action: Hand docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md to Claude Code and execute UI-01 locally on macOS/Xcode.
+Last verification: Claude Code implemented UI-01 on branch feat/ui-01-design-system-foundation and draft PR #6 is open. A real Xcode build passed in GitHub macOS CI. Unit tests are being rerun after fixing the test-host executable-name mismatch. Production Apple enforcement remains spike-gated.
+Next action: Wait for the current macOS CI build/tests, perform visual comparison against the approved Design System, then merge PR #6 before starting UI-02.
 
 ## Current readiness
 
@@ -20,7 +20,7 @@ Next action: Hand docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md to
 - Design System: APPROVED
 - Final prototype: APPROVED
 - Engineering Handoff: APPROVED
-- SwiftUI UI implementation: READY
+- SwiftUI UI implementation: IN PROGRESS
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
@@ -33,7 +33,8 @@ UI-01 Design System Foundation:
 - status system
 - navigation shell
 - tests
-- local Xcode verification
+- macOS GitHub Actions build/test verification
+- visual comparison against approved Design System
 
 Do not attempt all 216 screens in one context.
 
@@ -55,3 +56,12 @@ Remain unresolved:
 Household deletion UI may be implemented, but production billing side-effects must not be finalised until the requirements explicitly distinguish:
 1. Themis household/internal entitlement termination
 2. App Store subscription auto-renewal management
+
+## Progress tracking
+
+Human-readable progress and cross-chat handoff live in Airtable:
+- Base: Themis Family Product Tracker
+- Interface: Themis Control Centre
+- Tracker guide: docs/implementation/AIRTABLE_TRACKER.md
+
+Airtable is not a replacement for the approved requirements or GitHub implementation state.
