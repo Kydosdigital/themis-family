@@ -104,7 +104,7 @@ Source: Themis Final Prototype frames P-023, P-023 · Clear, P-023 · Setup inco
 2. **Grace fill.** The `GraceBar` fill is the share of the 30-minute Provisional Approval Grace Period already used (DEC-40, BR-207). 18 min remaining = 40%, matching the frame.
 3. **Protection evidence.** Every child row carries `ProtectionEvidence` ("Verified 2 min ago", "Noticed 10 min ago", "Protection not active yet"). The repository chooses the status; no staleness threshold (OQ-19) is encoded in the UI.
 4. **Degraded protection scenarios.** The design draws a Home card only for Needs Attention (P-023 · Protection problem). For the Sync pending, Device offline and Protection unavailable demo scenarios, Parent Home shows the honest status and evidence on the child row and keeps the canonical Needs You card. No Home card copy was invented for them.
-5. **Dock placement.** The floating dock uses `safeAreaInset(edge: .bottom)`, so scroll content always ends above it and is never covered. It moves inline (after Agreements) at accessibility text sizes and at regular horizontal size class (iPad), per the component inventory ("inline at accessibility sizes and on iPad").
+5. **Dock placement.** The floating dock uses `safeAreaInset(edge: .bottom)`, so scroll content always ends above it and is never covered. It moves inline (after Agreements) at accessibility text sizes and at regular horizontal size class (iPad), per the component inventory ("inline at accessibility sizes and on iPad"). The inline variant shows the approved `QUICK ACTIONS` section label.
 6. **Debug navigation bar.** The page header replaces the navigation bar on this tab root. Debug builds keep the bar so the demo scenario control is reachable. Visual review uses the deterministic `#Preview`s, which hide the bar as Release does.
 7. **Type-role mapping.** Two prototype sizes sit between approved roles: the grace value (22 pt heavy) uses `headline` + heavy, and card body copy (14 pt) uses `secondary` (15 pt). Card titles (17 pt bold) use the `button` role, which has exactly those metrics.
 8. **No children.** Not a drawn P-023 state. It shows an empty state with the scaffold's existing copy until onboarding (P-004 onwards) is built.
@@ -112,7 +112,7 @@ Source: Themis Final Prototype frames P-023, P-023 · Clear, P-023 · Setup inco
 
 Shared UI-01 corrections made for P-023 (recorded in BUILD_LOG):
 - `ThemisRow` moves its status or value under the subtitle at accessibility sizes, so long statuses are not squeezed or clipped.
-- `StatusBadge` keeps labels on one line at standard sizes but lets them wrap at accessibility sizes instead of overflowing.
+- `StatusBadge` keeps labels on one line at every size, matching the approved accessibility rule. `ThemisRow` moves the whole chip below the text at accessibility sizes so long labels remain intact without squeezing the row.
 - `AvatarTile` gains a 40 pt `.large` size for card heads (prototype 2.5em).
 - New tokens from the prototype: `ThemisColor.dockSecondary` (#F0F2F5), `ThemisRadius.dockButton` (16 pt), `ThemisSize.avatarLarge` (40 pt).
 - `ShellPlaceholderView` supports being pushed (keeps the navigation bar and Back).
