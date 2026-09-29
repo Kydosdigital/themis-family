@@ -76,6 +76,9 @@ struct StatusBadge: View {
             Text(status.label)
                 .themisFont(.caption)
                 .foregroundStyle(ThemisColor.textPrimary)
+                // Approved accessibility rule: status chips never wrap.
+                // Parent Home rows move the whole chip under the text at accessibility sizes
+                // so the label can remain intact without squeezing adjacent content.
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
         }

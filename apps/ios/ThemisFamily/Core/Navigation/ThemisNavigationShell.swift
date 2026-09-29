@@ -109,19 +109,24 @@ struct ChildTabShell<Content: View>: View {
     }
 }
 
-/// Tab root for a destination whose screens are built in a later slice.
-/// Uses the approved header and ground so the shell can be reviewed now;
-/// it deliberately shows no invented layout.
+/// A destination whose screens are built in a later slice. Uses the approved header and
+/// ground so the shell can be reviewed now; it deliberately shows no invented layout.
+///
+/// As a tab root it hides the navigation bar like other tab roots. Pushed, it keeps the
+/// native bar so Back works.
 struct ShellPlaceholderView: View {
     let title: String
     let screenID: String
+    var isTabRoot: Bool = true
 
     @Environment(\.themisAudience) private var audience
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
-                PageHeader(title: title)
+                if isTabRoot {
+                    PageHeader(title: title)
+                }
                 EmptyStateView(
                     title: "\(title) isn’t built yet",
                     message: "Screen \(screenID) is built in a later slice.",
@@ -130,7 +135,9 @@ struct ShellPlaceholderView: View {
             }
             .padding(.horizontal, ThemisSpacing.screen)
         }
-        .themisGround(audience.homeGround)
-        .toolbar(.hidden, for: .navigationBar)
+        .themisGround(isTabRoot ? audience.homeGround : .plain)
+        .navigationTitle(isTabRoot ? "" : title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(isTabRoot ? .hidden : .automatic, for: .navigationBar)
     }
 }

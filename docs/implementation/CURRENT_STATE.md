@@ -1,16 +1,17 @@
 # Themis Family Implementation State
 
-Status: READY
+Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: Implement UI-02 Parent Home from the approved P-023 design and states.
-Active slice: UI-02 Parent Home — READY
+Current objective: UI-02 Parent Home is verified and ready to merge. Next slice is UI-03 Child + Teen Home.
+Active slice: UI-02 Parent Home — COMPLETE
 Allowed scope: P-023 Parent Home and approved Parent Home states, Parent Home-specific presentation components, mock/display-state extensions, tests, previews/review harness, and verification. Do not begin UI-03.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI02_PARENT_HOME_PROMPT.md
 Last verification: UI-01 Design System Foundation merged through PR #6. The SwiftUI app compiled successfully with Xcode on GitHub macOS CI and unit tests passed. Representative screenshot QA is carried into UI-02 because the implementation session is web-only. Production Apple enforcement remains spike-gated.
-Next action: Give Claude Code docs/implementation/CLAUDE_CODE_UI02_PARENT_HOME_PROMPT.md and implement UI-02 on a focused branch. Stop after P-023 and its approved states for review.
+UI-02 verification: the SwiftUI source through commit 905f13ff94fa575216893bf8212c3f88031fc532 passed a real macOS/Xcode build and unit-test run, including ParentHomeTests. Claude workflow checks passed. A release Simulator screenshot of canonical P-023 was captured and compared with the approved final prototype. The hierarchy, grouped grey ground, elevated Needs You card, child status rows, Agreements and floating quick-action dock match the approved direction. During review, StatusBadge was corrected to keep chips single-line at accessibility sizes, and inline quick actions gained the approved QUICK ACTIONS label.
+Next action: Merge PR #7, then start UI-03 Child + Teen Home. Do not begin UI-04.
 
 ## Current readiness
 
@@ -53,6 +54,8 @@ UI-02 Parent Home:
 - deterministic previews/review states
 - Parent Home presentation/state tests
 - GitHub macOS CI verification
+
+Source and verification status: COMPLETE. See BUILD_LOG "UI-02 Parent Home" and IMP-UI-002.
 
 Stop after UI-02.
 

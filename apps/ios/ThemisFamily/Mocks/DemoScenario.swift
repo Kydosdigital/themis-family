@@ -2,6 +2,9 @@ import Foundation
 
 enum DemoScenario: String, CaseIterable, Identifiable, Sendable {
     case normal = "Normal"
+    case nothingPending = "Nothing pending"
+    case setupIncomplete = "Setup incomplete"
+    case protectionProblem = "Protection problem"
     case homeworkOverdue = "Homework overdue"
     case waitingApproval = "Waiting for approval"
     case approvalGrace = "Approval grace"

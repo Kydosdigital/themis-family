@@ -4,6 +4,10 @@ struct MockParentDashboardRepository: ParentDashboardRepository {
     func dashboard(for scenario: DemoScenario) async throws -> ParentDashboardData {
         DemoData.dashboard(for: scenario)
     }
+
+    func parentHome(for scenario: DemoScenario) async throws -> ParentHomeState {
+        ParentHomeDemoData.state(for: scenario)
+    }
 }
 
 struct MockChildHomeRepository: ChildHomeRepository {

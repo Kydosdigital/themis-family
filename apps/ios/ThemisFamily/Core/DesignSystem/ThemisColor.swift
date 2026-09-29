@@ -52,6 +52,8 @@ enum ThemisColor {
     static let tabInactive = Color(hex: 0x6B7486)
     /// `color.scrim` · custom sheet scrim. Prefer the system sheet.
     static let scrim = Color(hex: 0x0F1B33, opacity: 0.32)
+    /// Secondary button inside the floating quick-action dock (prototype `dock`).
+    static let dockSecondary = Color(hex: 0xF0F2F5)
     /// Segmented control track and disabled button fill.
     static let controlTrack = Color(hex: 0xE9ECF0)
 

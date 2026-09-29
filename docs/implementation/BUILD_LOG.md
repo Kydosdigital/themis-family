@@ -112,3 +112,44 @@ Verification:
 - NOT run: Xcode build, XCTest, Simulator screenshots. This session ran on Linux without a Swift toolchain. UI-01 must not be marked complete until these pass on macOS.
 
 Not changed: frozen requirements, product behaviour, Apple enforcement gates, backend wiring.
+
+## 2026-09-29: UI-02 Parent Home
+
+Status: COMPLETE; verified on macOS CI and reviewed against the approved P-023 prototype.
+
+Source of truth: Themis Final Prototype frames P-023, P-023 · Clear, P-023 · Setup incomplete, P-023 · Protection problem; Engineering Handoff component inventory; DEC-40 for the grace period.
+
+Work:
+- Replaced the scaffold Parent Home with P-023 in the approved scan order: Needs You, Children, Agreements, quick actions. Header "Good evening" / "Sarah" with the Action Centre bell and count.
+- Added `ParentHomeState` and related display models, `ParentDashboardRepository.parentHome(for:)` and deterministic `ParentHomeDemoData` using the exact frame copy.
+- Added components: `NeedsYouCard` (elevated card, count pill, primary item, `GraceBar`, Review, further items), `GraceBar`, `ChildStatusRow` (status with last-verified evidence, read together by VoiceOver), `HomeActionCard` / `SetupIncompleteCard`, `QuickActionDock` (floating via `safeAreaInset`; inline at accessibility sizes and on iPad).
+- States: canonical Needs You; Nothing pending; Setup incomplete (Sam Not active yet, Maya independently Protected); Protection problem (Sam Needs attention, Noticed 10 min ago). The Sync pending, Device offline and Protection unavailable demo scenarios show the honest status on Sam's row.
+- Added demo scenarios Nothing pending, Setup incomplete and Protection problem. Existing scenarios kept.
+- Taps open screen-ID placeholders for later-slice destinations.
+- Previews: Needs you, Clear, Setup incomplete, Protection problem, Needs you at AX3, Protection unavailable at AX5, and the canonical state inside the Parent tab shell.
+
+Shared UI-01 corrections (see IMP-UI-002):
+- `ThemisRow` stacks status/value under the subtitle at accessibility sizes.
+- `StatusBadge` remains single-line at all sizes, as approved; `ThemisRow` moves the whole status chip under the subtitle at accessibility sizes so long labels are not squeezed.
+- `AvatarTile` gains a 40 pt `.large` size.
+- Tokens added from the prototype: `ThemisColor.dockSecondary`, `ThemisRadius.dockButton`, `ThemisSize.avatarLarge`.
+- `ShellPlaceholderView` can be pushed with a working Back.
+
+Tests: `ParentHomeTests.swift` covers:
+- priority order, the canonical Sam/Maya example and the 18 min / 40% grace
+- quick actions are always Add rule and Free Pass, and last
+- nothing-pending keeps the Children and Agreements sections
+- setup incomplete keeps Maya Protected while Sam is Not active yet
+- protection problem is Needs attention, never Protected
+- degraded scenarios never show Protected, and every Protected child has Verified evidence
+- evidence wording and view-model loading
+
+Verification:
+- Web-session tree-sitter Swift syntax parse: 0 errors across all iOS source and test files.
+- `python3 scripts/validate_claude_workflow.py` passed.
+- GitHub macOS CI: real Xcode build and unit tests passed on source commit `905f13ff94fa575216893bf8212c3f88031fc532`.
+- Release Simulator canonical P-023 screenshot captured through the visual-review workflow and compared with the approved final-prototype frame.
+- Review correction: status chips remain single-line at accessibility sizes; rows move the chip under text instead. Inline quick actions show the approved `QUICK ACTIONS` section label.
+- Full iPad adaptation remains scheduled for UI-14; UI-02 already moves the dock inline at regular horizontal size class.
+
+Not changed: frozen requirements, tab IA, production Supabase, Apple enforcement.

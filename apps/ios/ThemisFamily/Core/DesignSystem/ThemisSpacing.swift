@@ -42,6 +42,8 @@ enum ThemisRadius {
     static let sm: CGFloat = 12
     /// Banners.
     static let banner: CGFloat = 16
+    /// Buttons inside the floating quick-action dock.
+    static let dockButton: CGFloat = 16
     /// Inner notes (consequence note, stacked list inside a panel).
     static let inner: CGFloat = 18
     /// Inputs.
@@ -60,8 +62,10 @@ enum ThemisSize {
     static let inputMinimum: CGFloat = 52
     /// Status header glyph circle.
     static let statusHeaderGlyph: CGFloat = 44
-    /// Avatar tile.
+    /// Avatar tile in rows.
     static let avatar: CGFloat = 38
+    /// Avatar tile at the head of a card (Needs you, action cards).
+    static let avatarLarge: CGFloat = 40
 }
 
 /// Line widths (`border.*`).
