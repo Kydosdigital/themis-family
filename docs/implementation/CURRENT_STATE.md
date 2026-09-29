@@ -9,8 +9,8 @@ Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI_IMPLEMENTATION_PROMPT.md
-Last verification: Claude Code implemented UI-01 on branch feat/ui-01-design-system-foundation and draft PR #6 is open. A real Xcode build passed in GitHub macOS CI. Unit tests are being rerun after fixing the test-host executable-name mismatch. Production Apple enforcement remains spike-gated.
-Next action: Wait for the current macOS CI build/tests, perform visual comparison against the approved Design System, then merge PR #6 before starting UI-02.
+Last verification: Claude Code implemented UI-01 on branch feat/ui-01-design-system-foundation and draft PR #6 is open. GitHub macOS CI now passes the real Xcode build and unit tests, and Claude workflow checks pass. Production Apple enforcement remains spike-gated.
+Next action: Perform the UI-01 visual comparison against the approved Design System at normal and accessibility text sizes. If approved, merge PR #6, then start UI-02 Parent Home.
 
 ## Current readiness
 
