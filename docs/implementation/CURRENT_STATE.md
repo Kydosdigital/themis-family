@@ -2,11 +2,11 @@
 
 Status: IDLE
 Mode: DESIGN_REVIEW
-Current objective: Complete final prototype QA and produce the engineering handoff package.
-Active slice: Claude Design Pass 5
-Allowed scope: final render sanity check, full prototype QA, consistency/accessibility audit, Engineering Handoff board, traceability matrix, spike flags, asset register and implementation sequence. No production SwiftUI or backend implementation yet.
-Last verification: Pass 4 founder amendments reported applied. Pass 4 is approved subject only to the final render sanity check already in progress.
-Next action: Give Claude Design docs/implementation/CLAUDE_DESIGN_PASS5_PROMPT.md and stop after the handoff package.
+Current objective: Review and approve the Claude Design Engineering Handoff board before production UI implementation begins.
+Active slice: Claude Design Pass 5 final handoff review
+Allowed scope: Engineering Handoff board review, traceability cleanup, and requirements clarification for any implementation-blocking inconsistency. No production SwiftUI or backend implementation yet.
+Last verification: Final prototype and final Design System reviewed and approved. Prototype reports 216 screens/states, 28 critical paths, 0 broken links and 0 unreachable screens. Engineering Handoff board has not yet been available in the uploaded review files.
+Next action: Export/upload Themis Engineering Handoff.dc.html (preferably PDF) for final review.
 
 ## Current design status
 
@@ -16,5 +16,10 @@ Next action: Give Claude Design docs/implementation/CLAUDE_DESIGN_PASS5_PROMPT.m
 - Design system: APPROVED
 - High-fidelity core journeys: APPROVED
 - Pass 4 supporting areas: APPROVED
-- Final prototype QA / handoff: PASS 5 OPEN
-- Claude Code production UI implementation: BLOCKED pending founder approval of Pass 5
+- Final prototype: APPROVED
+- Engineering Handoff board: PENDING REVIEW
+- Claude Code production UI implementation: BLOCKED pending handoff approval
+
+## Known implementation clarification
+
+ST-011 household deletion currently needs an explicit requirements clarification separating Themis household/internal entitlement termination from App Store subscription auto-renewal behaviour. Do not silently resolve this during implementation.
