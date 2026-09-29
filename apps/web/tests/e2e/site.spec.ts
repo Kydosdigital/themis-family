@@ -1,0 +1,204 @@
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+const routes = [
+  "/",
+  "/how-it-works",
+  "/for-parents",
+  "/for-children",
+  "/for-teens",
+  "/rules",
+  "/school-access",
+  "/privacy",
+  "/safety",
+  "/features",
+  "/pricing",
+  "/faq",
+  "/about",
+  "/support",
+  "/download",
+  "/waitlist",
+  "/insights",
+  "/insights/a-clearer-homework-agreement",
+  "/insights/room-for-an-exception",
+  "/insights/privacy-is-part-of-the-conversation",
+  "/press",
+  "/legal/privacy-policy",
+  "/legal/terms",
+  "/legal/cookies",
+];
+for (const route of routes)
+  test("page, overflow and accessibility: " + route, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    const response = await page.goto(route);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1")).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    const result = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(
+      result.violations.map((v) => ({
+        id: v.id,
+        nodes: v.nodes.map((n) => n.target),
+      })),
+    ).toEqual([]);
+    expect(errors).toEqual([]);
+    for (const img of await page.locator("img").all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() =>
+          img.evaluate(
+            (el) =>
+              (el as HTMLImageElement).complete &&
+              (el as HTMLImageElement).naturalWidth > 0,
+          ),
+        )
+        .toBe(true);
+    }
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({
+      path:
+        "test-results/screens/" +
+        test.info().project.name +
+        "-" +
+        (route === "/" ? "home" : route.replaceAll("/", "-")) +
+        ".png",
+      fullPage: true,
+    });
+  });
+test("all internal links resolve", async ({ page, request }) => {
+  await page.goto("/");
+  const links = await page
+    .locator('a[href^="/"]')
+    .evaluateAll((els) => [
+      ...new Set(els.map((e) => e.getAttribute("href")!)),
+    ]);
+  for (const link of links)
+    expect((await request.get(link)).status(), link).toBeLessThan(400);
+});
+test("navigation supports keyboard and escape", async ({ page, isMobile }) => {
+  await page.goto("/");
+  if (isMobile) {
+    await page.getByRole("button", { name: "Open navigation" }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Open navigation" }),
+    ).toBeFocused();
+  } else {
+    const product = page.locator(".desktop-nav summary").first();
+    await product.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator(".nav-dropdown").first()).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(product).toBeFocused();
+    await expect(page.locator(".nav-dropdown").first()).not.toBeVisible();
+  }
+});
+test("form validation and production unavailable outcome", async ({ page }) => {
+  await page.goto("/waitlist");
+  await page
+    .getByRole("button", { name: "Join the waitlist", exact: true })
+    .click();
+  await expect(page.getByLabel("First name", { exact: true })).toBeFocused();
+  await page.getByLabel("First name", { exact: true }).fill("Test");
+  await page
+    .getByLabel("Email address", { exact: true })
+    .fill("test@example.com");
+  await page.getByRole("checkbox").check();
+  await page
+    .getByRole("button", { name: "Join the waitlist", exact: true })
+    .click();
+  await expect(page.locator(".form-message[role=alert]")).toContainText(
+    "not accepting submissions",
+  );
+  await expect(page.getByLabel("Email address", { exact: true })).toHaveValue(
+    "test@example.com",
+  );
+});
+test("form handles duplicate and network errors accessibly", async ({
+  page,
+}) => {
+  await page.goto("/waitlist");
+  await page.getByLabel("First name", { exact: true }).fill("Test");
+  await page
+    .getByLabel("Email address", { exact: true })
+    .fill("test@example.com");
+  await page.getByRole("checkbox").check();
+  await page.route("**/api/waitlist", (route) => route.abort());
+  await page
+    .getByRole("button", { name: "Join the waitlist", exact: true })
+    .click();
+  await expect(page.locator(".form-message[role=alert]")).toContainText(
+    "couldn’t connect",
+  );
+  await page.unroute("**/api/waitlist");
+  await page.route("**/api/waitlist", (route) =>
+    route.fulfill({
+      json: {
+        status: "duplicate",
+        message: "Already on the demo waitlist.",
+        demo: true,
+      },
+    }),
+  );
+  await page
+    .getByRole("button", { name: "Join the waitlist", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Already on");
+});
+test("rules and FAQ interactions", async ({ page }) => {
+  await page.goto("/rules");
+  await page.getByRole("button", { name: "Free Pass", exact: true }).click();
+  await expect(page.locator("#rule-preview")).toContainText("20 minutes");
+  await page.goto("/faq");
+  await page
+    .getByText("Does Themis read my child’s messages?", { exact: true })
+    .click();
+  await expect(page.locator("details[open]")).toContainText(
+    "not designed to read",
+  );
+});
+test("reduced motion has a complete fallback", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.waitForTimeout(1000);
+  await expect(page.locator(".boundary")).toHaveAttribute(
+    "data-scene-state",
+    "static",
+  );
+  await expect(page.locator(".boundary-centre")).toContainText(
+    "School access stays available",
+  );
+  expect(await page.locator("canvas").count()).toBe(0);
+});
+test("320px, tablet and large desktop", async ({ page }) => {
+  for (const width of [320, 768, 1920]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/");
+    await expect(page.locator("h1")).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+  }
+});
+test("draft metadata and unknown routes", async ({ page }) => {
+  await page.goto("/legal/terms");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    /noindex/,
+  );
+  expect((await page.goto("/not-a-real-page"))?.status()).toBe(404);
+});
