@@ -58,3 +58,16 @@ Mock data represents UI states only and must never be described as evidence that
 
 Product impact:
 None. This is an implementation-structure decision that preserves the approved product behaviour.
+
+## IMP-WEB-001: Isolated pre-launch public website
+
+Date: 2026-09-29
+Status: Implemented under the user-approved public website brief
+
+The website lives in apps/web as a self-contained Next.js package. It does not share runtime code with the iOS application or change approved requirements. WEB_STATE.md tracks this work separately so CURRENT_STATE.md continues to represent the native design work.
+
+Forms have provider-independent services and a development-only local adapter. Production fails closed until an authorised backend, durable rate limiter, reviewed privacy information and operational contacts are supplied. No connected Supabase project is implicitly selected.
+
+The 3D scene is dynamically imported on capable pointer devices. Touch, reduced-motion and constrained devices receive a complete static illustration by default, with an explicit motion control. Demand rendering stops after transitions and while off-screen. This preserves the required WebGL storytelling without making it a prerequisite to read or use the website.
+
+Legal text and article examples remain clearly labelled drafts. No price, launch date, permanent logo, customer endorsement or verified Apple behaviour is invented. Public app-launch gates remain unchanged.

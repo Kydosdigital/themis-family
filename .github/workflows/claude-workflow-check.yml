@@ -43,5 +43,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up website runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install website dependencies
+        run: npm ci --prefix apps/web
+
       - name: Validate Claude Code workflow
         run: bash scripts/verify.sh
