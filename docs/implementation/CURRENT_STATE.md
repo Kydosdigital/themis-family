@@ -24,3 +24,9 @@ Next action: Give Claude Design docs/implementation/CLAUDE_DESIGN_PASS2_PROMPT.m
 ## Existing frontend code
 
 Current SwiftUI screens remain mock/foundation code only and must not constrain the approved design.
+
+## External visual references
+
+- shadcn/ui: visual/component-composition reference only
+- 21st.dev: visual-reference discovery through project MCP, authenticated locally with API_KEY_21ST
+- Neither is an implementation dependency for the native SwiftUI product.

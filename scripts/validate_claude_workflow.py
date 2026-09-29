@@ -31,6 +31,7 @@ REQUIRED = [
     ".claude/rules/ios.md",
     ".claude/rules/swiftui.md",
     ".claude/rules/design-system.md",
+    ".claude/rules/design-references.md",
     ".claude/rules/backend.md",
     ".claude/rules/database.md",
     ".claude/rules/testing.md",
@@ -165,6 +166,13 @@ def main() -> None:
         fail("Supabase MCP must remain project-scoped through SUPABASE_PROJECT_REF")
     if "features=" not in url:
         fail("Supabase MCP must explicitly restrict feature groups")
+
+    twenty_first = mcp.get("mcpServers", {}).get("21st", {})
+    if twenty_first.get("url") != "https://21st.dev/api/mcp":
+        fail("21st MCP endpoint is missing or incorrect")
+    headers = twenty_first.get("headers", {})
+    if headers.get("x-api-key") != "${API_KEY_21ST}":
+        fail("21st MCP key must come from API_KEY_21ST environment expansion")
 
     print("Claude Code workflow validation passed.")
 

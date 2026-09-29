@@ -25,6 +25,40 @@ The information hierarchy and required content must stay consistent with the app
 
 The purpose is to decide what Themis Family should *feel like* before styling 90+ screens.
 
+## External design references
+
+You may use these as **visual inspiration and pattern references**, not as implementation dependencies:
+
+- shadcn/ui: https://ui.shadcn.com/
+- 21st.dev: https://21st.dev/
+
+Important:
+- Themis is a native SwiftUI iOS/iPadOS app.
+- Do NOT copy React/Tailwind implementation patterns into the mobile interaction model.
+- Do NOT turn Parent Home into a web dashboard.
+- Do NOT import web-only affordances such as hover states, desktop sidebars, dense data tables, tiny controls or browser-style navigation.
+- Translate any useful visual idea into native iOS composition, spacing, sheets, tabs, controls and accessibility behaviour.
+- Prefer Apple-native interaction conventions where a web reference conflicts with mobile expectations.
+- If a reference is used, borrow the visual principle, not the source code.
+
+For Pass 2, 21st/shadcn can help inspire:
+- premium card/surface treatment
+- hierarchy
+- micro-interaction ideas
+- empty states
+- soft status treatments
+- tasteful motion concepts
+- form composition
+- visual rhythm
+
+They must NOT dictate:
+- navigation architecture
+- Apple permission UI
+- Screen Time enforcement UI
+- component implementation technology
+- final brand identity
+
+
 ## Product feel
 
 Themis should feel:
