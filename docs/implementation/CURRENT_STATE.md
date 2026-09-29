@@ -9,7 +9,7 @@ Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI03_CHILD_TEEN_HOME_PROMPT.md
-Last verification: UI-01 Design System Foundation merged through PR #6. The SwiftUI app compiled successfully with Xcode on GitHub macOS CI and unit tests passed. Representative screenshot QA is carried into UI-02 because the implementation session is web-only. Production Apple enforcement remains spike-gated.
+Last verification: UI-02 Parent Home merged through PR #7 after a real macOS/Xcode build, passing unit tests and release-Simulator visual review against the approved P-023 design. Production Apple enforcement remains spike-gated.
 UI-02 verification: the SwiftUI source through commit 905f13ff94fa575216893bf8212c3f88031fc532 passed a real macOS/Xcode build and unit-test run, including ParentHomeTests. Claude workflow checks passed. A release Simulator screenshot of canonical P-023 was captured and compared with the approved final prototype. The hierarchy, grouped grey ground, elevated Needs You card, child status rows, Agreements and floating quick-action dock match the approved direction. During review, StatusBadge was corrected to keep chips single-line at accessibility sizes, and inline quick actions gained the approved QUICK ACTIONS label.
 Next action: Give Claude Code docs/implementation/CLAUDE_CODE_UI03_CHILD_TEEN_HOME_PROMPT.md, implement UI-03 on feat/ui-03-child-teen-home, then stop for review before UI-04.
 
@@ -40,7 +40,7 @@ UI-01 Design System Foundation:
 
 UI-01 is merged. Do not attempt all 216 screens in one context.
 
-## Current implementation slice
+## Completed implementation slice
 
 UI-02 Parent Home:
 - P-023 canonical needs-attention state
@@ -57,7 +57,7 @@ UI-02 Parent Home:
 
 Source and verification status: COMPLETE. See BUILD_LOG "UI-02 Parent Home" and IMP-UI-002.
 
-Stop after UI-02.
+UI-02 is merged.
 
 ## Production gates
 
