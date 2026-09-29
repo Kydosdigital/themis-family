@@ -115,7 +115,7 @@ Not changed: frozen requirements, product behaviour, Apple enforcement gates, ba
 
 ## 2026-09-29: UI-02 Parent Home
 
-Status: Source complete on `feat/ui-02-parent-home`; GitHub macOS CI and visual comparison pending.
+Status: COMPLETE; verified on macOS CI and reviewed against the approved P-023 prototype.
 
 Source of truth: Themis Final Prototype frames P-023, P-023 · Clear, P-023 · Setup incomplete, P-023 · Protection problem; Engineering Handoff component inventory; DEC-40 for the grace period.
 
@@ -144,9 +144,12 @@ Tests: `ParentHomeTests.swift` covers:
 - degraded scenarios never show Protected, and every Protected child has Verified evidence
 - evidence wording and view-model loading
 
-Verification in the web session:
-- Tree-sitter Swift syntax parse: 0 errors across all iOS source and test files. This is a parser check, not a compile.
+Verification:
+- Web-session tree-sitter Swift syntax parse: 0 errors across all iOS source and test files.
 - `python3 scripts/validate_claude_workflow.py` passed.
-- NOT run here: Xcode build, XCTest, Simulator/preview rendering. GitHub macOS CI must build and test; P-023 visual comparison remains a review step.
+- GitHub macOS CI: real Xcode build and unit tests passed on source commit `905f13ff94fa575216893bf8212c3f88031fc532`.
+- Release Simulator canonical P-023 screenshot captured through the visual-review workflow and compared with the approved final-prototype frame.
+- Review correction: status chips remain single-line at accessibility sizes; rows move the chip under text instead. Inline quick actions show the approved `QUICK ACTIONS` section label.
+- Full iPad adaptation remains scheduled for UI-14; UI-02 already moves the dock inline at regular horizontal size class.
 
 Not changed: frozen requirements, tab IA, production Supabase, Apple enforcement.
