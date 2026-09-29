@@ -4,16 +4,28 @@ on:
   push:
     paths:
       - "CLAUDE.md"
+      - ".mcp.json"
+      - ".env.example"
+      - "README.md"
       - ".claude/**"
       - "docs/implementation/**"
+      - "apps/ios/**"
+      - "supabase/**"
       - "scripts/validate_claude_workflow.py"
+      - "scripts/verify.sh"
       - ".github/workflows/claude-workflow-check.yml"
   pull_request:
     paths:
       - "CLAUDE.md"
+      - ".mcp.json"
+      - ".env.example"
+      - "README.md"
       - ".claude/**"
       - "docs/implementation/**"
+      - "apps/ios/**"
+      - "supabase/**"
       - "scripts/validate_claude_workflow.py"
+      - "scripts/verify.sh"
       - ".github/workflows/claude-workflow-check.yml"
 
 permissions:
@@ -32,4 +44,4 @@ jobs:
           python-version: "3.12"
 
       - name: Validate Claude Code workflow
-        run: python3 scripts/validate_claude_workflow.py
+        run: bash scripts/verify.sh
