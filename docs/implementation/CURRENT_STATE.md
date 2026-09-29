@@ -1,17 +1,17 @@
 # Themis Family Implementation State
 
-Status: COMPLETE
+Status: READY
 Mode: UI_IMPLEMENTATION
-Current objective: UI-02 Parent Home is verified and ready to merge. Next slice is UI-03 Child + Teen Home.
-Active slice: UI-02 Parent Home — COMPLETE
-Allowed scope: P-023 Parent Home and approved Parent Home states, Parent Home-specific presentation components, mock/display-state extensions, tests, previews/review harness, and verification. Do not begin UI-03.
+Current objective: Implement UI-03 Child + Teen Home from the approved C-001/C-012/C-013/C-014 designs.
+Active slice: UI-03 Child + Teen Home — READY
+Allowed scope: C-001 Child Home, C-001 Teen Home, C-012 Themis is active, C-013 Child/Teen transparency, C-014 essential access, supporting presentation models/components, previews and tests. Do not begin UI-04.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
-Implementation prompt: docs/implementation/CLAUDE_CODE_UI02_PARENT_HOME_PROMPT.md
+Implementation prompt: docs/implementation/CLAUDE_CODE_UI03_CHILD_TEEN_HOME_PROMPT.md
 Last verification: UI-01 Design System Foundation merged through PR #6. The SwiftUI app compiled successfully with Xcode on GitHub macOS CI and unit tests passed. Representative screenshot QA is carried into UI-02 because the implementation session is web-only. Production Apple enforcement remains spike-gated.
 UI-02 verification: the SwiftUI source through commit 905f13ff94fa575216893bf8212c3f88031fc532 passed a real macOS/Xcode build and unit-test run, including ParentHomeTests. Claude workflow checks passed. A release Simulator screenshot of canonical P-023 was captured and compared with the approved final prototype. The hierarchy, grouped grey ground, elevated Needs You card, child status rows, Agreements and floating quick-action dock match the approved direction. During review, StatusBadge was corrected to keep chips single-line at accessibility sizes, and inline quick actions gained the approved QUICK ACTIONS label.
-Next action: Merge PR #7, then start UI-03 Child + Teen Home. Do not begin UI-04.
+Next action: Give Claude Code docs/implementation/CLAUDE_CODE_UI03_CHILD_TEEN_HOME_PROMPT.md, implement UI-03 on feat/ui-03-child-teen-home, then stop for review before UI-04.
 
 ## Current readiness
 
@@ -86,3 +86,19 @@ Human-readable progress and cross-chat handoff live in Airtable:
 - Tracker guide: docs/implementation/AIRTABLE_TRACKER.md
 
 Airtable is not a replacement for the approved requirements or GitHub implementation state.
+
+## Current implementation slice
+
+UI-03 Child + Teen Home:
+- C-001 Sam Child Home
+- C-001 Maya Teen Home
+- C-012 Themis is active
+- C-013 Child transparency
+- C-013 Teen privacy/transparency
+- C-014 essential access
+- deterministic previews/review states
+- presentation/state tests
+- GitHub macOS CI verification
+- Simulator visual review
+
+Stop after UI-03.
