@@ -96,7 +96,7 @@ Product impact: none. No product behaviour, copy rule or requirement changed.
 ## IMP-UI-002: UI-02 Parent Home implementation choices
 
 Date: 2026-09-29
-Status: Implemented; awaiting GitHub macOS CI and visual review
+Status: Verified and approved for merge
 
 Source: Themis Final Prototype frames P-023, P-023 · Clear, P-023 · Setup incomplete and P-023 · Protection problem (`themis-screens.js`), rendered by `ThemisScreen.dc.html`.
 
