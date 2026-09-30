@@ -71,7 +71,7 @@ Typed events cover CTA actions, waitlist/support outcomes, pricing, FAQ, downloa
 
 ## Deployment
 
-Vercel root directory: apps/web. Install: npm ci. Build: npm run build. Framework: Next.js. No deploy has been performed.
+Vercel root directory: apps/web. Install: npm ci. Build: npm run build. Framework: Next.js. The pre-launch website is deployed at https://themis-family.vercel.app from main; deployment was explicitly authorised after the initial draft PR.
 
 Before public release configure the verified HTTPS origin, approved legal text, form provider with durable rate limiting, operational contact/safeguarding routes and consent-reviewed analytics (if used). Do not change the iOS project's readiness gates. App Store launch state requires a real verified URL; a QR code must encode that URL when supplied. Current QR is explicitly a placeholder.
 
@@ -79,4 +79,6 @@ Before public release configure the verified HTTPS origin, approved legal text, 
 
 Unit tests cover boundary validation and production mock protection. Playwright covers all routes at mobile and desktop widths, accessibility, navigation, forms, content interactions, fallbacks and indexing. Browser tests use a production build. See QA.md for actual results and remaining manual limitations.
 
-The repository's scripts/verify.sh includes web verification. The path-scoped web CI runs npm ci, verification and Chromium E2E. It does not modify app requirements.
+The repository's scripts/verify.sh includes web verification. The path-scoped web CI runs npm ci, verification, Chromium E2E and WebKit mobile ergonomics checks. It does not modify app requirements.
+
+Mobile layout uses 44px navigation/link targets, 16px form inputs, stacked audience previews and a sticky menu close control. Touch devices load neither automatic WebGL nor the desktop scroll-animation module. To run Lighthouse against a deployment, set SITE_URL before running node tests/performance.mjs; use an otherwise idle machine and record the test conditions.

@@ -66,7 +66,8 @@ export function Boundary({ walkthrough = false }: { walkthrough?: boolean }) {
           host.current.getBoundingClientRect().top < innerHeight,
       );
     const scroll = () => {
-      if (!host.current) return;
+      // Static mobile artwork does not need React updates on every scroll.
+      if (!host.current || !enabled) return;
       const top = host.current.getBoundingClientRect().top;
       const story = host.current.closest(".walkthrough");
       if (walkthrough && story && innerWidth > 850) {
@@ -96,7 +97,7 @@ export function Boundary({ walkthrough = false }: { walkthrough?: boolean }) {
       document.removeEventListener("visibilitychange", visibility);
       window.removeEventListener("scroll", scroll);
     };
-  }, [walkthrough]);
+  }, [walkthrough, enabled]);
   useEffect(() => {
     if (!enabled) return;
     try {

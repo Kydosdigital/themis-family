@@ -41,15 +41,7 @@ export default function Home() {
           <div>
             <Eyebrow>Less negotiating. More living.</Eyebrow>
             <h1>
-              Clear digital
-              <br />
-              boundaries.
-              <br />
-              <em>
-                Without the
-                <br />
-                daily arguments.
-              </em>
+              Clear digital boundaries. <em>Without the daily arguments.</em>
             </h1>
             <p className="lede">
               Set clear digital rules once, and let the phone enforce them.

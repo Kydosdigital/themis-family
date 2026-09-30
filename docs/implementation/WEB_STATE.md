@@ -1,7 +1,7 @@
 # Public website implementation
 
-Status: IMPLEMENTED — draft review; launch dependencies remain
-Branch: feat/public-website
+Status: DEPLOYED — pre-launch website; operational launch dependencies remain
+Production: https://themis-family.vercel.app
 Scope: Complete public website in apps/web, isolated from apps/ios.
 Authority: User-approved public-website brief and implementation plan.
 
@@ -15,4 +15,4 @@ Lighthouse mobile lab scores: Home 93, Privacy 95, Waitlist 91; CLS 0 on each. H
 
 Launch dependencies: production origin and hosting configuration; approved legal text and safeguarding/contact routing; an approved durable backend with rate limiting and server-only credentials; production performance and device validation. Production form providers intentionally fail closed. Pricing, App Store links and social accounts remain unconfigured.
 
-No deployment, application enforcement, Supabase project changes, or approved requirement modifications.
+PR #4 was merged and deployed with explicit user approval. No application enforcement, Supabase project changes, or approved requirement modifications. The native app's readiness is unchanged.

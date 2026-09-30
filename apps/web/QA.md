@@ -1,5 +1,13 @@
 # Website QA — 29 September 2026
 
+## Mobile follow-up — 30 September
+
+The live review found a 35px header CTA with 10px text, 14px form inputs, undersized standalone links and squeezed two-column audience previews. The update provides 44px main navigation/link targets, 16px inputs, full-width hero buttons and stacked family previews. The menu close button stays visible while scrolling; focus returns after the modal closes, including WebKit.
+
+All 14 new mobile checks pass across Chromium and WebKit: 320/375/390/430px layouts, small-phone and landscape key journeys, unclipped previews, readable forms and menu focus. The broader run passed the existing 70 tests and exposed narrow walkthrough overflow and Safari focus issues, both fixed and covered by the final mobile rerun. CI runs the complete suite.
+
+Touch devices no longer request the desktop Motion module or update the static boundary on every scroll. A live Lighthouse baseline varied substantially on this workstation (Home 56, Privacy 47, Waitlist 72), with inconsistent resource latency and blocking times; it does not support a before/after speed claim. Physical iPhone and Android testing remains distinct from browser emulation.
+
 ## Verified implementation
 
 - All 22 requested route patterns implemented, including three example article URLs (24 rendered page URLs).
