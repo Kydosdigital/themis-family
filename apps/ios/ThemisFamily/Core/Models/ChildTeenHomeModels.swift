@@ -80,7 +80,13 @@ struct EssentialAccessState: Equatable, Sendable {
         facts.contains { fact in
             let lower = fact.lowercased()
             let namesOneOfThem = lower.contains("phone") || lower.contains("messages") || lower.contains("maps")
-            let makesGuarantee = lower.contains("guaranteed") || lower.contains("always remain available") || lower.contains("cannot be blocked")
+            let explicitlyDisclaimsGuarantee =
+                lower.contains("not technically guaranteed") ||
+                lower.contains("not guaranteed")
+            let makesGuarantee =
+                (lower.contains("guaranteed") && !explicitlyDisclaimsGuarantee) ||
+                lower.contains("always remain available") ||
+                lower.contains("cannot be blocked")
             return namesOneOfThem && makesGuarantee
         }
     }
