@@ -2,6 +2,14 @@
 
 This log records completed implementation work, not requirements history.
 
+## 2026-09-30: Mobile website optimisation
+
+- Improved touch targets, hero hierarchy, form text, family previews and mobile menu dismissal after reviewing the live website.
+- Deferred desktop Motion features on touch hardware and removed static-scene scroll updates.
+- Fixed narrow walkthrough overflow and Safari modal focus restoration.
+- TypeScript, lint, 15 unit/integration tests and production build pass. All 14 new Chromium/WebKit mobile checks pass after fixes; the existing 70 regression tests passed in the broader run.
+- Backend collection remains disabled and legal notices remain visible. iOS and frozen specifications are unchanged.
+
 ## 2026-09-29: Implementation operating layer
 
 Status: Prepared in GitHub.

@@ -11,12 +11,20 @@ const chrome = await launch({
 await mkdir("lighthouse-results", { recursive: true });
 try {
   for (const route of ["/", "/privacy", "/waitlist"]) {
-    const result = await lighthouse("http://127.0.0.1:3000" + route, {
-      port: chrome.port,
-      output: "json",
-      onlyCategories: ["performance", "accessibility", "best-practices", "seo"],
-      logLevel: "error",
-    });
+    const result = await lighthouse(
+      (process.env.SITE_URL || "http://127.0.0.1:3000") + route,
+      {
+        port: chrome.port,
+        output: "json",
+        onlyCategories: [
+          "performance",
+          "accessibility",
+          "best-practices",
+          "seo",
+        ],
+        logLevel: "error",
+      },
+    );
     if (!result) throw new Error("No Lighthouse result");
     const name = route === "/" ? "home" : route.slice(1);
     await writeFile(

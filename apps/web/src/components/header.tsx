@@ -27,6 +27,8 @@ export function Header() {
       .forEach((d) => (d.open = false));
   }, [pathname]);
   function close() {
+    // Safari cannot focus the trigger while the modal keeps the page inert.
+    dialog.current?.close();
     setOpen(false);
     trigger.current?.focus();
   }
@@ -101,13 +103,14 @@ export function Header() {
         id="mobile-navigation"
         ref={dialog}
         className="mobile-nav"
+        aria-label="Site navigation"
         onCancel={close}
         onClick={(e) => {
           if (e.target === e.currentTarget) close();
         }}
       >
         <div className="mobile-nav-content">
-          <div className="row">
+          <div className="row mobile-nav-heading">
             <span className="wordmark">
               themis<span>family</span>
             </span>

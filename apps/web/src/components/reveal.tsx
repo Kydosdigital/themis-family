@@ -1,16 +1,29 @@
 "use client";
-import { motion, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+
+// Keep the complete server-rendered content visible while desktop-only
+// enhancements load. Touch devices never request the animation module.
 export function Reveal({ children }: { children: ReactNode }) {
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      initial={false}
-      whileInView={reduced ? {} : { y: [12, 0] }}
-      viewport={{ once: true, amount: 0.1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
+  const [Animated, setAnimated] = useState<ComponentType<{
+    children: ReactNode;
+  }> | null>(null);
+  useEffect(() => {
+    const query = matchMedia(
+      "(pointer: fine) and (prefers-reduced-motion: no-preference)",
+    );
+    let cancelled = false;
+    if (query.matches) {
+      import("./reveal-motion")
+        .then((module) => {
+          if (!cancelled) setAnimated(() => module.default);
+        })
+        .catch(() => {
+          /* The static content remains fully usable. */
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return Animated ? <Animated>{children}</Animated> : <div>{children}</div>;
 }

@@ -23,6 +23,11 @@ export default defineConfig({
       name: "mobile",
       use: { ...devices["iPhone 13"], defaultBrowserType: "chromium" },
     },
+    {
+      name: "mobile-webkit",
+      testMatch: "mobile.spec.ts",
+      use: { ...devices["iPhone 13"] },
+    },
   ],
   webServer: {
     command: "npm run start -- --hostname 127.0.0.1",
