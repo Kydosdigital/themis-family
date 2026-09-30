@@ -198,7 +198,7 @@ enum OnboardingDemoData {
         bands: [
             .init("Homework", from: 16 * 60, to: 18 * 60, tone: .aqua),
             .init("Gaming", from: 18 * 60, to: 20 * 60, tone: .mint),
-            .init("Bedtime", from: 20 * 60 + 30, to: 23 * 60, tone: .peach)
+            .init("Bedtime", from: 20 * 60 + 30, to: 22 * 60, tone: .peach)
         ],
         nowMinute: 17 * 60 + 40,
         nowLabel: "5:40"
