@@ -76,8 +76,8 @@ jobs:
             xcrun simctl io "$DEVICE_ID" screenshot "$OUTPUT/$filename"
           }
 
-          # Standard Dynamic Type canonical screens.
-          xcrun simctl ui "$DEVICE_ID" content_size medium || true
+          # Standard Dynamic Type canonical screens. A fresh simulator starts at
+          # the normal content size, matching the proven UI-02 capture path.
           capture parent "P-023-canonical.png"
           capture child "C-001-child-canonical.png"
           capture teen "C-001-teen-canonical.png"
