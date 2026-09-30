@@ -67,12 +67,16 @@ jobs:
           xcrun simctl bootstatus "$DEVICE_ID" -b
           xcrun simctl install "$DEVICE_ID" "$APP_PATH"
 
+          # Give first-boot Simulator system banners time to appear and clear
+          # before visual review starts. These are OS chrome, not Themis UI.
+          sleep 12
+
           capture() {
             local perspective="$1"
             local filename="$2"
             xcrun simctl terminate "$DEVICE_ID" "$BUNDLE_ID" || true
             xcrun simctl launch "$DEVICE_ID" "$BUNDLE_ID" --visual-review-perspective "$perspective"
-            sleep 4
+            sleep 8
             xcrun simctl io "$DEVICE_ID" screenshot "$OUTPUT/$filename"
           }
 
