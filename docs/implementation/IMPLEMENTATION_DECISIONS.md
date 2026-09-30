@@ -118,3 +118,23 @@ Shared UI-01 corrections made for P-023 (recorded in BUILD_LOG):
 - `ShellPlaceholderView` supports being pushed (keeps the navigation bar and Back).
 
 Product impact: none. No requirement, business rule or approved copy changed.
+
+
+## IMP-UI-003: UI-03 Child + Teen Home implementation choices
+
+Date: 2026-09-30
+Status: Verified and approved for merge
+
+Source: UI-03 implementation prompt, final Claude Design Child/Teen frames, Design System, Engineering Handoff and approved requirements.
+
+1. **Dedicated presentation state.** UI-03 uses `ChildTeenHomeState` and deterministic `ChildTeenHomeDemoData` through `ChildHomeRepository.homeState`. The older `ChildHomeData` scenarios remain available for later task, request, Free Pass and restriction slices rather than being overloaded into C-001.
+2. **Audience variants stay shared.** Sam and Maya use the same UI-01 primitives. Sam selects the Child warm ground, larger geometry and simpler task hierarchy. Maya selects the Teen variant, with Parent-adjacent grouped surfaces and a more compact standard-size status/schedule treatment.
+3. **Timeline reuse.** Both homes use `AgreementTimeline`. At accessibility text sizes the existing `StackedTimelineList` fallback carries the same semantic timing data rather than squeezing a horizontal timeline.
+4. **Child conditional label.** The timeline band uses the short visual label "Games pause" so it remains readable inside the available band. The full approved consequence, "If it isn’t done by 6:00 PM, Roblox and Minecraft pause.", remains immediately below. The stacked accessibility detail explicitly says "From 6 PM · only if it applies". This is a layout adaptation, not a rule change.
+5. **Future destinations stay placeholders.** UI-03 actions route to their owning future screen IDs without implementing them: homework completion to C-003, more-time requests to Q-001 and Focus Session to E-004. C-002 through C-011 and request flows remain outside this slice.
+6. **Privacy boundary.** C-013 lists rule/task/request/protection information but never message/chat content, full browsing/search history, minute-by-minute activity or raw Apple Screen Time data as stored Themis data.
+7. **Essential-access honesty.** C-014 says Phone, Messages and Maps may be configured or recommended where supported and remain spike-gated. Emergency calling is never deliberately restricted. No production Apple capability claim was added.
+8. **Visual-review selector.** `AppContainer` accepts a deterministic `--visual-review-perspective` launch argument only for Simulator review. Normal launches still default to Parent. The workflow captures Parent, Child and Teen Release screens at standard and large accessibility text sizes.
+9. **Simulator OS noise.** The visual-review workflow waits for first-boot system banners to clear and then waits after each perspective launch. This keeps screenshot artifacts deterministic without changing app behaviour.
+
+Product impact: none. No approved product behaviour, privacy rule, business rule or Apple capability assumption changed.
