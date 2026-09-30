@@ -11,6 +11,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published var deadline: Date
     @Published var schedule: OnboardingSchedule = .schoolDays
     @Published var isTestingProtection = false
+    @Published var applePermissionDeclined = false
 
     init(initialStep: OnboardingStep = .launch) {
         self.step = initialStep
@@ -24,20 +25,12 @@ final class OnboardingViewModel: ObservableObject {
 
     var progressStep: Int? {
         switch step {
-        case .launch, .welcome, .signInWithApple, .accountCreated:
-            return nil
-        case .goal:
-            return 1
-        case .addChild, .chooseExperience, .childCreated:
-            return 2
-        case .pairDeviceIntro, .pairing:
-            return 3
-        case .familyControlsExplanation, .appleAuthorisationHandoff:
-            return 4
-        case .starterRule, .homeworkDeadlineStarter, .controlledApps, .deadline,
-             .verification, .essentialAccess, .agreementReview, .protectionTest,
-             .protectionTestResult, .activated:
-            return 5
+        case .goal: return 1
+        case .addChild, .chooseExperience: return 2
+        case .pairDeviceIntro: return 3
+        case .familyControlsExplanation: return 4
+        case .starterRule, .homeworkDeadlineStarter: return 5
+        default: return nil
         }
     }
 
