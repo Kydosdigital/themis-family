@@ -139,6 +139,26 @@ final class ChildTeenHomeStateTests: XCTestCase {
     }
 
     @MainActor
+    func testVisualReviewPerspectiveLaunchArgumentIsDeterministic() {
+        XCTAssertEqual(
+            AppContainer.visualReviewPerspective(from: ["ThemisFamily", "--visual-review-perspective", "child"]),
+            .child
+        )
+        XCTAssertEqual(
+            AppContainer.visualReviewPerspective(from: ["ThemisFamily", "--visual-review-perspective", "teen"]),
+            .teen
+        )
+        XCTAssertEqual(
+            AppContainer.visualReviewPerspective(from: ["ThemisFamily", "--visual-review-perspective", "parent"]),
+            .parent
+        )
+        XCTAssertNil(AppContainer.visualReviewPerspective(from: ["ThemisFamily"]))
+        XCTAssertNil(
+            AppContainer.visualReviewPerspective(from: ["ThemisFamily", "--visual-review-perspective", "unknown"])
+        )
+    }
+
+    @MainActor
     func testViewModelLoadsCanonicalChildAndTeenStates() async {
         let repository = MockChildHomeRepository()
 
