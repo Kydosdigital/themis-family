@@ -48,33 +48,49 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Launch and capture Parent Home
+      - name: Launch and capture canonical homes
         shell: bash
         run: |
           set -euo pipefail
           DEVICE_ID="${{ steps.simulator.outputs.device_id }}"
+          BUNDLE_ID="com.kydosdigital.themisfamily.dev"
           APP_PATH="$(find "$RUNNER_TEMP/ThemisDerivedData/Build/Products/Release-iphonesimulator" -maxdepth 1 -name '*.app' | head -1)"
           if [ -z "$APP_PATH" ]; then
             echo "Could not find built .app"
             exit 1
           fi
 
-          mkdir -p "$RUNNER_TEMP/themis-visual-review"
+          OUTPUT="$RUNNER_TEMP/themis-visual-review"
+          mkdir -p "$OUTPUT"
 
           xcrun simctl boot "$DEVICE_ID" || true
           xcrun simctl bootstatus "$DEVICE_ID" -b
           xcrun simctl install "$DEVICE_ID" "$APP_PATH"
-          xcrun simctl launch "$DEVICE_ID" com.kydosdigital.themisfamily.dev
-          sleep 4
-          xcrun simctl io "$DEVICE_ID" screenshot "$RUNNER_TEMP/themis-visual-review/P-023-canonical.png"
 
-          # Capture the same screen at a large accessibility content size.
-          # The approved QA target is about 170%, not the maximum accessibility size.
+          # Give first-boot Simulator system banners time to appear and clear
+          # before visual review starts. These are OS chrome, not Themis UI.
+          sleep 12
+
+          capture() {
+            local perspective="$1"
+            local filename="$2"
+            xcrun simctl terminate "$DEVICE_ID" "$BUNDLE_ID" || true
+            xcrun simctl launch "$DEVICE_ID" "$BUNDLE_ID" --visual-review-perspective "$perspective"
+            sleep 8
+            xcrun simctl io "$DEVICE_ID" screenshot "$OUTPUT/$filename"
+          }
+
+          # Standard Dynamic Type canonical screens. A fresh simulator starts at
+          # the normal content size, matching the proven UI-02 capture path.
+          capture parent "P-023-canonical.png"
+          capture child "C-001-child-canonical.png"
+          capture teen "C-001-teen-canonical.png"
+
+          # Approved large-text review target, approximately 170%.
           xcrun simctl ui "$DEVICE_ID" content_size accessibility-large || true
-          xcrun simctl terminate "$DEVICE_ID" com.kydosdigital.themisfamily.dev || true
-          xcrun simctl launch "$DEVICE_ID" com.kydosdigital.themisfamily.dev
-          sleep 4
-          xcrun simctl io "$DEVICE_ID" screenshot "$RUNNER_TEMP/themis-visual-review/P-023-canonical-accessibility.png"
+          capture parent "P-023-canonical-accessibility.png"
+          capture child "C-001-child-canonical-accessibility.png"
+          capture teen "C-001-teen-canonical-accessibility.png"
 
       - name: Upload visual review screenshots
         uses: actions/upload-artifact@v4
