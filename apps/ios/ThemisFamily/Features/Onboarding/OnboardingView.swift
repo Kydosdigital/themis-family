@@ -1,3 +1,4 @@
+import AuthenticationServices
 import SwiftUI
 
 struct OnboardingView: View {
@@ -93,7 +94,9 @@ struct OnboardingView: View {
             .padding(.bottom, 32)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            actionBar
+            if viewModel.step != .signInWithApple {
+                actionBar
+            }
         }
         .themisGround(.plain)
     }
@@ -114,16 +117,28 @@ struct OnboardingView: View {
             }
 
         case .signInWithApple:
-            ThemisCard {
-                VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
-                    Image(systemName: "apple.logo")
-                        .font(.system(size: 30, weight: .semibold))
-                        .foregroundStyle(ThemisColor.textPrimary)
-                        .accessibilityHidden(true)
-                    Text("Use your Apple account to create the Owner account for this household.")
-                        .themisFont(.body)
-                        .foregroundStyle(ThemisColor.textPrimary)
+            VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
+                ThemisCard {
+                    VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
+                        Image(systemName: "apple.logo")
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundStyle(ThemisColor.textPrimary)
+                            .accessibilityHidden(true)
+                        Text("Use your Apple account to create the Owner account for this household.")
+                            .themisFont(.body)
+                            .foregroundStyle(ThemisColor.textPrimary)
+                    }
                 }
+                SignInWithAppleButton(.continue) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { _ in
+                    // UI-04 remains mock-first. Production identity/session wiring belongs
+                    // to the backend/auth implementation, not this visual slice.
+                    viewModel.advance()
+                }
+                .signInWithAppleButtonStyle(.black)
+                .frame(minHeight: 52)
+                .accessibilityHint("Creates or signs in to the household Owner account")
             }
 
         case .accountCreated:
