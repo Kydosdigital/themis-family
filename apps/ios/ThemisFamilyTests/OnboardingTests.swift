@@ -94,6 +94,21 @@ final class OnboardingStateTests: XCTestCase {
     }
 
     @MainActor
+    func testVisualReviewLaunchArgumentsSelectOnboardingDeterministically() {
+        XCTAssertEqual(
+            AppContainer.visualReviewPerspective(from: ["ThemisFamily", "--visual-review-perspective", "onboarding"]),
+            .onboarding
+        )
+        XCTAssertEqual(
+            AppContainer.visualReviewOnboardingStep(from: ["ThemisFamily", "--visual-review-onboarding-screen", "P-019"]),
+            .agreementReview
+        )
+        XCTAssertNil(
+            AppContainer.visualReviewOnboardingStep(from: ["ThemisFamily", "--visual-review-onboarding-screen", "P-099"])
+        )
+    }
+
+    @MainActor
     func testViewModelCanResumeAtDeterministicScreenID() {
         let viewModel = OnboardingViewModel(initialStep: .welcome)
         XCTAssertEqual(viewModel.step, .welcome)
