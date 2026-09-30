@@ -20,7 +20,7 @@ enum ChildTeenHomeDemoData {
                     bands: [
                         .init("Homework", from: 16 * 60, to: 18 * 60, tone: .aqua),
                         .init(
-                            "Games pause if not approved",
+                            "Games pause",
                             from: 18 * 60,
                             to: 21 * 60,
                             tone: .peach,
