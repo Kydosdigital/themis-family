@@ -180,9 +180,11 @@ struct AgreementTimeline: View {
             (revealProgress - Double(index) * ThemisMotion.revealBandStagger) / ThemisMotion.revealBandLength
         )
         let startX = CGFloat(model.fraction(of: band.startMinute)) * width
-        let endFraction = min(model.fraction(of: band.endMinute), 1.12)
-        let fullWidth = max(CGFloat(endFraction) * width - startX, 0)
         let openEnded = model.isOpenEnded(band)
+        let endFraction = min(model.fraction(of: band.endMinute), 1)
+        let fullWidth = openEnded
+            ? max(width - startX, 0)
+            : max(CGFloat(endFraction) * width - startX, 0)
         let shape = UnevenRoundedRectangle(
             topLeadingRadius: 20,
             bottomLeadingRadius: 20,
