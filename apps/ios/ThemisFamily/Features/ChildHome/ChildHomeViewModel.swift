@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 final class ChildHomeViewModel: ObservableObject {
-    @Published private(set) var home: ChildHomeData?
+    @Published private(set) var state: ChildTeenHomeState?
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
 
@@ -17,7 +17,7 @@ final class ChildHomeViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            home = try await repository.home(childID: childID, scenario: scenario)
+            state = try await repository.homeState(childID: childID, scenario: scenario)
         } catch {
             errorMessage = "We couldn’t load Themis right now."
         }
