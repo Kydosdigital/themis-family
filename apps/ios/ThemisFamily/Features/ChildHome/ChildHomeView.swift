@@ -5,6 +5,9 @@ enum ChildHomeRoute: String, Identifiable, Hashable {
     case transparency
     case essentialAccess
     case myRules
+    case submitHomework
+    case requestMoreTime
+    case focusSession
 
     var id: String { rawValue }
 }
@@ -73,6 +76,12 @@ struct ChildHomeView: View {
             )
         case .myRules:
             ShellPlaceholderView(title: "My Rules", screenID: "C-015", isTabRoot: false)
+        case .submitHomework:
+            ShellPlaceholderView(title: "I’ve finished my homework", screenID: "C-003", isTabRoot: false)
+        case .requestMoreTime:
+            ShellPlaceholderView(title: "Ask for more time", screenID: "Q-001", isTabRoot: false)
+        case .focusSession:
+            ShellPlaceholderView(title: "Focus Session", screenID: "E-004", isTabRoot: false)
         }
     }
 }
@@ -197,7 +206,7 @@ struct ChildHomeContentView: View {
                         title: homework.primaryActionTitle,
                         systemImage: "checkmark"
                     ) {
-                        open(.myRules)
+                        open(.submitHomework)
                     }
 
                     ThemisButton(
@@ -205,7 +214,7 @@ struct ChildHomeContentView: View {
                         systemImage: "clock.badge.questionmark",
                         style: .secondary
                     ) {
-                        open(.myRules)
+                        open(.requestMoreTime)
                     }
                 }
             }
@@ -257,7 +266,7 @@ struct ChildHomeContentView: View {
                             title: teen.startActionTitle,
                             systemImage: "play.fill"
                         ) {
-                            open(.myRules)
+                            open(.focusSession)
                         }
 
                         ThemisButton(
@@ -265,7 +274,7 @@ struct ChildHomeContentView: View {
                             systemImage: "clock.badge.questionmark",
                             style: .secondary
                         ) {
-                            open(.myRules)
+                            open(.requestMoreTime)
                         }
                     }
                 }
