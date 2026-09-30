@@ -116,7 +116,7 @@ final class ChildTeenHomeStateTests: XCTestCase {
         }
         XCTAssertEqual(
             homework.timeline.stackedRows.map(\.title),
-            ["Now", "Homework", "Games pause if not approved"]
+            ["Now", "Homework", "Games pause"]
         )
         XCTAssertEqual(homework.timeline.stackedRows[1].detail, "4 PM – 6 PM")
         XCTAssertEqual(homework.timeline.stackedRows[2].detail, "From 6 PM · only if it applies")
