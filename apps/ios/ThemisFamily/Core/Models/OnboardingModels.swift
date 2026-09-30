@@ -53,8 +53,6 @@ enum OnboardingStep: Int, CaseIterable, Identifiable, Hashable {
         }
     }
 
-    var ordinal: Int { rawValue + 1 }
-
     static func from(screenID: String) -> OnboardingStep? {
         allCases.first { $0.screenID.caseInsensitiveCompare(screenID) == .orderedSame }
     }
@@ -64,7 +62,7 @@ enum OnboardingGoal: String, CaseIterable, Hashable {
     case homework = "Homework"
     case bedtime = "Bedtime"
     case gaming = "Gaming"
-    case social = "Social"
+    case socialApps = "Social apps"
     case schoolNights = "School nights"
 }
 
@@ -77,8 +75,16 @@ enum OnboardingVerification: String, CaseIterable, Hashable {
     case parentApproval = "Parent Approval"
 }
 
+enum OnboardingSchedule: String, CaseIterable, Hashable {
+    case schoolDays = "School days"
+    case everyDay = "Every day"
+    case custom = "Custom"
+}
+
 enum PairingPresentationVariant: String, CaseIterable, Hashable {
     case code = "Pairing code"
+    case childDevice = "Child device"
+    case codeExpired = "Code expired"
     case alreadyPaired = "Already paired"
     case recoveryRequired = "Recovery required"
 }
@@ -101,6 +107,7 @@ struct OnboardingDraft: Equatable {
     var controlledTargets: [String]
     var deadlineHour: Int
     var deadlineMinute: Int
+    var schedule: OnboardingSchedule
     var verification: OnboardingVerification
     var schoolAccessPreserved: Bool
     var essentialAccessSummary: String
@@ -164,24 +171,46 @@ enum OnboardingDemoData {
         controlledTargets: ["Roblox", "Minecraft"],
         deadlineHour: 18,
         deadlineMinute: 0,
+        schedule: .schoolDays,
         verification: .parentApproval,
         schoolAccessPreserved: true,
-        essentialAccessSummary: "School access stays available. Phone, Messages and Maps can be configured to stay available where supported."
+        essentialAccessSummary: "Phone, Messages, Maps and school apps can be configured to stay available where supported."
     )
 
-    static let accountCreatedMessage = "Your account is ready. Protection is not active yet."
-
-    static let emergencyAccessMessage = "Emergency calling and iOS emergency functionality are never deliberately restricted."
-
-    static let systemOwnedAppleAuthorisationMessage = "Apple provides the Family Controls permission step. Themis explains why it is needed, then hands over to the system flow."
-
-    static let systemOwnedPickerMessage = "Apps and websites are chosen with Apple's system picker. Themis does not replace it with its own app catalogue."
+    static let accountCreatedTitle = "Hi Sarah. Your account is ready."
+    static let accountProtectionStatus = "Not active yet. Three steps to go."
+    static let emergencyAccessMessage = "Emergency calling is never deliberately restricted."
+    static let systemOwnedAppleAuthorisationMessage = "Family Controls permission is shown by iOS on Sam's iPhone."
+    static let systemOwnedPickerMessage = "Apple's app and website picker opens next. Themis does not draw or replace that system sheet."
 
     static let agreementFacts = [
-        "Homework is due at 6:00 PM.",
-        "Roblox and Minecraft pause if the rule applies.",
-        "Parent Approval confirms homework completion.",
-        "School access stays available.",
-        "Essential apps can be configured to stay available where supported."
+        "Homework due 6:00 PM, school days",
+        "Checked by Parent Approval",
+        "If not approved Roblox and Minecraft pause",
+        "Always Allowed Phone, Messages, Maps and school apps, where supported",
+        "Sam can Ask for more time"
     ]
+
+    static let welcomeTimeline = AgreementTimelineModel(
+        startMinute: 16 * 60,
+        endMinute: 22 * 60,
+        ticks: ["4 PM", "6", "8", "10 PM"],
+        bands: [
+            .init("Homework", from: 16 * 60, to: 18 * 60, tone: .aqua),
+            .init("Gaming", from: 18 * 60, to: 20 * 60, tone: .mint),
+            .init("Bedtime", from: 20 * 60 + 30, to: 23 * 60, tone: .peach)
+        ],
+        nowMinute: 17 * 60 + 40,
+        nowLabel: "5:40"
+    )
+
+    static let homeworkTimeline = AgreementTimelineModel(
+        startMinute: 16 * 60,
+        endMinute: 20 * 60,
+        ticks: ["4 PM", "6", "8 PM"],
+        bands: [
+            .init("Homework", from: 16 * 60, to: 18 * 60, tone: .aqua),
+            .init("Games pause", from: 18 * 60, to: 20 * 60, tone: .peach, isConditional: true)
+        ]
+    )
 }
