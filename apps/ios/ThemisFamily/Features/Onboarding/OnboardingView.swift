@@ -359,7 +359,7 @@ struct OnboardingView: View {
                     title: "Homework Deadline",
                     detail: "Games pause if homework isn't approved by a set time.",
                     badge: "Suggested",
-                    selected: true
+                    selected: false
                 )
                 ruleCard(
                     title: "Bedtime",
@@ -383,7 +383,7 @@ struct OnboardingView: View {
                             .themisFont(.headline)
                             .foregroundStyle(ThemisColor.textPrimary)
                         Spacer()
-                        StatusBadge(.selected)
+                        StatusBadge(ThemisStatus(.selected))
                     }
                     Text("Games pause if homework isn't approved by a set time.")
                         .themisFont(.body)
@@ -435,7 +435,7 @@ struct OnboardingView: View {
                                 .themisFont(.headline)
                                 .foregroundStyle(ThemisColor.textPrimary)
                             Spacer()
-                            StatusBadge(.selected)
+                            StatusBadge(ThemisStatus(.selected))
                         }
                         Text("\(viewModel.safeChildName) marks it done. You or a Guardian approve.")
                             .themisFont(.body)
@@ -908,7 +908,7 @@ struct OnboardingView: View {
                             .foregroundStyle(ThemisColor.textPrimary)
                         Spacer()
                         if viewModel.experience == experience {
-                            StatusBadge(.selected)
+                            StatusBadge(ThemisStatus(.selected))
                         }
                     }
                     Text(detail)
@@ -936,7 +936,7 @@ struct OnboardingView: View {
                         .foregroundStyle(ThemisColor.textPrimary)
                     Spacer()
                     if selected {
-                        StatusBadge(.selected)
+                        StatusBadge(ThemisStatus(.selected))
                     } else if let badge {
                         StatusBadge(ThemisStatus(.suggested, label: badge))
                     }
