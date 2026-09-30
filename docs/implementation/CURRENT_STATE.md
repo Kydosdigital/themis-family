@@ -1,17 +1,17 @@
 # Themis Family Implementation State
 
-Status: IN_PROGRESS
+Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: Implement UI-03 Child + Teen Home from the approved C-001/C-012/C-013/C-014 designs.
-Active slice: UI-03 Child + Teen Home — IN_PROGRESS
-Allowed scope: C-001 Child Home, C-001 Teen Home, C-012 Themis is active, C-013 Child/Teen transparency, C-014 essential access, supporting presentation models/components, previews and tests. Do not begin UI-04.
+Current objective: UI-03 Child + Teen Home is complete and verified. UI-04 Onboarding is the next slice, but it has not started.
+Active slice: UI-03 Child + Teen Home - COMPLETE
+Allowed scope: C-001 Child Home, C-001 Teen Home, C-012 Themis is active, C-013 Child/Teen transparency, C-014 essential access, supporting presentation models/components, previews and tests. Do not begin UI-04 in this slice.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Implementation prompt: docs/implementation/CLAUDE_CODE_UI03_CHILD_TEEN_HOME_PROMPT.md
-Last verification: UI-02 Parent Home merged through PR #7 after a real macOS/Xcode build, passing unit tests and release-Simulator visual review against the approved P-023 design. Production Apple enforcement remains spike-gated.
-UI-02 verification: the SwiftUI source through commit 905f13ff94fa575216893bf8212c3f88031fc532 passed a real macOS/Xcode build and unit-test run, including ParentHomeTests. Claude workflow checks passed. A release Simulator screenshot of canonical P-023 was captured and compared with the approved final prototype. The hierarchy, grouped grey ground, elevated Needs You card, child status rows, Agreements and floating quick-action dock match the approved direction. During review, StatusBadge was corrected to keep chips single-line at accessibility sizes, and inline quick actions gained the approved QUICK ACTIONS label.
-Next action: Verify the UI-03 source on feat/ui-03-child-teen-home with macOS/Xcode CI and Simulator visual review, correct any failures or design discrepancies, then merge before UI-04.
+Last verification: UI-03 source through commit e8b1ed1bad1e88579b143c4b502ab642ecb050e6 passed a real macOS/Xcode build and XCTest run in GitHub Actions. Release Simulator screenshots for Sam Child Home, Maya Teen Home, Parent Home regression, and their approved large-text review states were captured and reviewed against the approved design direction.
+UI-03 review: Sam keeps the warmer, larger Child treatment and homework-first hierarchy. Maya stays mature and closer to Parent, with a compact active row, schedule timeline and visible Focus Session actions. Status chips remain single-line, AgreementTimeline stacks at accessibility sizes, and the Home / My Rules / Requests tab IA is unchanged. C-012/C-013/C-014 use mock-driven UI and honest Apple/privacy wording only.
+Next action: Merge PR #9, sync Airtable and the cross-chat handoff, then prepare UI-04 Onboarding as a new slice. Do not start UI-04 from the UI-03 branch.
 
 ## Current readiness
 
@@ -21,7 +21,7 @@ Next action: Verify the UI-03 source on feat/ui-03-child-teen-home with macOS/Xc
 - Design System: APPROVED
 - Final prototype: APPROVED
 - Engineering Handoff: APPROVED
-- SwiftUI UI implementation: IN PROGRESS
+- SwiftUI UI implementation: IN PROGRESS, 3 of 15 slices complete
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
@@ -54,10 +54,28 @@ UI-02 Parent Home:
 - deterministic previews/review states
 - Parent Home presentation/state tests
 - GitHub macOS CI verification
+- Release Simulator visual review
 
 Source and verification status: COMPLETE. See BUILD_LOG "UI-02 Parent Home" and IMP-UI-002.
 
 UI-02 is merged.
+
+## Completed implementation slice
+
+UI-03 Child + Teen Home:
+- C-001 Sam Child Home
+- C-001 Maya Teen Home
+- C-012 Themis is active
+- C-013 Child transparency
+- C-013 Teen privacy/transparency
+- C-014 essential access
+- deterministic previews/review states
+- presentation/state tests
+- GitHub macOS Xcode/XCTest verification
+- Release Simulator visual review at standard and approved large-text sizes
+- Parent Home visual regression capture
+
+Source and verification status: COMPLETE. See BUILD_LOG "UI-03 Child + Teen Home" and IMP-UI-003.
 
 ## Production gates
 
@@ -87,18 +105,10 @@ Human-readable progress and cross-chat handoff live in Airtable:
 
 Airtable is not a replacement for the approved requirements or GitHub implementation state.
 
-## Current implementation slice
+## Next implementation slice
 
-UI-03 Child + Teen Home:
-- C-001 Sam Child Home
-- C-001 Maya Teen Home
-- C-012 Themis is active
-- C-013 Child transparency
-- C-013 Teen privacy/transparency
-- C-014 essential access
-- deterministic previews/review states
-- presentation/state tests
-- GitHub macOS CI verification
-- Simulator visual review
-
-Stop after UI-03.
+UI-04 Onboarding:
+- not started
+- prepare a dedicated slice prompt from the approved onboarding frames and requirements
+- continue to use the merged UI-01 design system and verified UI-02/UI-03 patterns
+- do not bypass backend or Apple production gates
