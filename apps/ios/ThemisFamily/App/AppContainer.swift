@@ -28,10 +28,28 @@ final class AppContainer: ObservableObject {
         self.perspective = perspective
     }
 
-    static func preview() -> AppContainer {
+    static func preview(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppContainer {
         AppContainer(
             parentRepository: MockParentDashboardRepository(),
-            childRepository: MockChildHomeRepository()
+            childRepository: MockChildHomeRepository(),
+            perspective: visualReviewPerspective(from: arguments) ?? .parent
         )
+    }
+
+    /// Deterministic review-only launch selection for Release Simulator screenshot CI.
+    /// Normal app launches omit the flag and continue to start in the Parent perspective.
+    static func visualReviewPerspective(from arguments: [String]) -> Perspective? {
+        guard let flagIndex = arguments.firstIndex(of: "--visual-review-perspective") else {
+            return nil
+        }
+        let valueIndex = arguments.index(after: flagIndex)
+        guard valueIndex < arguments.endIndex else { return nil }
+
+        switch arguments[valueIndex].lowercased() {
+        case "parent": return .parent
+        case "child": return .child
+        case "teen": return .teen
+        default: return nil
+        }
     }
 }
