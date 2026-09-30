@@ -9,6 +9,8 @@ final class OnboardingViewModel: ObservableObject {
     @Published var pairingVariant: PairingPresentationVariant = .code
     @Published var testResult: ProtectionTestPresentationResult = .success
     @Published var deadline: Date
+    @Published var schedule: OnboardingSchedule = .schoolDays
+    @Published var isTestingProtection = false
 
     init(initialStep: OnboardingStep = .launch) {
         self.step = initialStep
@@ -20,28 +22,33 @@ final class OnboardingViewModel: ObservableObject {
         ) ?? Date()
     }
 
-    var phase: Int {
+    var progressStep: Int? {
         switch step {
-        case .launch, .welcome, .signInWithApple, .accountCreated, .goal:
+        case .launch, .welcome, .signInWithApple, .accountCreated:
+            return nil
+        case .goal:
             return 1
-        case .addChild, .chooseExperience, .childCreated, .pairDeviceIntro, .pairing:
+        case .addChild, .chooseExperience, .childCreated:
             return 2
-        case .familyControlsExplanation, .appleAuthorisationHandoff:
+        case .pairDeviceIntro, .pairing:
             return 3
-        case .starterRule, .homeworkDeadlineStarter, .controlledApps, .deadline, .verification, .essentialAccess, .agreementReview:
+        case .familyControlsExplanation, .appleAuthorisationHandoff:
             return 4
-        case .protectionTest, .protectionTestResult, .activated:
+        case .starterRule, .homeworkDeadlineStarter, .controlledApps, .deadline,
+             .verification, .essentialAccess, .agreementReview, .protectionTest,
+             .protectionTestResult, .activated:
             return 5
         }
     }
 
-    var phaseLabel: String {
-        switch phase {
-        case 1: return "Start"
-        case 2: return "Sam and this device"
-        case 3: return "Apple permission"
-        case 4: return "First family rule"
-        default: return "Test and activate"
+    var progressLabel: String? {
+        guard let progressStep else { return nil }
+        switch progressStep {
+        case 1: return "Step 1 of 5 · Your family"
+        case 2: return "Step 2 of 5 · Your child"
+        case 3: return "Step 3 of 5 · \(safeChildName)'s iPhone"
+        case 4: return "Step 4 of 5 · Permission"
+        default: return "Step 5 of 5 · First rule"
         }
     }
 
@@ -49,16 +56,19 @@ final class OnboardingViewModel: ObservableObject {
         step != .launch
     }
 
+    var safeChildName: String {
+        let trimmed = childName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "Sam" : trimmed
+    }
+
     var canonicalDraft: OnboardingDraft {
         var draft = OnboardingDemoData.canonicalDraft
         draft.goal = goal ?? .homework
-        draft.child = OnboardingChildProfile(
-            firstName: childName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Sam" : childName,
-            experience: experience
-        )
+        draft.child = OnboardingChildProfile(firstName: safeChildName, experience: experience)
         let components = Calendar.current.dateComponents([.hour, .minute], from: deadline)
         draft.deadlineHour = components.hour ?? 18
         draft.deadlineMinute = components.minute ?? 0
+        draft.schedule = schedule
         return draft
     }
 
@@ -67,10 +77,10 @@ final class OnboardingViewModel: ObservableObject {
             return OnboardingActivationReadiness(
                 accountCreated: true,
                 childCreated: true,
-                devicePaired: pairingVariant != .recoveryRequired,
+                devicePaired: pairingVariant != .recoveryRequired && pairingVariant != .alreadyPaired,
                 appleAuthorisationGranted: testResult != .permissionRequired,
                 hasActiveRuleTarget: true,
-                testShieldApplied: testResult == .success,
+                testShieldApplied: false,
                 testShieldRemoved: false,
                 resultingStateVerified: false
             )
@@ -82,7 +92,15 @@ final class OnboardingViewModel: ObservableObject {
         guard let index = OnboardingStep.allCases.firstIndex(of: step) else { return }
         let nextIndex = OnboardingStep.allCases.index(after: index)
         guard nextIndex < OnboardingStep.allCases.endIndex else { return }
-        step = OnboardingStep.allCases[nextIndex]
+
+        // P-014 is a lightweight selected-starter state inside P-013 in the approved
+        // flow. Keep it addressable for review, but do not add a tap-stop.
+        if step == .starterRule {
+            self.step = .controlledApps
+            return
+        }
+
+        self.step = OnboardingStep.allCases[nextIndex]
     }
 
     func retreat() {
@@ -97,8 +115,17 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
+    func runProtectionTest() async {
+        isTestingProtection = true
+        try? await Task.sleep(for: .milliseconds(700))
+        guard !Task.isCancelled else { return }
+        isTestingProtection = false
+        step = .protectionTestResult
+    }
+
     func retryProtectionTest() {
         testResult = .success
+        isTestingProtection = false
         step = .protectionTest
     }
 }
