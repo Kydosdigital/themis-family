@@ -224,10 +224,12 @@ struct OnboardingView: View {
                 )
                 SignInWithAppleButton(.continue) { request in
                     request.requestedScopes = [.fullName, .email]
-                } onCompletion: { _ in
-                    // UI-04 remains mock-first. Production identity/session handling
-                    // belongs to the auth/backend implementation.
-                    viewModel.advance()
+                } onCompletion: { result in
+                    // UI-04 remains mock-first. A failed Apple result must never
+                    // advance into an "Account created" state.
+                    if case .success = result {
+                        viewModel.advance()
+                    }
                 }
                 .signInWithAppleButtonStyle(.black)
                 .frame(minHeight: 52)
@@ -704,8 +706,6 @@ struct OnboardingView: View {
         switch viewModel.step {
         case .addChild:
             return viewModel.childName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case .recoveryRequired:
-            return false
         default:
             return false
         }
