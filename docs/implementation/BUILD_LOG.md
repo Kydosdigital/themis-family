@@ -161,3 +161,37 @@ Verification:
 - Full iPad adaptation remains scheduled for UI-14; UI-02 already moves the dock inline at regular horizontal size class.
 
 Not changed: frozen requirements, tab IA, production Supabase, Apple enforcement.
+
+
+## 2026-09-30: UI-03 Child + Teen Home
+
+Status: COMPLETE; verified on macOS CI and reviewed from Release Simulator output against the approved Child/Teen direction.
+
+Source of truth: UI-03 implementation prompt, final Claude Design package, Design System, Engineering Handoff, approved requirements and MOBILE_UX_BLUEPRINT.
+
+Work:
+- Replaced the older Child/Teen scaffold with repository-backed presentation states for canonical Sam and Maya homes while retaining later-slice demo scenarios.
+- Implemented C-001 Sam Child Home with the warmer Child ground, Themis active status, privacy link, Homework section, due status, 4 PM / 6 PM / 8 PM AgreementTimeline, consequence copy, completion action and more-time action.
+- Implemented C-001 Maya Teen Home with the restrained Teen treatment, Themis active status, privacy link, Social apps 10 PM-7 AM schedule, AgreementTimeline, Focus Session and request action.
+- Implemented C-012 Themis is active, C-013 Child transparency, C-013 Teen privacy/transparency and C-014 Essential access.
+- Reused the shared status system and AgreementTimeline, including the stacked accessibility fallback.
+- Kept Child/Teen tabs to Home / My Rules / Requests.
+- Added deterministic standard, accessibility and tab-shell previews plus ChildTeenHomeTests.
+- Extended the macOS visual-review workflow to capture Parent, Child and Teen canonical homes at standard and approved large-text sizes.
+
+Review corrections before merge:
+- Visible C-001 actions now route to the correct owning future-screen placeholders: C-003 for homework submission, Q-001 for more-time requests and E-004 for Focus Session, without implementing those later flows.
+- Teen Home was tightened at standard text size so the active state and schedule status remain mature and compact, while accessibility sizes stack safely.
+- The Child timeline conditional band uses the readable label "Games pause"; the exact Roblox/Minecraft consequence remains directly below and the accessibility list preserves "From 6 PM · only if it applies".
+- Essential-access tests recognise explicit spike-gated Apple availability wording without turning Phone, Messages or Maps into a guarantee.
+- First-boot Simulator system banners are given time to clear before screenshot capture so review artifacts contain app UI rather than transient OS chrome.
+
+Verification:
+- GitHub macOS CI run 36682980817: real Xcode build passed and the full XCTest run passed on source commit e8b1ed1bad1e88579b143c4b502ab642ecb050e6.
+- GitHub visual-review run 36682976607: Release Simulator build and six screenshots passed, covering Parent, Sam and Maya at standard and approved large-text sizes.
+- Sam visual review: warm Child surface, dominant homework task/deadline, timeline, calm consequence, clear primary/secondary actions and approved three-tab IA.
+- Maya visual review: Parent-adjacent mature surface, schedule-first NOW section, compact status treatment, Focus Session, visible request action and approved three-tab IA.
+- Accessibility review: status chips remain single-line and AgreementTimeline changes to the stacked semantic representation at accessibility sizes.
+- Parent P-023 was recaptured as a regression check and remains aligned with the UI-02 implementation.
+
+Not changed: frozen requirements, production Supabase, Apple enforcement, OQ-30 capability assumptions, C-002 through C-011 implementation or UI-04.
