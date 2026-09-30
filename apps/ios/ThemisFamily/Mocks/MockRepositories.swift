@@ -14,4 +14,8 @@ struct MockChildHomeRepository: ChildHomeRepository {
     func home(childID: UUID, scenario: DemoScenario) async throws -> ChildHomeData {
         DemoData.childHome(childID: childID, scenario: scenario)
     }
+
+    func homeState(childID: UUID, scenario: DemoScenario) async throws -> ChildTeenHomeState {
+        ChildTeenHomeDemoData.state(childID: childID, scenario: scenario)
+    }
 }
