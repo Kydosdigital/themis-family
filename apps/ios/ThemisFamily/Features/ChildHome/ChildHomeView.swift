@@ -92,6 +92,7 @@ struct ChildHomeContentView: View {
     var open: (ChildHomeRoute) -> Void = { _ in }
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var audience: ThemisAudience { ThemisAudience(state.audience) }
 
@@ -137,17 +138,32 @@ struct ChildHomeContentView: View {
     private var activeCard: some View {
         Button { open(.active) } label: {
             ThemisCard {
-                VStack(alignment: .leading, spacing: ThemisSpacing.inline10) {
-                    StatusBadge(state.activeStatus, size: .chip, accessibilityContext: "Themis status")
+                if state.audience == .teen && !dynamicTypeSize.isAccessibilitySize {
                     HStack(spacing: ThemisSpacing.inline10) {
+                        StatusBadge(state.activeStatus, size: .compact, accessibilityContext: "Themis status")
                         Text("Themis is active")
                             .themisFont(.rowTitle)
                             .foregroundStyle(ThemisColor.textPrimary)
-                        Spacer(minLength: 8)
+                            .layoutPriority(1)
+                        Spacer(minLength: 6)
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(ThemisColor.chevron)
                             .accessibilityHidden(true)
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: ThemisSpacing.inline10) {
+                        StatusBadge(state.activeStatus, size: .chip, accessibilityContext: "Themis status")
+                        HStack(spacing: ThemisSpacing.inline10) {
+                            Text("Themis is active")
+                                .themisFont(.rowTitle)
+                                .foregroundStyle(ThemisColor.textPrimary)
+                            Spacer(minLength: 8)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(ThemisColor.chevron)
+                                .accessibilityHidden(true)
+                        }
                     }
                 }
             }
@@ -227,19 +243,20 @@ struct ChildHomeContentView: View {
                 SectionHeader(title: teen.nowSectionTitle)
                     .padding(.horizontal, 4)
 
-                ThemisCard(padding: ThemisSpacing.cardTask) {
+                ThemisCard(padding: ThemisSpacing.card) {
                     VStack(alignment: .leading, spacing: ThemisSpacing.block) {
-                        VStack(alignment: .leading, spacing: ThemisSpacing.inline6) {
-                            Text(teen.scheduleTitle)
-                                .themisFont(.headline)
-                                .foregroundStyle(ThemisColor.textPrimary)
-                            Text(teen.scheduleSummary)
-                                .themisFont(.body)
-                                .foregroundStyle(ThemisColor.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
+                        if dynamicTypeSize.isAccessibilitySize {
+                            VStack(alignment: .leading, spacing: ThemisSpacing.inline10) {
+                                teenScheduleCopy(teen)
+                                StatusBadge(teen.scheduleStatus, size: .chip)
+                            }
+                        } else {
+                            HStack(alignment: .top, spacing: ThemisSpacing.inline10) {
+                                teenScheduleCopy(teen)
+                                Spacer(minLength: 8)
+                                StatusBadge(teen.scheduleStatus, size: .compact)
+                            }
                         }
-
-                        StatusBadge(teen.scheduleStatus, size: .chip)
 
                         AgreementTimeline(model: teen.eveningTimeline)
                     }
@@ -250,8 +267,8 @@ struct ChildHomeContentView: View {
                 SectionHeader(title: teen.todaySectionTitle)
                     .padding(.horizontal, 4)
 
-                ThemisCard(padding: ThemisSpacing.cardTask) {
-                    VStack(alignment: .leading, spacing: ThemisSpacing.block) {
+                ThemisCard(padding: ThemisSpacing.card) {
+                    VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
                         VStack(alignment: .leading, spacing: ThemisSpacing.inline6) {
                             Text(teen.focusTitle)
                                 .themisFont(.headline)
@@ -279,6 +296,18 @@ struct ChildHomeContentView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func teenScheduleCopy(_ teen: TeenHomeState) -> some View {
+        VStack(alignment: .leading, spacing: ThemisSpacing.inline6) {
+            Text(teen.scheduleTitle)
+                .themisFont(.headline)
+                .foregroundStyle(ThemisColor.textPrimary)
+            Text(teen.scheduleSummary)
+                .themisFont(.body)
+                .foregroundStyle(ThemisColor.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
