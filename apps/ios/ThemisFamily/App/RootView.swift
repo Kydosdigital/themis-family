@@ -16,6 +16,12 @@ struct RootView: View {
             childShell(segment: .child, childID: DemoData.samID)
         case .teen:
             childShell(segment: .teen, childID: DemoData.mayaID)
+        case .rules:
+            NavigationStack { RulesSchoolAccessView(initialSection: .rules) }
+                .demoControls()
+        case .schoolAccess:
+            NavigationStack { RulesSchoolAccessView(initialSection: .schoolAccess) }
+                .demoControls()
         case .onboarding:
             OnboardingView(
                 initialStep: container.onboardingInitialStep ?? .launch,
