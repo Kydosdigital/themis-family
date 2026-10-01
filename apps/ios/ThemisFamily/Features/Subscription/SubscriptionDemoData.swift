@@ -11,14 +11,19 @@ enum SubscriptionDemoScenario: String, CaseIterable, Sendable, Identifiable {
     case manageCancelledPaidThrough
     /// B-003 · Apple Billing Grace Period.
     case billingGrace
-    /// B-003 recovered during grace: protection simply continues, no reactivation flow.
+    /// B-003 · Recovered: payment recovered during the Billing Grace Period. Protection
+    /// simply continues, no reactivation flow.
     case recoveredDuringGrace
     /// B-004 · Protection Expired.
     case protectionExpired
     /// B-005 · Resubscribed — "Ready to turn protection back on?"
     case readyToReactivate
+    /// B-005 · Not now — the parent explicitly deferred reactivation.
+    case readyToReactivateNotNow
     /// B-006 · Review existing rules.
     case reviewRetainedRules
+    /// B-006 · Confirm — confirm reactivation, after review, before anything is sent.
+    case reviewConfirmReactivation
     /// B-007 · Reactivation sent.
     case reactivationSent
     /// B-008 · Protection active on device.
@@ -32,20 +37,26 @@ enum SubscriptionDemoScenario: String, CaseIterable, Sendable, Identifiable {
 /// Demo data only — it never means an App Store transaction, backend entitlement change
 /// or device-shield change actually happened.
 enum SubscriptionDemoData {
-    /// Retained rule definitions, unchanged since before protection was cleared — only
-    /// enforcement paused, never the definitions themselves.
+    /// The approved B-006 retained-rule examples. Definitions only — unchanged since
+    /// before protection was cleared; only enforcement paused, never the definitions.
     static let retainedRules: [RetainedRule] = [
         RetainedRule(
             id: "sam-homework-deadline",
             childName: "Sam",
             title: "Homework Deadline",
-            detail: "Due 6:00 PM · Roblox + Minecraft pause if not done"
+            detail: "Due 6:00 PM"
+        ),
+        RetainedRule(
+            id: "sam-bedtime",
+            childName: "Sam",
+            title: "Bedtime",
+            detail: "8:30 PM–7:00 AM"
         ),
         RetainedRule(
             id: "maya-social-apps",
             childName: "Maya",
             title: "Social apps",
-            detail: "Pause 10:00 PM–7:00 AM"
+            detail: "10:00 PM–7:00 AM"
         )
     ]
 
@@ -58,15 +69,18 @@ enum SubscriptionDemoData {
     static func presentation(for scenario: SubscriptionDemoScenario) -> SubscriptionPresentation {
         switch scenario {
         case .offer:
+            // B-001: no entitlement and no device protection state exist yet. `nil`
+            // here must never be read as "inactive" standing in for "active" — it
+            // means the question doesn't apply yet, before any subscription exists.
             return SubscriptionPresentation(
                 screen: .offer,
-                lifecycle: .active,
-                protection: .enforcing,
+                lifecycle: nil,
+                protection: nil,
                 reactivationStep: nil,
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
             )
 
         case .manageActive:
@@ -78,7 +92,7 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
             )
 
         case .manageCancelledPaidThrough:
@@ -90,7 +104,7 @@ enum SubscriptionDemoData {
                 paidThroughDate: exampleReferenceDate,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
             )
 
         case .billingGrace:
@@ -102,7 +116,7 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: exampleReferenceDate,
                 retainedRules: [],
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
             )
 
         case .recoveredDuringGrace:
@@ -117,7 +131,7 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
             )
 
         case .protectionExpired:
@@ -129,7 +143,7 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
             )
 
         case .readyToReactivate:
@@ -141,7 +155,21 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
+            )
+
+        case .readyToReactivateNotNow:
+            // The parent chose "Not now": payment stays active, protection stays
+            // cleared, rules stay retained, and nothing advances to B-006/B-007/B-008.
+            return SubscriptionPresentation(
+                screen: .readyToReactivate,
+                lifecycle: .resubscribed,
+                protection: .cleared,
+                reactivationStep: .deferred,
+                paidThroughDate: nil,
+                exampleEntitlementDate: nil,
+                retainedRules: retainedRules,
+                reactivationConfirmedByParent: false
             )
 
         case .reviewRetainedRules:
@@ -153,7 +181,22 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
-                reactivationAcknowledged: false
+                reactivationConfirmedByParent: false
+            )
+
+        case .reviewConfirmReactivation:
+            // B-006 · Confirm sits strictly between review and send. The parent has
+            // not yet confirmed here, so protection remains cleared and nothing has
+            // been sent to the device.
+            return SubscriptionPresentation(
+                screen: .reviewRetainedRules,
+                lifecycle: .resubscribed,
+                protection: .cleared,
+                reactivationStep: .confirming,
+                paidThroughDate: nil,
+                exampleEntitlementDate: nil,
+                retainedRules: retainedRules,
+                reactivationConfirmedByParent: false
             )
 
         case .reactivationSent:
@@ -165,7 +208,7 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
-                reactivationAcknowledged: true
+                reactivationConfirmedByParent: true
             )
 
         case .protectionActiveOnDevice:
@@ -177,7 +220,7 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
-                reactivationAcknowledged: true
+                reactivationConfirmedByParent: true
             )
         }
     }

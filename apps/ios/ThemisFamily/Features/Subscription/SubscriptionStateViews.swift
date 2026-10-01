@@ -3,13 +3,57 @@ import SwiftUI
 /// Per-screen content for UI-12 (B-001…B-008). Each view takes a `SubscriptionPresentation`
 /// and renders using only shared `ThemisCard`/`ThemisButton`/`StatusBadge`/`InlineBanner`
 /// primitives — no new shared components, no custom payment forms.
+///
+/// Approved copy lives here as named constants (rather than inline string literals) so
+/// `SubscriptionTests.swift` can assert on exact wording without any SwiftUI dependency,
+/// and so a regression such as B-004 reverting to "this device" language fails a test
+/// immediately instead of only being caught by visual review.
 enum SubscriptionCopy {
     static func dateText(_ date: Date) -> String {
         date.formatted(date: .long, time: .omitted)
     }
+
+    // MARK: B-004 · Protection Expired
+
+    /// Approved meaning: the subscription lapsed and Themis cleared restrictions on the
+    /// CHILDREN's managed devices — never phrased as if the Parent's own phone (where
+    /// this screen is shown) was the restricted device.
+    static let protectionExpiredRestrictionsCleared =
+        "Your subscription lapsed, so Themis cleared all restrictions on Sam's and Maya's devices."
+    static let protectionExpiredRulesSaved = "Your rules are saved."
+
+    // MARK: B-005 · Ready to turn protection back on? / Not now
+
+    static let readyToReactivateTitle = "Ready to turn protection back on?"
+    static let readyToReactivateExplanation = "Your subscription is active again."
+    static let readyToReactivatePrimaryAction = "Review rules first"
+    static let readyToReactivateSecondaryAction = "Not now"
+    static let readyToReactivateReviewPrompt =
+        "Your previous rules are still saved. Nothing has been re-applied to the device yet — review them first, since things may have changed."
+
+    /// B-005 · Not now: a calm confirmation that deferring changed nothing — payment
+    /// stays active, protection stays cleared, rules stay retained.
+    static let notNowExplanation =
+        "Protection stays off for now. Your rules are still saved, and nothing has been sent to Sam's or Maya's devices. Review them whenever you're ready."
+
+    // MARK: B-006 · Review old rules
+
+    static let reviewRulesTitle = "Review your rules"
+    static let reviewRulesSupportingCopy = "Edit any rule before turning protection on."
+    static let reviewRulesPrimaryAction = "Turn protection back on"
+
+    // MARK: B-006 · Confirm
+
+    static let confirmTitle = "Turn protection back on?"
+    static let confirmExplanation =
+        "The reviewed, saved rules will be sent to Sam's and Maya's managed devices. Protection isn't active on those devices until they acknowledge the rules were applied."
+    static let confirmPrimaryAction = "Turn protection back on"
+    static let confirmSecondaryAction = "Cancel"
 }
 
 /// B-001 · Trial / subscription offer. Calm, premium, no invented pricing or trial length.
+/// Shown before any entitlement exists — deliberately takes no `SubscriptionPresentation`,
+/// since there is no lifecycle or protection state to represent yet.
 struct SubscriptionOfferView: View {
     let onContinue: () -> Void
 
@@ -124,7 +168,9 @@ struct SubscriptionBillingGraceView: View {
     }
 }
 
-/// B-004 · Protection Expired. Not punitive, not phrased as deletion — rules are retained.
+/// B-004 · Protection Expired. Not punitive, not phrased as deletion — rules are
+/// retained. The Parent views this on their own phone, so the copy is explicit that it
+/// is Sam's and Maya's devices that had restrictions cleared, never "this device".
 struct SubscriptionProtectionExpiredView: View {
     let onContinue: () -> Void
 
@@ -138,11 +184,11 @@ struct SubscriptionProtectionExpiredView: View {
 
                 ThemisCard {
                     VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
-                        Text("Themis-managed restrictions have been cleared on this device.")
+                        Text(SubscriptionCopy.protectionExpiredRestrictionsCleared)
                             .themisFont(.body)
                             .foregroundStyle(ThemisColor.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text("Your existing rules are saved and ready for whenever you're ready to turn protection back on.")
+                        Text(SubscriptionCopy.protectionExpiredRulesSaved)
                             .themisFont(.secondary)
                             .foregroundStyle(ThemisColor.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -157,32 +203,39 @@ struct SubscriptionProtectionExpiredView: View {
     }
 }
 
-/// B-005 · Resubscribed — "Ready to turn protection back on?" Payment active again;
-/// protection is not automatically reinstated.
+/// B-005 · Resubscribed — "Ready to turn protection back on?", and its approved
+/// secondary result, B-005 · Not now. Payment is active again in both; protection is
+/// never automatically reinstated.
 struct SubscriptionReadyToReactivateView: View {
+    /// `true` renders the B-005 · Not now result instead of the initial B-005 ask.
+    var isDeferred: Bool = false
     let onReviewRules: () -> Void
+    var onNotNow: () -> Void = {}
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
-                Text("Ready to turn protection back on?")
+                Text(SubscriptionCopy.readyToReactivateTitle)
                     .themisFont(.pageTitle)
                     .foregroundStyle(ThemisColor.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 ThemisCard {
                     VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
-                        Text("Your subscription is active again.")
+                        Text(SubscriptionCopy.readyToReactivateExplanation)
                             .themisFont(.body)
                             .foregroundStyle(ThemisColor.textPrimary)
-                        Text("Your previous rules are still saved. Nothing has been re-applied to the device yet — review them first, since things may have changed.")
+                        Text(isDeferred ? SubscriptionCopy.notNowExplanation : SubscriptionCopy.readyToReactivateReviewPrompt)
                             .themisFont(.secondary)
                             .foregroundStyle(ThemisColor.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
-                ThemisButton(title: "Review rules", action: onReviewRules)
+                ThemisButton(title: SubscriptionCopy.readyToReactivatePrimaryAction, action: onReviewRules)
+                if !isDeferred {
+                    ThemisButton(title: SubscriptionCopy.readyToReactivateSecondaryAction, style: .tertiary, action: onNotNow)
+                }
             }
             .padding(ThemisSpacing.screen)
         }
@@ -190,28 +243,67 @@ struct SubscriptionReadyToReactivateView: View {
     }
 }
 
-/// B-006 · Review existing rules. Review only — not the UI-05 rule editor.
+/// B-006 · Review existing rules. Review only — not the UI-05 rule editor. There are no
+/// per-rule activation toggles; a row tap is an inert, feature-local "Edit" callback
+/// suitable for later integration, never wired into UI-05 from this isolated slice.
 struct SubscriptionReviewRulesView: View {
     let rules: [RetainedRule]
     let onTurnProtectionBackOn: () -> Void
+    var onEditRule: (RetainedRule) -> Void = { _ in }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
-                Text("Review your rules")
+                Text(SubscriptionCopy.reviewRulesTitle)
                     .themisFont(.pageTitle)
                     .foregroundStyle(ThemisColor.textPrimary)
 
-                Text("These are the rules Themis last had saved. Make sure they still make sense before protection turns back on.")
+                Text(SubscriptionCopy.reviewRulesSupportingCopy)
                     .themisFont(.secondary)
                     .foregroundStyle(ThemisColor.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 ThemisGroupedSection(data: rules) { rule in
-                    ThemisRow(title: rule.title, subtitle: "\(rule.childName) · \(rule.detail)")
+                    Button {
+                        onEditRule(rule)
+                    } label: {
+                        ThemisRow(title: rule.title, subtitle: "\(rule.childName) · \(rule.detail)", showsChevron: true)
+                    }
+                    .buttonStyle(.plain)
                 }
 
-                ThemisButton(title: "Turn protection back on", action: onTurnProtectionBackOn)
+                ThemisButton(title: SubscriptionCopy.reviewRulesPrimaryAction, action: onTurnProtectionBackOn)
+            }
+            .padding(ThemisSpacing.screen)
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+/// B-006 · Confirm. Sits strictly between B-006 review and B-007 send. Confirming here
+/// does not mean protection is active — only that the rules will be sent and the device
+/// has not yet acknowledged them.
+struct SubscriptionReviewConfirmView: View {
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: ThemisSpacing.block) {
+                Text(SubscriptionCopy.confirmTitle)
+                    .themisFont(.pageTitle)
+                    .foregroundStyle(ThemisColor.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                ThemisCard {
+                    Text(SubscriptionCopy.confirmExplanation)
+                        .themisFont(.secondary)
+                        .foregroundStyle(ThemisColor.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                ThemisButton(title: SubscriptionCopy.confirmPrimaryAction, action: onConfirm)
+                ThemisButton(title: SubscriptionCopy.confirmSecondaryAction, style: .tertiary, action: onCancel)
             }
             .padding(ThemisSpacing.screen)
         }

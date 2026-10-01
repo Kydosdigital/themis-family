@@ -29,13 +29,14 @@ final class SubscriptionTests: XCTestCase {
         XCTAssertEqual(DeviceProtectionState.allCases.count, 3)
         XCTAssertEqual(Set(DeviceProtectionState.allCases), [.enforcing, .cleared, .reactivationSent])
         for state in DeviceProtectionState.allCases {
-            XCTAssertNotEqual(state.rawValue.lowercased(), "partial")
             XCTAssertFalse(state.rawValue.lowercased().contains("partial"))
             XCTAssertFalse(state.rawValue.lowercased().contains("reduced"))
         }
     }
 
-    // MARK: Test 4 — Protection Expired clears restrictions but retains rule definitions
+    // MARK: Test 4 — Protection Expired clears restrictions but retains rule definitions,
+    // and NEVER describes the clearing as happening on "this device" (the Parent is
+    // viewing B-004 on their own phone; the cleared devices are Sam's and Maya's).
 
     func testProtectionExpiredClearsRestrictionsAndRetainsRuleDefinitions() {
         XCTAssertEqual(SubscriptionStateMachine.protectionState(for: .protectionExpired), .cleared)
@@ -43,6 +44,14 @@ final class SubscriptionTests: XCTestCase {
         let presentation = SubscriptionDemoData.presentation(for: .protectionExpired)
         XCTAssertEqual(presentation.protection, .cleared)
         XCTAssertFalse(presentation.retainedRules.isEmpty)
+    }
+
+    func testProtectionExpiredCopyDoesNotSayThisDeviceAndNamesTheChildrensDevices() {
+        XCTAssertFalse(SubscriptionCopy.protectionExpiredRestrictionsCleared.lowercased().contains("this device"))
+        XCTAssertTrue(SubscriptionCopy.protectionExpiredRestrictionsCleared.contains("Sam"))
+        XCTAssertTrue(SubscriptionCopy.protectionExpiredRestrictionsCleared.contains("Maya"))
+        XCTAssertTrue(SubscriptionCopy.protectionExpiredRestrictionsCleared.contains("devices"))
+        XCTAssertEqual(SubscriptionCopy.protectionExpiredRulesSaved, "Your rules are saved.")
     }
 
     // MARK: Test 5 — resubscribing after Protection Expired does not auto-reactivate
@@ -62,11 +71,35 @@ final class SubscriptionTests: XCTestCase {
         XCTAssertTrue(SubscriptionStateMachine.isPaymentActive(presentation.lifecycle))
     }
 
-    // MARK: Test 6 — resubscription requires review, confirmation, sent, then device ack
+    // MARK: Test (B-005 · Not now) — payment active, protection cleared, rules retained,
+    // no automatic transition into the B-006/B-007/B-008 reactivation flow.
+
+    func testReadyToReactivateNotNowKeepsPaymentActiveAndProtectionClearedWithoutAdvancing() {
+        let presentation = SubscriptionDemoData.presentation(for: .readyToReactivateNotNow)
+
+        XCTAssertEqual(presentation.screen, .readyToReactivate)
+        XCTAssertEqual(presentation.reactivationStep, .deferred)
+        XCTAssertTrue(SubscriptionStateMachine.isPaymentActive(presentation.lifecycle))
+        XCTAssertEqual(presentation.protection, .cleared)
+        XCTAssertFalse(presentation.retainedRules.isEmpty)
+        XCTAssertFalse(presentation.reactivationConfirmedByParent)
+
+        // "Not now" only ever returns to the ask; it never advances into review/confirm/send.
+        XCTAssertEqual(ReactivationReviewStep.deferred.allowedNextSteps, [.awaitingReview])
+        XCTAssertFalse(ReactivationReviewStep.deferred.allowedNextSteps.contains(.reviewingRetainedRules))
+        XCTAssertFalse(ReactivationReviewStep.deferred.allowedNextSteps.contains(.confirming))
+        XCTAssertFalse(ReactivationReviewStep.deferred.allowedNextSteps.contains(.sent))
+    }
+
+    // MARK: Test 6 — the full confirmed sequence, including the new B-006 · Confirm step
 
     func testResubscriptionRequiresReviewConfirmationSentThenDeviceAcknowledgementBeforeActive() {
         XCTAssertEqual(
             SubscriptionStateMachine.protectionState(for: .resubscribed, reactivationStep: .reviewingRetainedRules),
+            .cleared
+        )
+        XCTAssertEqual(
+            SubscriptionStateMachine.protectionState(for: .resubscribed, reactivationStep: .confirming),
             .cleared
         )
         XCTAssertEqual(
@@ -78,7 +111,9 @@ final class SubscriptionTests: XCTestCase {
             .enforcing
         )
 
-        let order: [ReactivationReviewStep] = [.awaitingReview, .reviewingRetainedRules, .sent, .acknowledgedOnDevice]
+        let order: [ReactivationReviewStep] = [
+            .awaitingReview, .deferred, .reviewingRetainedRules, .confirming, .sent, .acknowledgedOnDevice
+        ]
         XCTAssertEqual(Set(order), Set(ReactivationReviewStep.allCases))
     }
 
@@ -151,6 +186,9 @@ final class SubscriptionTests: XCTestCase {
         XCTAssertNotEqual(presentation.protection, .enforcing)
         XCTAssertEqual(presentation.protection, .reactivationSent)
         XCTAssertEqual(presentation.reactivationStep, .sent)
+        // True on B-007 even though the device has not acknowledged anything — this is
+        // exactly why the field is named for PARENT confirmation, not acknowledgement.
+        XCTAssertTrue(presentation.reactivationConfirmedByParent)
     }
 
     // MARK: Test 12 — B-008 represents device-acknowledged Protection Active
@@ -162,15 +200,69 @@ final class SubscriptionTests: XCTestCase {
         XCTAssertEqual(presentation.reactivationStep, .acknowledgedOnDevice)
     }
 
-    // MARK: Test 13 — retained rules include canonical Sam and Maya examples
+    // MARK: Test 13 — retained rules include all three canonical approved examples
 
-    func testRetainedRulesIncludeCanonicalSamAndMayaExamples() {
+    func testRetainedRulesIncludeAllThreeCanonicalExamples() {
         let rules = SubscriptionDemoData.retainedRules
-        XCTAssertTrue(rules.contains { $0.childName == "Sam" && $0.title == "Homework Deadline" })
-        XCTAssertTrue(rules.contains { $0.childName == "Maya" && $0.title == "Social apps" })
+        XCTAssertEqual(rules.count, 3)
+        XCTAssertTrue(rules.contains {
+            $0.childName == "Sam" && $0.title == "Homework Deadline" && $0.detail == "Due 6:00 PM"
+        })
+        XCTAssertTrue(rules.contains {
+            $0.childName == "Sam" && $0.title == "Bedtime" && $0.detail == "8:30 PM–7:00 AM"
+        })
+        XCTAssertTrue(rules.contains {
+            $0.childName == "Maya" && $0.title == "Social apps" && $0.detail == "10:00 PM–7:00 AM"
+        })
     }
 
-    // MARK: Test 14 — billing presentation is Parent-only, no child-blaming language
+    // MARK: Test — B-006 review is not a rule editor: `RetainedRule` carries no
+    // activation-toggle or enabled field, only the four read-only display properties.
+
+    func testRetainedRuleHasNoActivationToggleFieldsAndIsReviewOnly() {
+        let rule = SubscriptionDemoData.retainedRules[0]
+        let mirror = Mirror(reflecting: rule)
+        let fieldNames = Set(mirror.children.compactMap(\.label))
+        XCTAssertEqual(fieldNames, ["id", "childName", "title", "detail"])
+        XCTAssertFalse(fieldNames.contains("isEnabled"))
+        XCTAssertFalse(fieldNames.contains("isActive"))
+        XCTAssertFalse(fieldNames.contains("isSelected"))
+
+        XCTAssertFalse(SubscriptionCopy.reviewRulesSupportingCopy.lowercased().contains("toggle"))
+        XCTAssertEqual(SubscriptionCopy.reviewRulesSupportingCopy, "Edit any rule before turning protection on.")
+        XCTAssertEqual(SubscriptionCopy.reviewRulesPrimaryAction, "Turn protection back on")
+    }
+
+    // MARK: Test — B-006 · Confirm exists as its own deterministic state, distinct from
+    // plain review, and still does not mean protection is active.
+
+    func testReviewConfirmExistsAsSeparateStateBeforeSending() {
+        let presentation = SubscriptionDemoData.presentation(for: .reviewConfirmReactivation)
+
+        XCTAssertEqual(presentation.reactivationStep, .confirming)
+        XCTAssertNotEqual(presentation.reactivationStep, .reviewingRetainedRules)
+        XCTAssertEqual(presentation.protection, .cleared)
+        XCTAssertFalse(presentation.reactivationConfirmedByParent)
+        XCTAssertTrue(SubscriptionStateMachine.isPaymentActive(presentation.lifecycle))
+
+        XCTAssertEqual(SubscriptionCopy.confirmTitle, "Turn protection back on?")
+        XCTAssertEqual(SubscriptionCopy.confirmPrimaryAction, "Turn protection back on")
+        XCTAssertEqual(SubscriptionCopy.confirmSecondaryAction, "Cancel")
+    }
+
+    // MARK: Test — Parent confirmation transitions to B-007 (sent), never directly to
+    // B-008 (acknowledgedOnDevice/enforcing); B-007 is reachable only via `confirming`.
+
+    func testParentConfirmationTransitionsOnlyToReactivationSentNotDirectlyToActive() {
+        XCTAssertTrue(SubscriptionStateMachine.canAdvance(from: .confirming, to: .sent))
+        XCTAssertFalse(SubscriptionStateMachine.canAdvance(from: .confirming, to: .acknowledgedOnDevice))
+        XCTAssertFalse(SubscriptionStateMachine.canAdvance(from: .reviewingRetainedRules, to: .sent))
+        XCTAssertFalse(SubscriptionStateMachine.canAdvance(from: .awaitingReview, to: .sent))
+        XCTAssertFalse(SubscriptionStateMachine.canAdvance(from: nil, to: .sent))
+        XCTAssertTrue(SubscriptionStateMachine.canAdvance(from: .sent, to: .acknowledgedOnDevice))
+    }
+
+    // MARK: Test — billing presentation is Parent-only, no child-blaming language
 
     func testBillingPresentationIsParentOnlyWithNoChildBlamingLanguage() {
         let presentation = SubscriptionDemoData.presentation(for: .billingGrace)
@@ -188,7 +280,7 @@ final class SubscriptionTests: XCTestCase {
         }
     }
 
-    // MARK: Test 15 — Themis never claims it directly processes the App Store payment
+    // MARK: Test — Themis never claims it directly processes the App Store payment
 
     func testSubscriptionPresentationDoesNotClaimThemisProcessesPaymentDirectly() {
         let manageCopy = "Managed by: App Store. Your subscription is managed through the App Store."
@@ -205,5 +297,39 @@ final class SubscriptionTests: XCTestCase {
         for claim in forbiddenClaims {
             XCTAssertFalse(manageCopy.lowercased().contains(claim))
         }
+    }
+
+    // MARK: Test — B-001 does not imply an active entitlement or active device protection
+
+    func testOfferPresentationDoesNotImplyActiveEntitlementOrActiveProtection() {
+        let presentation = SubscriptionDemoData.presentation(for: .offer)
+
+        XCTAssertEqual(presentation.screen, .offer)
+        XCTAssertNil(presentation.lifecycle)
+        XCTAssertNil(presentation.protection)
+        XCTAssertNotEqual(presentation.lifecycle, .active)
+        XCTAssertNotEqual(presentation.protection, .enforcing)
+        XCTAssertFalse(SubscriptionStateMachine.isPaymentActive(presentation.lifecycle))
+        XCTAssertTrue(presentation.retainedRules.isEmpty)
+        XCTAssertFalse(presentation.reactivationConfirmedByParent)
+    }
+
+    // MARK: Test — the parent-confirmation field is not ambiguously named as device
+    // acknowledgement: confirmed by name, and by behaviour (true pre-device-ack on B-007).
+
+    func testParentConfirmationFieldIsNotAmbiguouslyNamedAsDeviceAcknowledgement() {
+        let fieldNames = Set(Mirror(reflecting: SubscriptionDemoData.presentation(for: .reactivationSent)).children.compactMap(\.label))
+        XCTAssertTrue(fieldNames.contains("reactivationConfirmedByParent"))
+        XCTAssertFalse(fieldNames.contains("reactivationAcknowledged"))
+
+        // On B-007 the parent has confirmed, but the device has not acknowledged yet —
+        // these must never read as the same thing.
+        let sent = SubscriptionDemoData.presentation(for: .reactivationSent)
+        XCTAssertTrue(sent.reactivationConfirmedByParent)
+        XCTAssertNotEqual(sent.protection, .enforcing)
+
+        let active = SubscriptionDemoData.presentation(for: .protectionActiveOnDevice)
+        XCTAssertTrue(active.reactivationConfirmedByParent)
+        XCTAssertEqual(active.protection, .enforcing)
     }
 }

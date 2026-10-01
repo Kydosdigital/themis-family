@@ -66,16 +66,40 @@ enum DeviceProtectionState: String, CaseIterable, Sendable, Equatable {
 }
 
 /// The explicit resubscription review flow required before protection may resume after
-/// `protectionExpired` (§25.6). Never skipped, never silently automatic.
+/// `protectionExpired` (§25.6). Never skipped, never silently automatic. Confirmed
+/// sequence: `awaitingReview` (B-005) → `reviewingRetainedRules` (B-006) →
+/// `confirming` (B-006 · Confirm) → `sent` (B-007) → `acknowledgedOnDevice` (B-008).
+/// `deferred` (B-005 · Not now) is the one alternate branch: it returns to
+/// `awaitingReview` without ever touching B-006/B-007/B-008.
 enum ReactivationReviewStep: String, CaseIterable, Sendable, Equatable {
     /// "Ready to turn protection back on?" — B-005.
     case awaitingReview
+    /// The parent chose "Not now" — B-005 · Not now. Payment stays active, protection
+    /// stays cleared, rules stay retained; nothing advances automatically.
+    case deferred
     /// The parent is reviewing retained rule definitions — B-006.
     case reviewingRetainedRules
-    /// The parent confirmed; reactivation has been sent to the device — B-007.
+    /// The parent is confirming reactivation before anything is sent — B-006 · Confirm.
+    /// Confirming here does NOT mean protection is active yet.
+    case confirming
+    /// The parent confirmed; reactivation has been sent to the device — B-007. Not
+    /// active on the device until it acknowledges.
     case sent
     /// The child device acknowledged the plan is applied — B-008.
     case acknowledgedOnDevice
+
+    /// Valid next steps in the confirmed sequence. Used by this isolated slice's own
+    /// tests to prove B-007 (`sent`) can never be reached except via `confirming`.
+    var allowedNextSteps: Set<ReactivationReviewStep> {
+        switch self {
+        case .awaitingReview: return [.reviewingRetainedRules, .deferred]
+        case .deferred: return [.awaitingReview]
+        case .reviewingRetainedRules: return [.confirming]
+        case .confirming: return [.sent]
+        case .sent: return [.acknowledgedOnDevice]
+        case .acknowledgedOnDevice: return []
+        }
+    }
 }
 
 /// Pure mapping from lifecycle (+ reactivation step where relevant) to the two states a
@@ -92,6 +116,12 @@ enum SubscriptionStateMachine {
         }
     }
 
+    /// `nil` (B-001, before any entitlement exists) never implies an active entitlement.
+    static func isPaymentActive(_ lifecycle: SubscriptionLifecycleState?) -> Bool {
+        guard let lifecycle else { return false }
+        return isPaymentActive(lifecycle)
+    }
+
     /// The device protection state for a given lifecycle state and (only meaningful
     /// after `.resubscribed`) reactivation step.
     static func protectionState(
@@ -105,7 +135,7 @@ enum SubscriptionStateMachine {
             return .cleared
         case .resubscribed:
             switch reactivationStep {
-            case nil, .awaitingReview, .reviewingRetainedRules:
+            case nil, .awaitingReview, .deferred, .reviewingRetainedRules, .confirming:
                 return .cleared
             case .sent:
                 return .reactivationSent
@@ -113,6 +143,15 @@ enum SubscriptionStateMachine {
                 return .enforcing
             }
         }
+    }
+
+    /// Whether advancing from `step` (`nil` meaning no reactivation flow started yet)
+    /// to `next` is a valid move in the confirmed B-005 → B-006 → B-006 · Confirm →
+    /// B-007 → B-008 sequence. Proves B-007 (`sent`) can only follow `confirming` —
+    /// never reachable directly from `reviewingRetainedRules` or `awaitingReview`.
+    static func canAdvance(from step: ReactivationReviewStep?, to next: ReactivationReviewStep) -> Bool {
+        guard let step else { return next == .awaitingReview }
+        return step.allowedNextSteps.contains(next)
     }
 }
 
@@ -143,10 +182,15 @@ struct RetainedRule: Identifiable, Sendable, Equatable {
 /// Everything one Subscription screen needs to render, with no App Store transaction
 /// object and no production entitlement logic — a future subscription service supplies
 /// the equivalent real data.
+///
+/// `lifecycle` and `protection` are optional because B-001 (the pre-subscription
+/// trial/offer screen) has neither an entitlement nor a device protection state yet —
+/// `nil` here must never be defaulted to `.active`/`.enforcing`. Every other screen
+/// (B-002 onward) always supplies both, since by then a subscription exists.
 struct SubscriptionPresentation: Sendable, Equatable {
     let screen: SubscriptionScreen
-    let lifecycle: SubscriptionLifecycleState
-    let protection: DeviceProtectionState
+    let lifecycle: SubscriptionLifecycleState?
+    let protection: DeviceProtectionState?
     let reactivationStep: ReactivationReviewStep?
 
     /// Paid-through date for the voluntary-cancellation copy ("Protection stays active
@@ -161,7 +205,10 @@ struct SubscriptionPresentation: Sendable, Equatable {
     /// Non-empty whenever `lifecycle` is `.protectionExpired` or `.resubscribed`.
     let retainedRules: [RetainedRule]
 
-    /// Whether the parent has explicitly confirmed reactivation in this presentation
-    /// (B-006 → B-007 transition gate). Never implied automatically.
-    let reactivationAcknowledged: Bool
+    /// Whether the PARENT has explicitly confirmed reactivation (the B-006 · Confirm →
+    /// B-007 transition gate). Deliberately not named "acknowledged": that word is
+    /// reserved for the separate, later CHILD-DEVICE acknowledgement event
+    /// (`protection == .enforcing` after `reactivationStep == .acknowledgedOnDevice`).
+    /// True on B-007 even though the device has not acknowledged anything yet.
+    let reactivationConfirmedByParent: Bool
 }

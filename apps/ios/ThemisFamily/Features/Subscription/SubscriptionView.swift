@@ -47,9 +47,17 @@ struct SubscriptionView: View {
         case .protectionExpiredNotice:
             SubscriptionProtectionExpiredView(onContinue: {})
         case .readyToReactivate:
-            SubscriptionReadyToReactivateView(onReviewRules: {})
+            SubscriptionReadyToReactivateView(
+                isDeferred: presentation.reactivationStep == .deferred,
+                onReviewRules: {},
+                onNotNow: {}
+            )
         case .reviewRetainedRules:
-            SubscriptionReviewRulesView(rules: presentation.retainedRules, onTurnProtectionBackOn: {})
+            if presentation.reactivationStep == .confirming {
+                SubscriptionReviewConfirmView(onConfirm: {}, onCancel: {})
+            } else {
+                SubscriptionReviewRulesView(rules: presentation.retainedRules, onTurnProtectionBackOn: {})
+            }
         case .reactivationSent:
             SubscriptionReactivationSentView()
         case .protectionActiveOnDevice:
@@ -108,6 +116,19 @@ struct SubscriptionView: View {
     }
 }
 
+#Preview("B-005 · Not now") {
+    NavigationStack {
+        SubscriptionView(scenario: .readyToReactivateNotNow)
+    }
+}
+
+#Preview("B-005 · Not now, accessibility3") {
+    NavigationStack {
+        SubscriptionView(scenario: .readyToReactivateNotNow)
+    }
+    .environment(\.dynamicTypeSize, .accessibility3)
+}
+
 #Preview("B-006 · Review rules") {
     NavigationStack {
         SubscriptionView(scenario: .reviewRetainedRules)
@@ -117,6 +138,19 @@ struct SubscriptionView: View {
 #Preview("B-006 · Review rules, accessibility3") {
     NavigationStack {
         SubscriptionView(scenario: .reviewRetainedRules)
+    }
+    .environment(\.dynamicTypeSize, .accessibility3)
+}
+
+#Preview("B-006 · Confirm") {
+    NavigationStack {
+        SubscriptionView(scenario: .reviewConfirmReactivation)
+    }
+}
+
+#Preview("B-006 · Confirm, accessibility3") {
+    NavigationStack {
+        SubscriptionView(scenario: .reviewConfirmReactivation)
     }
     .environment(\.dynamicTypeSize, .accessibility3)
 }
