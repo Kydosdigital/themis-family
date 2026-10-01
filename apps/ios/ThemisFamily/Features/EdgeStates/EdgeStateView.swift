@@ -13,6 +13,7 @@ private extension EdgeStateStatusKind {
     var themisStatus: ThemisStatus? {
         switch self {
         case .protectionUnavailable: return .protectionUnavailable
+        case .unconfirmed: return .unconfirmed
         case .deviceOffline: return .deviceOffline
         case .syncPending: return .syncPending
         case .approvedTimingUnverified: return .approvedTimingUnverified
