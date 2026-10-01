@@ -138,3 +138,24 @@ Source: UI-03 implementation prompt, final Claude Design Child/Teen frames, Desi
 9. **Simulator OS noise.** The visual-review workflow waits for first-boot system banners to clear and then waits after each perspective launch. This keeps screenshot artifacts deterministic without changing app behaviour.
 
 Product impact: none. No approved product behaviour, privacy rule, business rule or Apple capability assumption changed.
+
+
+## IMP-UI-004: UI-04 Onboarding implementation choices
+
+Date: 2026-09-30
+Status: Verified and merged
+
+Source: approved onboarding requirements, final clickable prototype, Design System, Engineering Handoff and UI-04 implementation prompt.
+
+1. **One onboarding state machine.** P-001 through P-022 are represented by a typed `OnboardingStep` flow with deterministic review entry points, rather than 22 unrelated screens.
+2. **Five approved chapters.** The visible progress indicator follows the prototype's family, child, device, permission and first-rule chapters. Lightweight states such as P-014 remain addressable for review without adding unnecessary tap stops.
+3. **Apple-owned UI remains Apple-owned.** Sign in with Apple uses the native control. Family Controls authorisation and the app/site picker are represented only as clearly labelled system-owned handoffs, never recreated as fake Themis UI.
+4. **Activation is fail-closed.** P-022 is reachable only when account, child, pairing, Apple authorisation, rule target, test application, test removal and resulting-state verification are all satisfied. Account creation alone is explicitly Not active yet.
+5. **Homework verification.** Generic Homework uses Parent Approval only. Automatic Verification remains limited to supported Themis-timed sessions.
+6. **Pairing conflicts are blocking.** Already-paired and recovery-required states never silently rebind a device. Secure recovery remains a separate authorised path.
+7. **Essential access stays conservative.** Phone, Messages and Maps are described as configurable where supported, school access remains part of the family agreement, and emergency calling is never deliberately restricted.
+8. **Deferred onboarding uses existing incomplete state.** Choosing to do device pairing later returns to the established Parent Home setup-incomplete presentation instead of fabricating a protected state.
+9. **Shared timeline fix.** Open-ended `AgreementTimeline` bands use the remaining visible width so labels cannot render beyond the screen edge. This fixes both onboarding Bedtime and Teen Social apps pause clipping centrally.
+10. **Mock-first protection test.** UI-04 can visually exercise test success/failure states, but production test behaviour remains behind the Apple real-device gates.
+
+Product impact: none. No approved business rule, privacy rule or Apple capability assumption changed.
