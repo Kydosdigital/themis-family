@@ -253,8 +253,8 @@ enum EdgeStateCopy {
     // MARK: C-004 · Queued (saved offline)
     static let childQueuedTitle = "Saved offline"
     static let childQueuedMessage =
-        "The time you pressed it is saved. This will send to Themis as soon as the " +
-        "connection comes back. If the timing can't later be confirmed, a parent or " +
+        "The time you pressed it is saved. This will wait to send when Themis " +
+        "reconnects. If the timing can't later be confirmed, a parent or " +
         "carer may take a normal look."
 
     // MARK: Q-006 · Offline (request saved offline)
@@ -278,9 +278,8 @@ enum EdgeStateCopy {
     // MARK: P-010 · Pairing interrupted
     static let pairingInterruptedTitle = "Pairing interrupted"
     static let pairingInterruptedMessage =
-        "Pairing didn't finish. This device wasn't added to the household, so " +
-        "there's nothing partial to undo \u{2014} you can try again whenever " +
-        "you're ready."
+        "Pairing didn't finish. Themis hasn't confirmed this device for this " +
+        "household. You can try pairing again whenever you're ready."
     static let pairingInterruptedRetry = "Try pairing again"
 
     // MARK: E-007 · Session not finished (abandoned)
