@@ -7,6 +7,8 @@ final class AppContainer: ObservableObject {
         case child = "Sam · Child"
         case teen = "Maya · Teen"
         case onboarding = "Onboarding"
+        case rules = "Rules"
+        case schoolAccess = "School Access"
 
         var id: String { rawValue }
     }
@@ -56,6 +58,8 @@ final class AppContainer: ObservableObject {
         case "child": return .child
         case "teen": return .teen
         case "onboarding": return .onboarding
+        case "rules": return .rules
+        case "school-access": return .schoolAccess
         default: return nil
         }
     }
