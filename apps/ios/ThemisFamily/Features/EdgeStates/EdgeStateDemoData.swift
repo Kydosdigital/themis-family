@@ -69,7 +69,7 @@ enum EdgeStateDemoData {
                 screenID: scenario.screenID,
                 frameName: scenario.frameName,
                 audience: .parent,
-                severity: .unavailable,
+                severity: .offline,
                 title: EdgeStateCopy.serversUnreachableTitle,
                 message: EdgeStateCopy.serversUnreachableMessage,
                 statusKind: .unconfirmed,
