@@ -42,7 +42,9 @@ struct RootView: View {
                 repository: container.parentRepository,
                 scenario: container.scenario
             )
-        case .rules, .activity, .settings:
+        case .rules:
+            NavigationStack { RulesSchoolAccessView() }
+        case .activity, .settings:
             ShellPlaceholderView(title: tab.title, screenID: tab.rootScreenID)
         }
     }
