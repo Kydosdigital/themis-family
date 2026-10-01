@@ -113,15 +113,15 @@ enum EdgeStateScenario: String, CaseIterable, Identifiable, Sendable {
     /// The audience this state is written for.
     var audience: EdgeStateAudience {
         switch self {
-        case .serversUnreachable, .actionCentreEmpty, .timingUnverified, .timingApproved,
-             .timingAsk, .activityTiming, .decisionSendFailed:
+        case .serversUnreachable, .actionCentreEmpty, .activityEmpty, .timingUnverified,
+             .timingApproved, .timingAsk, .activityTiming, .decisionSendFailed,
+             .pairingInterrupted, .permissionRevokedExternally:
             return .parent
         case .childOffline, .childQueuedOffline, .childTimingUnverified, .childPermissionNeeded,
-             .childDeviceRemoved:
+             .childDeviceRemoved, .sessionAbandoned:
             return .child
-        case .activityEmpty, .requestSavedOffline, .pairingInterrupted, .sessionAbandoned,
-             .permissionRevokedExternally:
-            return .parent
+        case .requestSavedOffline:
+            return .teen
         }
     }
 
