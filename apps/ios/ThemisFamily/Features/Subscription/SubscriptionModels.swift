@@ -179,6 +179,26 @@ struct RetainedRule: Identifiable, Sendable, Equatable {
     let detail: String
 }
 
+/// One managed child's protection evidence shown on B-003 (Billing Grace), proving the
+/// billing problem has NOT reduced their protection. Deliberately carries no billing
+/// detail and no Themis-computed countdown — only the same "Last verified …" evidence
+/// style already used elsewhere (e.g. `ChildStatusRow`).
+struct ChildProtectionDuringBilling: Identifiable, Sendable, Equatable {
+    let id: String
+    /// e.g. "Sam · Child" / "Maya · Teen" — matches the existing row title convention.
+    let title: String
+    let lastVerifiedText: String
+}
+
+/// One managed device's acknowledgement shown on B-008, once `reactivationStep ==
+/// .acknowledgedOnDevice`. Deterministic UI demo data only — no backend acknowledgement
+/// API, no networking, no real device communication is modelled here.
+struct DeviceProtectionAcknowledgement: Identifiable, Sendable, Equatable {
+    let id: String
+    let deviceName: String
+    let confirmedAtText: String
+}
+
 /// Everything one Subscription screen needs to render, with no App Store transaction
 /// object and no production entitlement logic — a future subscription service supplies
 /// the equivalent real data.
@@ -204,6 +224,14 @@ struct SubscriptionPresentation: Sendable, Equatable {
     /// Rule definitions retained for parent review after `protectionExpired` (§25.6).
     /// Non-empty whenever `lifecycle` is `.protectionExpired` or `.resubscribed`.
     let retainedRules: [RetainedRule]
+
+    /// Managed children's protection evidence shown on B-003 only, to visually reinforce
+    /// that a billing problem never reduces protection. Empty on every other screen.
+    let billingProtectedChildren: [ChildProtectionDuringBilling]
+
+    /// Per-device acknowledgement rows shown on B-008 only, once every managed device
+    /// has confirmed the reactivated rules are applied. Empty on every other screen.
+    let deviceAcknowledgements: [DeviceProtectionAcknowledgement]
 
     /// Whether the PARENT has explicitly confirmed reactivation (the B-006 · Confirm →
     /// B-007 transition gate). Deliberately not named "acknowledged": that word is

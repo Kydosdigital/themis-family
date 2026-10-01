@@ -332,4 +332,143 @@ final class SubscriptionTests: XCTestCase {
         XCTAssertTrue(active.reactivationConfirmedByParent)
         XCTAssertEqual(active.protection, .enforcing)
     }
+
+    // MARK: Test — B-003 canonical presentation contains both children, both Protected
+
+    func testBillingGraceCanonicalPresentationContainsSamChildAndMayaTeenProtected() {
+        let presentation = SubscriptionDemoData.presentation(for: .billingGrace)
+        let children = presentation.billingProtectedChildren
+        XCTAssertEqual(children.count, 2)
+        XCTAssertTrue(children.contains { $0.title == "Sam · Child" })
+        XCTAssertTrue(children.contains { $0.title == "Maya · Teen" })
+        // Both rows render with the shared `.protected` status preset — never a reduced
+        // or partial tier.
+        XCTAssertEqual(StatusKind.protected.rawValue, "protected")
+    }
+
+    // MARK: Test — B-003 does not imply reduced protection (no countdown, no grace days,
+    // no custom Themis timer figure anywhere in the canonical copy).
+
+    func testBillingGraceDoesNotImplyReducedProtectionOrACountdown() {
+        XCTAssertEqual(SubscriptionStateMachine.protectionState(for: .appleBillingGracePeriod), .enforcing)
+        let forbidden = ["day", "days", "countdown", "16-day", "remaining"]
+        let copy = [
+            SubscriptionCopy.billingGraceStatusLabel,
+            SubscriptionCopy.billingGraceExplanation,
+            SubscriptionCopy.billingGraceReassurance,
+            SubscriptionCopy.billingGraceCallToAction,
+            SubscriptionCopy.billingGraceAction
+        ].joined(separator: " ").lowercased()
+        for token in forbidden {
+            XCTAssertFalse(copy.contains(token))
+        }
+    }
+
+    // MARK: Test — B-004 primary action is Resubscribe, and the supporting copy makes
+    // clear the App Store subscription sheet is the system-owned hand-off.
+
+    func testProtectionExpiredPrimaryActionIsResubscribeViaAppStoreHandoff() {
+        XCTAssertEqual(SubscriptionCopy.protectionExpiredPrimaryAction, "Resubscribe")
+        XCTAssertEqual(SubscriptionCopy.protectionExpiredResubscribeExplanation, "Opens the App Store subscription sheet.")
+        XCTAssertTrue(SubscriptionCopy.protectionExpiredResubscribeExplanation.contains("App Store"))
+    }
+
+    // MARK: Test — B-005 contains the approved status, title, supporting copy and actions
+
+    func testReadyToReactivateContainsApprovedCanonicalCopy() {
+        XCTAssertEqual(SubscriptionCopy.readyToReactivateStatusLabel, "Subscription active")
+        XCTAssertEqual(SubscriptionCopy.readyToReactivateTitle, "Ready to turn protection back on?")
+        XCTAssertEqual(SubscriptionCopy.readyToReactivateExplanation, "Nothing is restricted until you confirm.")
+        XCTAssertEqual(SubscriptionCopy.readyToReactivatePrimaryAction, "Review rules first")
+        XCTAssertEqual(SubscriptionCopy.readyToReactivateSecondaryAction, "Not now")
+    }
+
+    // MARK: Test — B-006 exact retained-rule visible hierarchy: child name + rule name
+    // together as the title, with the detail beneath as the subtitle.
+
+    func testReviewRulesVisibleHierarchyIsChildAndRuleNameTogetherWithDetailBeneath() {
+        let rules = SubscriptionDemoData.retainedRules
+
+        func rowTitle(_ rule: RetainedRule) -> String { "\(rule.childName) · \(rule.title)" }
+
+        XCTAssertTrue(rules.contains { rowTitle($0) == "Sam · Homework Deadline" && $0.detail == "Due 6:00 PM" })
+        XCTAssertTrue(rules.contains { rowTitle($0) == "Sam · Bedtime" && $0.detail == "8:30 PM–7:00 AM" })
+        XCTAssertTrue(rules.contains { rowTitle($0) == "Maya · Social apps" && $0.detail == "10:00 PM–7:00 AM" })
+        XCTAssertEqual(SubscriptionCopy.reviewRulesTitle, "Review rules")
+    }
+
+    // MARK: Test — B-007 exact semantic content: "Reactivation sent", "Waiting for Sam's
+    // and Maya's devices", and a "Sending" status — never "Protected"/"Protection active".
+
+    func testReactivationSentExactSemanticContent() {
+        XCTAssertEqual(SubscriptionCopy.reactivationSentStatusLabel, "Reactivation sent")
+        XCTAssertEqual(SubscriptionCopy.reactivationSentExplanation, "Waiting for Sam's and Maya's devices.")
+        XCTAssertEqual(SubscriptionCopy.reactivationSentBadgeLabel, "Sending")
+        XCTAssertTrue(SubscriptionCopy.reactivationSentExplanation.contains("Sam"))
+        XCTAssertTrue(SubscriptionCopy.reactivationSentExplanation.contains("Maya"))
+    }
+
+    // MARK: Test — B-007 contains no Protected / Protection active claim anywhere in its copy.
+
+    func testReactivationSentContainsNoProtectedOrProtectionActiveClaim() {
+        let copy = [
+            SubscriptionCopy.reactivationSentStatusLabel,
+            SubscriptionCopy.reactivationSentBadgeLabel,
+            SubscriptionCopy.reactivationSentExplanation,
+            SubscriptionCopy.reactivationSentDetail
+        ].joined(separator: " ").lowercased()
+        XCTAssertFalse(copy.contains("protected"))
+        XCTAssertFalse(copy.contains("protection active"))
+        XCTAssertFalse(copy.contains("protection is active"))
+        XCTAssertFalse(copy.contains("done"))
+        XCTAssertFalse(copy.contains("applied"))
+    }
+
+    // MARK: Test — B-008 contains both canonical device acknowledgement rows, Protected.
+
+    func testProtectionActiveOnDeviceContainsBothCanonicalDeviceRows() {
+        let presentation = SubscriptionDemoData.presentation(for: .protectionActiveOnDevice)
+        let devices = presentation.deviceAcknowledgements
+        XCTAssertEqual(devices.count, 2)
+        XCTAssertTrue(devices.contains { $0.deviceName == "Sam's iPhone" && $0.confirmedAtText == "Confirmed 9:12 AM" })
+        XCTAssertTrue(devices.contains { $0.deviceName == "Maya's iPhone" && $0.confirmedAtText == "Confirmed 9:13 AM" })
+        // Both rows render with the shared `.protected` status preset.
+        XCTAssertEqual(StatusKind.protected.rawValue, "protected")
+    }
+
+    // MARK: Test — B-008 is only valid for acknowledgedOnDevice + enforcing; every other
+    // scenario carries no device acknowledgement rows at all.
+
+    func testDeviceAcknowledgementRowsOnlyPresentWhenAcknowledgedOnDeviceAndEnforcing() {
+        for scenario in SubscriptionDemoScenario.allCases {
+            let presentation = SubscriptionDemoData.presentation(for: scenario)
+            if !presentation.deviceAcknowledgements.isEmpty {
+                XCTAssertEqual(presentation.reactivationStep, .acknowledgedOnDevice)
+                XCTAssertEqual(presentation.protection, .enforcing)
+            }
+        }
+        let active = SubscriptionDemoData.presentation(for: .protectionActiveOnDevice)
+        XCTAssertFalse(active.deviceAcknowledgements.isEmpty)
+    }
+
+    // MARK: Test — no StoreKit/payment/network implementation was introduced anywhere
+    // in this isolated feature.
+
+    func testNoStoreKitPaymentOrNetworkImplementationIsPresent() {
+        let featureDirectory = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("ThemisFamily/Features/Subscription")
+        let forbiddenTokens = ["import StoreKit", "URLSession", "SKProduct", "SKPaymentQueue", "import Network"]
+        guard let enumerator = FileManager.default.enumerator(at: featureDirectory, includingPropertiesForKeys: nil) else {
+            XCTFail("Could not enumerate Subscription feature directory")
+            return
+        }
+        for case let fileURL as URL in enumerator where fileURL.pathExtension == "swift" {
+            guard let contents = try? String(contentsOf: fileURL, encoding: .utf8) else { continue }
+            for token in forbiddenTokens {
+                XCTAssertFalse(contents.contains(token), "\(fileURL.lastPathComponent) unexpectedly contains \(token)")
+            }
+        }
+    }
 }

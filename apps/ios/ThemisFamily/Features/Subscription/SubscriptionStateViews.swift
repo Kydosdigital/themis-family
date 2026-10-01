@@ -13,7 +13,17 @@ enum SubscriptionCopy {
         date.formatted(date: .long, time: .omitted)
     }
 
+    // MARK: B-003 · Apple Billing Grace Period
+
+    static let billingGraceStatusLabel = "Billing issue"
+    static let billingGraceExplanation = "Apple couldn't take payment."
+    static let billingGraceReassurance = "Protection stays on while Apple retries."
+    static let billingGraceCallToAction = "Update payment in the App Store."
+    static let billingGraceAction = "Update payment in App Store"
+
     // MARK: B-004 · Protection Expired
+
+    static let protectionExpiredStatusLabel = "Protection has ended"
 
     /// Approved meaning: the subscription lapsed and Themis cleared restrictions on the
     /// CHILDREN's managed devices — never phrased as if the Parent's own phone (where
@@ -21,11 +31,16 @@ enum SubscriptionCopy {
     static let protectionExpiredRestrictionsCleared =
         "Your subscription lapsed, so Themis cleared all restrictions on Sam's and Maya's devices."
     static let protectionExpiredRulesSaved = "Your rules are saved."
+    static let protectionExpiredPrimaryAction = "Resubscribe"
+    /// The Resubscribe action is an Apple-owned, system-owned hand-off — never a fake
+    /// in-app App Store sheet, never StoreKit called from this isolated slice.
+    static let protectionExpiredResubscribeExplanation = "Opens the App Store subscription sheet."
 
     // MARK: B-005 · Ready to turn protection back on? / Not now
 
+    static let readyToReactivateStatusLabel = "Subscription active"
     static let readyToReactivateTitle = "Ready to turn protection back on?"
-    static let readyToReactivateExplanation = "Your subscription is active again."
+    static let readyToReactivateExplanation = "Nothing is restricted until you confirm."
     static let readyToReactivatePrimaryAction = "Review rules first"
     static let readyToReactivateSecondaryAction = "Not now"
     static let readyToReactivateReviewPrompt =
@@ -38,7 +53,7 @@ enum SubscriptionCopy {
 
     // MARK: B-006 · Review old rules
 
-    static let reviewRulesTitle = "Review your rules"
+    static let reviewRulesTitle = "Review rules"
     static let reviewRulesSupportingCopy = "Edit any rule before turning protection on."
     static let reviewRulesPrimaryAction = "Turn protection back on"
 
@@ -49,6 +64,22 @@ enum SubscriptionCopy {
         "The reviewed, saved rules will be sent to Sam's and Maya's managed devices. Protection isn't active on those devices until they acknowledge the rules were applied."
     static let confirmPrimaryAction = "Turn protection back on"
     static let confirmSecondaryAction = "Cancel"
+
+    // MARK: B-007 · Reactivation sent
+
+    static let reactivationSentStatusLabel = "Reactivation sent"
+    /// Deliberately an applying/sending status, never "Protected" or "Protection
+    /// active" — the device has not acknowledged yet.
+    static let reactivationSentBadgeLabel = "Sending"
+    static let reactivationSentExplanation = "Waiting for Sam's and Maya's devices."
+    static let reactivationSentDetail =
+        "Your rules have been sent. This screen will update once both devices confirm the plan is in effect."
+
+    // MARK: B-008 · Protection active on device
+
+    static let protectionActiveStatusLabel = "Protection active on device"
+    static let protectionActiveExplanation =
+        "Protection is being enforced normally, the same as before your subscription lapsed."
 }
 
 /// B-001 · Trial / subscription offer. Calm, premium, no invented pricing or trial length.
@@ -135,32 +166,41 @@ struct SubscriptionManageView: View {
 }
 
 /// B-003 · Apple Billing Grace Period. Calm, Parent-facing only. Protection remains
-/// fully active; there is no reduced-enforcement tier.
+/// fully active; there is no reduced-enforcement tier, no countdown, no grace-days-
+/// remaining figure, and no child-facing billing language. The two canonical rows
+/// visually reinforce: billing problem ≠ reduced protection.
 struct SubscriptionBillingGraceView: View {
+    var children: [ChildProtectionDuringBilling] = []
     let onUpdatePaymentMethod: () -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
                 StatusHeader(
-                    status: ThemisStatus(.needsAttention, label: "Billing issue"),
-                    explanation: "Your payment didn't go through."
+                    status: ThemisStatus(.needsAttention, label: SubscriptionCopy.billingGraceStatusLabel),
+                    explanation: SubscriptionCopy.billingGraceExplanation
                 )
 
                 ThemisCard {
                     VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
-                        Text("Protection is still active while Apple retries payment.")
+                        Text(SubscriptionCopy.billingGraceReassurance)
                             .themisFont(.body)
                             .foregroundStyle(ThemisColor.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text("Update your payment method to keep protection active.")
+                        Text(SubscriptionCopy.billingGraceCallToAction)
                             .themisFont(.secondary)
                             .foregroundStyle(ThemisColor.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
-                ThemisButton(title: "Update payment method", action: onUpdatePaymentMethod)
+                if !children.isEmpty {
+                    ThemisGroupedSection(data: children) { child in
+                        ThemisRow(title: child.title, subtitle: child.lastVerifiedText, status: .protected)
+                    }
+                }
+
+                ThemisButton(title: SubscriptionCopy.billingGraceAction, action: onUpdatePaymentMethod)
             }
             .padding(ThemisSpacing.screen)
         }
@@ -170,32 +210,32 @@ struct SubscriptionBillingGraceView: View {
 
 /// B-004 · Protection Expired. Not punitive, not phrased as deletion — rules are
 /// retained. The Parent views this on their own phone, so the copy is explicit that it
-/// is Sam's and Maya's devices that had restrictions cleared, never "this device".
+/// is Sam's and Maya's devices that had restrictions cleared, never "this device". The
+/// primary action is an Apple-owned, system-owned hand-off — never a fake in-app App
+/// Store sheet, never a call into StoreKit from this isolated slice.
 struct SubscriptionProtectionExpiredView: View {
-    let onContinue: () -> Void
+    let onResubscribe: () -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
                 StatusHeader(
-                    status: .protectionEnded,
-                    explanation: "Themis Protection is no longer active."
+                    status: ThemisStatus(.notActiveYet, label: SubscriptionCopy.protectionExpiredStatusLabel),
+                    explanation: SubscriptionCopy.protectionExpiredRestrictionsCleared
                 )
 
                 ThemisCard {
-                    VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
-                        Text(SubscriptionCopy.protectionExpiredRestrictionsCleared)
-                            .themisFont(.body)
-                            .foregroundStyle(ThemisColor.textPrimary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text(SubscriptionCopy.protectionExpiredRulesSaved)
-                            .themisFont(.secondary)
-                            .foregroundStyle(ThemisColor.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    Text(SubscriptionCopy.protectionExpiredRulesSaved)
+                        .themisFont(.secondary)
+                        .foregroundStyle(ThemisColor.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
-                ThemisButton(title: "Continue", style: .secondary, action: onContinue)
+                ThemisButton(title: SubscriptionCopy.protectionExpiredPrimaryAction, action: onResubscribe)
+                Text(SubscriptionCopy.protectionExpiredResubscribeExplanation)
+                    .themisFont(.meta)
+                    .foregroundStyle(ThemisColor.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(ThemisSpacing.screen)
         }
@@ -215,6 +255,8 @@ struct SubscriptionReadyToReactivateView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
+                StatusBadge(ThemisStatus(.active, label: SubscriptionCopy.readyToReactivateStatusLabel), size: .chip)
+
                 Text(SubscriptionCopy.readyToReactivateTitle)
                     .themisFont(.pageTitle)
                     .foregroundStyle(ThemisColor.textPrimary)
@@ -225,6 +267,7 @@ struct SubscriptionReadyToReactivateView: View {
                         Text(SubscriptionCopy.readyToReactivateExplanation)
                             .themisFont(.body)
                             .foregroundStyle(ThemisColor.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(isDeferred ? SubscriptionCopy.notNowExplanation : SubscriptionCopy.readyToReactivateReviewPrompt)
                             .themisFont(.secondary)
                             .foregroundStyle(ThemisColor.textSecondary)
@@ -267,7 +310,7 @@ struct SubscriptionReviewRulesView: View {
                     Button {
                         onEditRule(rule)
                     } label: {
-                        ThemisRow(title: rule.title, subtitle: "\(rule.childName) · \(rule.detail)", showsChevron: true)
+                        ThemisRow(title: "\(rule.childName) · \(rule.title)", subtitle: rule.detail, showsChevron: true)
                     }
                     .buttonStyle(.plain)
                 }
@@ -312,18 +355,20 @@ struct SubscriptionReviewConfirmView: View {
 }
 
 /// B-007 · Reactivation sent. Not the final success state — the device hasn't
-/// acknowledged yet, so this never says "Protection active".
+/// acknowledged yet, so this never says "Protected" or "Protection active".
 struct SubscriptionReactivationSentView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
                 StatusHeader(
-                    status: ThemisStatus(.applying, label: "Reactivation sent"),
-                    explanation: "Themis is waiting for the child's device to confirm."
+                    status: ThemisStatus(.applying, label: SubscriptionCopy.reactivationSentStatusLabel),
+                    explanation: SubscriptionCopy.reactivationSentExplanation
                 )
 
+                StatusBadge(ThemisStatus(.applying, label: SubscriptionCopy.reactivationSentBadgeLabel), size: .chip)
+
                 ThemisCard {
-                    Text("Your rules have been sent to the device. This screen will update once the device confirms protection is applied.")
+                    Text(SubscriptionCopy.reactivationSentDetail)
                         .themisFont(.secondary)
                         .foregroundStyle(ThemisColor.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -335,22 +380,28 @@ struct SubscriptionReactivationSentView: View {
     }
 }
 
-/// B-008 · Protection active on device. Only reached after device acknowledgement.
+/// B-008 · Protection active on device. Only reached after every managed device has
+/// acknowledged — `reactivationStep == .acknowledgedOnDevice` and `protection ==
+/// .enforcing`. Shows per-device acknowledgement evidence, deterministic demo data only.
 struct SubscriptionProtectionActiveView: View {
+    var acknowledgements: [DeviceProtectionAcknowledgement] = []
+    var onDone: () -> Void = {}
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
                 StatusHeader(
-                    status: ThemisStatus(.applied, label: "Protection active on device"),
-                    explanation: "The device has confirmed your rules are applied again."
+                    status: ThemisStatus(.applied, label: SubscriptionCopy.protectionActiveStatusLabel),
+                    explanation: SubscriptionCopy.protectionActiveExplanation
                 )
 
-                ThemisCard {
-                    Text("Protection is being enforced normally, the same as before your subscription lapsed.")
-                        .themisFont(.secondary)
-                        .foregroundStyle(ThemisColor.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                if !acknowledgements.isEmpty {
+                    ThemisGroupedSection(data: acknowledgements) { device in
+                        ThemisRow(title: device.deviceName, subtitle: device.confirmedAtText, status: .protected)
+                    }
                 }
+
+                ThemisButton(title: "Done", style: .secondary, action: onDone)
             }
             .padding(ThemisSpacing.screen)
         }

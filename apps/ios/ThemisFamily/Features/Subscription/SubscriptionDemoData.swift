@@ -60,6 +60,21 @@ enum SubscriptionDemoData {
         )
     ]
 
+    /// The approved B-003 rows: both managed children remain protected despite the
+    /// billing problem. No countdown, no grace-days-remaining figure — just the same
+    /// "Last verified …" evidence style already used elsewhere (`ChildStatusRow`).
+    static let billingProtectedChildren: [ChildProtectionDuringBilling] = [
+        ChildProtectionDuringBilling(id: "sam-billing-grace", title: "Sam · Child", lastVerifiedText: "Last verified 2 min ago"),
+        ChildProtectionDuringBilling(id: "maya-billing-grace", title: "Maya · Teen", lastVerifiedText: "Last verified 5 min ago")
+    ]
+
+    /// The approved B-008 rows: both managed devices have acknowledged the reactivated
+    /// rules. Deterministic UI demo data only — no backend acknowledgement API.
+    static let deviceAcknowledgements: [DeviceProtectionAcknowledgement] = [
+        DeviceProtectionAcknowledgement(id: "sam-iphone-ack", deviceName: "Sam's iPhone", confirmedAtText: "Confirmed 9:12 AM"),
+        DeviceProtectionAcknowledgement(id: "maya-iphone-ack", deviceName: "Maya's iPhone", confirmedAtText: "Confirmed 9:13 AM")
+    ]
+
     /// An EXAMPLE entitlement date only, for deterministic preview/review. Never a
     /// Themis-computed value — a future subscription service supplies the real date.
     private static let exampleReferenceDate = DateComponents(
@@ -80,6 +95,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -92,6 +109,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -104,6 +123,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: exampleReferenceDate,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -116,6 +137,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: exampleReferenceDate,
                 retainedRules: [],
+                billingProtectedChildren: billingProtectedChildren,
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -131,6 +154,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: [],
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -143,6 +168,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -155,6 +182,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -169,6 +198,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -181,6 +212,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -196,6 +229,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: false
             )
 
@@ -208,6 +243,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
+                billingProtectedChildren: [],
+                deviceAcknowledgements: [],
                 reactivationConfirmedByParent: true
             )
 
@@ -220,6 +257,8 @@ enum SubscriptionDemoData {
                 paidThroughDate: nil,
                 exampleEntitlementDate: nil,
                 retainedRules: retainedRules,
+                billingProtectedChildren: [],
+                deviceAcknowledgements: deviceAcknowledgements,
                 reactivationConfirmedByParent: true
             )
         }

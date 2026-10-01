@@ -43,9 +43,9 @@ struct SubscriptionView: View {
         case .manage:
             SubscriptionManageView(presentation: presentation, onManageInAppStore: {})
         case .billingGraceWarning:
-            SubscriptionBillingGraceView(onUpdatePaymentMethod: {})
+            SubscriptionBillingGraceView(children: presentation.billingProtectedChildren, onUpdatePaymentMethod: {})
         case .protectionExpiredNotice:
-            SubscriptionProtectionExpiredView(onContinue: {})
+            SubscriptionProtectionExpiredView(onResubscribe: {})
         case .readyToReactivate:
             SubscriptionReadyToReactivateView(
                 isDeferred: presentation.reactivationStep == .deferred,
@@ -61,7 +61,7 @@ struct SubscriptionView: View {
         case .reactivationSent:
             SubscriptionReactivationSentView()
         case .protectionActiveOnDevice:
-            SubscriptionProtectionActiveView()
+            SubscriptionProtectionActiveView(acknowledgements: presentation.deviceAcknowledgements)
         }
     }
 }
@@ -165,4 +165,11 @@ struct SubscriptionView: View {
     NavigationStack {
         SubscriptionView(scenario: .protectionActiveOnDevice)
     }
+}
+
+#Preview("B-008 · Protection active on device, accessibility3") {
+    NavigationStack {
+        SubscriptionView(scenario: .protectionActiveOnDevice)
+    }
+    .environment(\.dynamicTypeSize, .accessibility3)
 }
