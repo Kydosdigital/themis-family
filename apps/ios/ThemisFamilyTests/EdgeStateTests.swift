@@ -325,8 +325,6 @@ final class EdgeStateTests: XCTestCase {
         let ids = EdgeStateDemoData.all.map(\.id)
         XCTAssertEqual(Set(ids).count, ids.count)
     }
-}
-
 
     func testApprovedAudienceMappingForTeenAndChildEdgeStates() {
         XCTAssertEqual(EdgeStateScenario.requestSavedOffline.audience, .teen)
@@ -343,6 +341,7 @@ final class EdgeStateTests: XCTestCase {
 
     func testServersUnreachableUsesApprovedUnconfirmedStatus() {
         let presentation = EdgeStateDemoData.presentation(for: .serversUnreachable)
+        XCTAssertEqual(presentation.severity, .offline)
         XCTAssertEqual(presentation.statusKind, .unconfirmed)
         XCTAssertEqual(presentation.statusLabel, "Unconfirmed")
         XCTAssertNotNil(presentation.lastVerifiedText)
@@ -359,3 +358,4 @@ final class EdgeStateTests: XCTestCase {
         XCTAssertFalse(message.contains("nothing partial to undo"))
         XCTAssertTrue(message.contains("hasn't confirmed"))
     }
+}
