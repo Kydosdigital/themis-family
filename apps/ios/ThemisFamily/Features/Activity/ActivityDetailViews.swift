@@ -1,9 +1,9 @@
 import SwiftUI
 
-// T-002 Child activity, T-003 Rule history, T-004 Request history, T-005 Protection
-// history, and the timing-unverified detail. All are pushed inside the Parent tab's
-// NavigationStack, so they use the native navigation bar and create no stack of their own.
-// None of them offers an action: everything shown was resolved elsewhere.
+// T-002 Child activity, T-003 Rule changes, T-004 Requests, T-005 Protection, and the
+// timing-unverified detail. All are pushed inside the Parent tab's NavigationStack, so they
+// use the native navigation bar and create no stack of their own. None offers an action:
+// everything shown was resolved elsewhere.
 
 /// Registers the Activity destinations. Apply once on the Activity root.
 extension View {
@@ -22,12 +22,12 @@ struct ActivityDestinationView: View {
         switch route {
         case let .child(child):
             ChildActivityView(child: child, snapshot: screen.snapshot)
-        case let .ruleHistory(scope):
-            RuleHistoryView(scope: scope, snapshot: screen.snapshot)
-        case let .requestHistory(scope):
-            RequestHistoryView(initialScope: scope, snapshot: screen.snapshot)
-        case let .protectionHistory(scope):
-            ProtectionHistoryView(scope: scope, snapshot: screen.snapshot)
+        case .ruleChanges:
+            RuleChangesView(snapshot: screen.snapshot)
+        case .requestHistory:
+            RequestHistoryView(snapshot: screen.snapshot)
+        case .protectionHistory:
+            ProtectionHistoryView(snapshot: screen.snapshot)
         case .appleScreenTime:
             AppleScreenTimeBoundaryView(state: screen.appleReport)
         case let .eventDetail(id):
@@ -44,10 +44,12 @@ struct ActivityDestinationView: View {
 /// Shared frame for a pushed Activity screen.
 private struct ActivityPage<Content: View>: View {
     let title: String
+    var ground: ThemisGround = .grouped
     private let content: Content
 
-    init(title: String, @ViewBuilder content: () -> Content) {
+    init(title: String, ground: ThemisGround = .grouped, @ViewBuilder content: () -> Content) {
         self.title = title
+        self.ground = ground
         self.content = content()
     }
 
@@ -61,91 +63,59 @@ private struct ActivityPage<Content: View>: View {
             .padding(.bottom, ThemisSpacing.lg)
         }
         .themisAudience(.parent)
-        .themisGround(.grouped)
+        .themisGround(ground)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
+/// Supporting copy under a list, in the frames' secondary text style.
+private struct ActivityNote: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .themisFont(.secondary)
+            .foregroundStyle(ThemisColor.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
 // MARK: - T-002 Child activity
 
-/// One child's Themis-owned outcomes. No Apple data appears here; the Screen Time row
-/// only links to Apple's own, separately bounded screen.
+/// One child's Themis-owned outcomes for this week. No Apple data appears here; the Screen
+/// Time link only opens Apple's own, separately bounded screen.
 struct ChildActivityView: View {
     let child: ActivityChild
     let snapshot: ActivitySnapshot
 
     var body: some View {
-        let scope = ActivityScope(child)
+        let summary = snapshot.summary(for: ActivityScope(child), period: .thisWeek)
+        let rows = ActivityPresentation.weekRows(for: child, snapshot: snapshot)
+
         ActivityPage(title: child.firstName) {
-            ThemisCard {
-                HStack(spacing: ThemisSpacing.inline12) {
-                    AvatarTile(initial: child.initial, tone: child.tone, size: .large)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(child.title)
-                            .themisFont(.headline)
-                            .foregroundStyle(ThemisColor.textPrimary)
-                            .accessibilityAddTraits(.isHeader)
-                        Text("Themis outcomes only")
-                            .themisFont(.meta)
-                            .foregroundStyle(ThemisColor.textSecondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            KeyValueList(
+                items: ActivityPresentation.summaryItems(summary).map { KeyValueList.Item($0.key, $0.value) }
+            )
+
+            if !rows.isEmpty {
+                ThemisGroupedSection(ActivityPeriod.thisWeek.title, data: rows) { row in
+                    ActivityRowView(row: row)
                 }
-                .accessibilityElement(children: .combine)
             }
 
-            ActivityEventSections(events: snapshot.events(for: scope), snapshot: snapshot, showsChild: false)
-
-            ThemisGroupedSection("History for \(child.firstName)", data: historyLinks(scope)) { item in
-                ActivityLinkRow(item: item)
+            if ActivityPresentation.showsAppUsageNote(for: child) {
+                ActivityNote(text: ActivityCopy.appUsageNote(for: child))
             }
 
-            Text(ActivityCopy.appUsageNote(for: child))
-                .themisFont(.meta)
-                .foregroundStyle(ThemisColor.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 4)
-
-            ThemisGroupedSection(AppleScreenTimeCopy.sectionLabel, data: [appleLink]) { item in
-                ActivityLinkRow(item: item)
+            NavigationLink(value: ActivityRoute.appleScreenTime) {
+                Text(AppleScreenTimeCopy.childLinkTitle)
+                    .themisFont(.rowTitle)
+                    .foregroundStyle(ThemisColor.brandPrimary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, minHeight: ThemisSize.tapMinimum)
             }
-        }
-    }
-
-    private func historyLinks(_ scope: ActivityScope) -> [ActivityLink] {
-        [
-            ActivityLink(id: "rules", route: .ruleHistory(scope), title: "Rule history", subtitle: "Outcomes of \(child.firstName)’s rules"),
-            ActivityLink(id: "requests", route: .requestHistory(scope), title: "Request history", subtitle: "Asked and decided"),
-            ActivityLink(id: "protection", route: .protectionHistory(scope), title: "Protection history", subtitle: "Changes in \(child.deviceName) protection")
-        ]
-    }
-
-    private var appleLink: ActivityLink {
-        ActivityLink(
-            id: "apple-screen-time",
-            route: .appleScreenTime,
-            title: "Open Apple’s Screen Time report",
-            subtitle: "Shown by Apple, separate from Themis activity"
-        )
-    }
-}
-
-// MARK: - T-003 Rule history
-
-/// Outcomes under the family's rules, including task outcomes such as approvals.
-struct RuleHistoryView: View {
-    let scope: ActivityScope
-    let snapshot: ActivitySnapshot
-
-    var body: some View {
-        let events = snapshot.events(for: scope, categories: [.rule, .task])
-        ActivityPage(title: "Rule history") {
-            if events.isEmpty {
-                EmptyStateView(title: ActivityCopy.emptyTitle, message: ActivityCopy.emptyMessage, systemImage: "clock")
-            } else {
-                ActivityEventSections(events: events, snapshot: snapshot, showsChild: scope == .all)
-            }
+            .buttonStyle(.plain)
         }
     }
 }
@@ -185,9 +155,29 @@ struct ActivityEventDetailView: View {
     }
 }
 
-// MARK: - T-004 Request history
+// MARK: - T-003 Rule changes
+
+/// Who changed which rule, and when, by month. Shows the last 12 months.
+struct RuleChangesView: View {
+    let snapshot: ActivitySnapshot
+
+    var body: some View {
+        ActivityPage(title: "Rule changes") {
+            ForEach(ActivityPresentation.ruleChangeSections(snapshot: snapshot)) { section in
+                ThemisGroupedSection(section.title, data: section.rows) { row in
+                    ActivityRowView(row: row)
+                }
+            }
+
+            ActivityNote(text: ActivityRetention.ruleChangesFooter)
+        }
+    }
+}
+
+// MARK: - T-004 Requests
 
 /// Requests and their outcomes, read-only. No decision controls and no message thread.
+/// Structured outcomes keep the 12-month period; only reasons and notes are removed at 90 days.
 struct RequestHistoryView: View {
     @State private var scope: ActivityScope
     let snapshot: ActivitySnapshot
@@ -198,8 +188,7 @@ struct RequestHistoryView: View {
     }
 
     var body: some View {
-        let events = snapshot.events(for: scope, categories: [.request])
-        ActivityPage(title: "Request history") {
+        ActivityPage(title: "Requests") {
             SegmentedChoice(
                 label: "Show requests for",
                 options: ActivityScope.allCases,
@@ -207,43 +196,31 @@ struct RequestHistoryView: View {
                 title: { $0.title }
             )
 
-            if events.isEmpty {
-                EmptyStateView(title: ActivityCopy.emptyTitle, message: ActivityCopy.emptyMessage, systemImage: "clock")
-            } else {
-                ActivityEventSections(events: events, snapshot: snapshot, showsChild: scope == .all)
+            ThemisGroupedSection(data: ActivityPresentation.requestRows(scope: scope, snapshot: snapshot)) { row in
+                ActivityRowView(row: row)
             }
+
+            ActivityNote(text: ActivityRetention.requestsFooter)
         }
     }
 }
 
-// MARK: - T-005 Protection history
+// MARK: - T-005 Protection
 
-/// Current protection with its evidence, then earlier changes. Recovery belongs to
-/// Protection (UI-09), not here.
+/// Current protection with when it was last verified, then earlier changes. Recovery
+/// belongs to Protection (UI-09), not here.
 struct ProtectionHistoryView: View {
-    let scope: ActivityScope
     let snapshot: ActivitySnapshot
 
     var body: some View {
-        let current = snapshot.protectionNow(for: scope)
-        let events = snapshot.events(for: scope, categories: [.protection])
-        ActivityPage(title: "Protection history") {
-            ThemisGroupedSection("Now", data: current) { item in
-                ThemisRow(
-                    title: item.child.deviceName,
-                    subtitle: item.evidence,
-                    status: item.status,
-                    avatar: (initial: item.child.initial, tone: item.child.tone)
-                )
+        ActivityPage(title: "Protection") {
+            ThemisGroupedSection("Now", data: ActivityPresentation.protectionNowRows(snapshot: snapshot)) { row in
+                ActivityRowView(row: row)
             }
 
-            ActivityEventSections(events: events, snapshot: snapshot, showsChild: scope == .all)
-
-            Text(ActivityCopy.protectionFooter)
-                .themisFont(.meta)
-                .foregroundStyle(ThemisColor.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 4)
+            ThemisGroupedSection("Earlier", data: ActivityPresentation.protectionEarlierRows(snapshot: snapshot)) { row in
+                ActivityRowView(row: row)
+            }
         }
     }
 }
@@ -252,10 +229,16 @@ struct ProtectionHistoryView: View {
 
 /// Hosts a pushed Activity screen with its destinations registered, for previews only.
 struct ActivityPreviewHost<Content: View>: View {
+    let snapshot: ActivitySnapshot
     let appleReport: AppleScreenTimeReportState
     private let content: Content
 
-    init(appleReport: AppleScreenTimeReportState = .systemOwnedReportArea, @ViewBuilder content: () -> Content) {
+    init(
+        snapshot: ActivitySnapshot = ActivityDemoData.snapshot,
+        appleReport: AppleScreenTimeReportState = .systemOwnedReportArea,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.snapshot = snapshot
         self.appleReport = appleReport
         self.content = content()
     }
@@ -263,7 +246,7 @@ struct ActivityPreviewHost<Content: View>: View {
     var body: some View {
         NavigationStack {
             content
-                .activityNavigation(ActivityScreenState(snapshot: ActivityDemoData.snapshot, appleReport: appleReport))
+                .activityNavigation(ActivityScreenState(snapshot: snapshot, appleReport: appleReport))
         }
     }
 }
@@ -276,11 +259,16 @@ struct ActivityPreviewHost<Content: View>: View {
     ActivityPreviewHost { ChildActivityView(child: .maya, snapshot: ActivityDemoData.snapshot) }
 }
 
-#Preview("T-003 · Rule history") {
-    ActivityPreviewHost { RuleHistoryView(scope: .all, snapshot: ActivityDemoData.snapshot) }
+#Preview("T-002 · Sam activity · AX3") {
+    ActivityPreviewHost { ChildActivityView(child: .sam, snapshot: ActivityDemoData.snapshot) }
+        .environment(\.dynamicTypeSize, .accessibility3)
 }
 
-#Preview("T-003 · Timing unverified detail") {
+#Preview("T-003 · Rule changes") {
+    ActivityPreviewHost { RuleChangesView(snapshot: ActivityDemoData.snapshot) }
+}
+
+#Preview("T-002 · Timing unverified detail") {
     ActivityPreviewHost {
         ActivityEventDetailView(
             event: ActivityDemoData.snapshot.event(id: "sam-homework-timing-unverified") ?? ActivityDemoData.events[0]
@@ -288,10 +276,16 @@ struct ActivityPreviewHost<Content: View>: View {
     }
 }
 
-#Preview("T-004 · Request history") {
+#Preview("T-004 · Requests") {
     ActivityPreviewHost { RequestHistoryView(snapshot: ActivityDemoData.snapshot) }
 }
 
-#Preview("T-005 · Protection history") {
-    ActivityPreviewHost { ProtectionHistoryView(scope: .all, snapshot: ActivityDemoData.snapshot) }
+#Preview("T-005 · Protection") {
+    ActivityPreviewHost { ProtectionHistoryView(snapshot: ActivityDemoData.snapshot) }
+}
+
+#Preview("T-005 · Protection · all five states") {
+    ActivityPreviewHost(snapshot: ActivityDemoData.allProtectionStatesSnapshot) {
+        ProtectionHistoryView(snapshot: ActivityDemoData.allProtectionStatesSnapshot)
+    }
 }

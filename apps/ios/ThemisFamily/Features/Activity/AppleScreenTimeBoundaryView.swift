@@ -1,13 +1,16 @@
 import SwiftUI
 
-/// T-006 Apple Screen Time.
+/// T-006 Screen Time, as drawn in the approved frames: "Shown by Apple", an info banner,
+/// the bounded Apple-owned area, and a note that Themis activity is separate.
 ///
-/// A presentation boundary only. Apple's `DeviceActivityReport` runs in Apple's sandbox,
-/// and whether it renders on the parent's iPhone is the Priority 8 real-device spike.
-/// This view therefore draws NO usage figures, bars, apps, websites or categories, and it
-/// imports no Family Controls or DeviceActivity framework.
+/// A presentation boundary only. Apple's `DeviceActivityReport` runs in Apple's sandbox, and
+/// whether it renders on the parent's iPhone is the Priority 8 real-device spike. This view
+/// therefore draws NO usage figures, bars, apps, websites or categories, shows none of the
+/// Themis weekly counts, and imports no Family Controls or DeviceActivity framework.
 struct AppleScreenTimeBoundaryView: View {
     let state: AppleScreenTimeReportState
+
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ScrollView {
@@ -16,24 +19,15 @@ struct AppleScreenTimeBoundaryView: View {
 
                 switch state {
                 case .systemOwnedReportArea:
+                    InlineBanner(.info, AppleScreenTimeCopy.availableNotice)
                     AppleOwnedReportArea()
+                    note(AppleScreenTimeCopy.separation)
+                    ThemisButton(title: AppleScreenTimeCopy.backLink, style: .tertiary) { dismiss() }
+                        .frame(maxWidth: .infinity)
                 case .unavailable:
-                    InlineBanner(.info, AppleScreenTimeCopy.unavailableMessage)
-                    Text(AppleScreenTimeCopy.unavailableSupport)
-                        .themisFont(.secondary)
-                        .foregroundStyle(ThemisColor.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    InlineBanner(.info, AppleScreenTimeCopy.unavailableNotice)
+                    note(AppleScreenTimeCopy.unavailableSupport)
                 }
-
-                Text(AppleScreenTimeCopy.privacy)
-                    .themisFont(.secondary)
-                    .foregroundStyle(ThemisColor.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Text(AppleScreenTimeCopy.separation)
-                    .themisFont(.meta)
-                    .foregroundStyle(ThemisColor.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, ThemisSpacing.screen)
             .padding(.top, ThemisSpacing.inline8)
@@ -43,6 +37,13 @@ struct AppleScreenTimeBoundaryView: View {
         .themisGround(.plain)
         .navigationTitle(AppleScreenTimeCopy.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func note(_ text: String) -> some View {
+        Text(text)
+            .themisFont(.secondary)
+            .foregroundStyle(ThemisColor.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -61,12 +62,8 @@ struct AppleOwnedReportArea: View {
             Text(AppleScreenTimeCopy.areaTitle)
                 .themisFont(.rowTitle)
                 .foregroundStyle(ThemisColor.textPrimary)
-                .accessibilityAddTraits(.isHeader)
-            Text(AppleScreenTimeCopy.reportExpectation)
-                .themisFont(.secondary)
-                .foregroundStyle(ThemisColor.textPrimary)
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
             Text(AppleScreenTimeCopy.areaDetail)
                 .themisFont(.meta)
                 .foregroundStyle(ThemisColor.textSecondary)

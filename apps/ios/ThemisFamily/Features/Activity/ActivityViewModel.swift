@@ -12,14 +12,14 @@ final class ActivityViewModel: ObservableObject {
     @Published private(set) var screen: ActivityScreenState?
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
-    /// Presentation-only filter for the T-001 feed.
-    @Published var scope: ActivityScope
+    /// The T-001 period selector. Presentation only.
+    @Published var period: ActivityPeriod
 
     private let repository: any ActivityRepository
 
-    init(repository: any ActivityRepository, scope: ActivityScope = .all) {
+    init(repository: any ActivityRepository, period: ActivityPeriod = .thisWeek) {
         self.repository = repository
-        self.scope = scope
+        self.period = period
     }
 
     func load() async {
