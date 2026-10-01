@@ -1,10 +1,19 @@
 import SwiftUI
 
 struct RulesSchoolAccessView: View {
+    enum InitialSection {
+        case rules
+        case schoolAccess
+    }
+
     @State private var rules = [RulesSchoolAccessDemoData.scheduled, RulesSchoolAccessDemoData.deadlineLock, RulesSchoolAccessDemoData.earnFirst, RulesSchoolAccessDemoData.pendingSync]
     @State private var alwaysAllowed = AlwaysAllowedState(targets: [RulesSchoolAccessDemoData.schoolPortal], disclosure: nil)
-    @State private var showingSchoolAccess = false
+    @State private var showingSchoolAccess: Bool
     @State private var showingCreate = false
+
+    init(initialSection: InitialSection = .rules) {
+        _showingSchoolAccess = State(initialValue: initialSection == .schoolAccess)
+    }
 
     var body: some View {
         ScrollView {
