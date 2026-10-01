@@ -140,8 +140,9 @@ struct TimingEvidence: Equatable, Sendable {
 /// Reusable outcome chips for Activity, built from the existing status kinds so glyph
 /// and tone stay in the shared status system.
 enum ActivityStatus {
-    /// Wednesday-style approval that came after the deadline (T-002 frame chip).
-    static let afterDeadline = ThemisStatus(.overdue, label: "After 6:00")
+    /// Approval that came after the 6 PM deadline (T-002 frame chip, clock glyph). The task was
+    /// submitted on time, so this uses the grace kind and never `.overdue`.
+    static let afterDeadline = ThemisStatus(.grace, label: "After 6")
     static let granted = ThemisStatus(.freePassActive, label: "Granted")
     static let interrupted = ThemisStatus(.expired, label: "Interrupted")
     static let fixed = ThemisStatus(.needsAttention, label: "Fixed")
@@ -212,6 +213,43 @@ struct ProtectionWeekNote: Equatable, Sendable {
     let weekday: String
 }
 
+/// What is known about a child's protection over a reporting period.
+///
+/// "Protected all week" needs explicit evidence that protection was verified for the whole
+/// period. The absence of a recorded problem is not that evidence, so it is `.noEvidence`.
+/// The demo supplies this evidence deterministically; a real repository will have to.
+enum WeeklyProtectionSummary: Equatable, Sendable {
+    /// Protection was verified for the full period.
+    case protectedAllWeek
+    /// One or more recorded changes from Protected.
+    case changed([ProtectionWeekNote])
+    /// No evidence either way. Never presented as Protected.
+    case noEvidence
+}
+
+struct ProtectionWeekKey: Hashable, Sendable {
+    let child: ActivityChild
+    let period: ActivityPeriod
+}
+
+/// How T-002 is laid out. The canonical frame carries the summary, the list, the note and the
+/// Apple link; after a timing review the frame is the list alone.
+enum ChildActivityVariant: Equatable, Sendable {
+    case canonical
+    case afterTimingReview
+}
+
+/// Frame-specific presentation for a snapshot: which rows the approved frames show. The full
+/// event data still feeds weekly counts and filters; only the visible rows are chosen here.
+/// A snapshot without it shows every matching event.
+struct ActivityFramePresentation: Equatable, Sendable {
+    /// Visible T-002 rows per child, in frame order (event ids).
+    let childWeekRowIDs: [ActivityChild: [String]]
+    /// Visible T-005 "Earlier" rows, in frame order (event ids).
+    let protectionEarlierIDs: [String]
+    let childActivityVariant: ChildActivityVariant
+}
+
 /// Weekly counts of Themis-owned outcomes (Category A only). Every field is derived from
 /// `ActivityEvent`s. There are no scores, rankings or ratings, and Apple Screen Time
 /// data cannot appear here because Themis never receives it.
@@ -221,6 +259,10 @@ struct ActivityWeeklySummary: Equatable, Sendable {
     /// School days with a resolved homework task, and how many were on time.
     let homeworkDays: Int
     let homeworkOnTime: Int
+    /// Submitted after the deadline.
+    let homeworkAfterDeadline: Int
+    /// Timing could not be verified. Counted in neither on time nor after the deadline.
+    let homeworkTimingUnverified: Int
     let requestsApproved: Int
     let requestsPartiallyApproved: Int
     let requestsDeclined: Int
@@ -229,7 +271,7 @@ struct ActivityWeeklySummary: Equatable, Sendable {
     let focusInterrupted: Int
     let freePassCount: Int
     let freePassMinutes: Int
-    let protectionNotes: [ProtectionWeekNote]
+    let protection: WeeklyProtectionSummary
 
     var requestCount: Int {
         requestsApproved + requestsPartiallyApproved + requestsDeclined + requestsExpired
@@ -243,6 +285,10 @@ struct ActivitySnapshot: Equatable, Sendable {
     let referenceDate: Date
     let events: [ActivityEvent]
     let protectionNow: [ProtectionNow]
+    /// Explicit week-level protection evidence per child and period.
+    var protectionWeeks: [ProtectionWeekKey: WeeklyProtectionSummary] = [:]
+    /// Which rows the approved frames show. Nil shows every matching event.
+    var presentation: ActivityFramePresentation? = nil
 
     /// Newest first, ties broken by id.
     func events(for scope: ActivityScope, categories: Set<ActivityCategory>? = nil) -> [ActivityEvent] {
@@ -262,19 +308,13 @@ struct ActivitySnapshot: Equatable, Sendable {
         let requests = inPeriod.filter { $0.category == .request }
         let sessions = inPeriod.filter { $0.category == .session }
         let passes = inPeriod.filter { $0.category == .temporaryAccess }
-        let notes = inPeriod
-            .filter { $0.category == .protection && $0.protectionState != nil && $0.protectionState != .protected }
-            .sorted { $0.occurredAt < $1.occurredAt }
-            .compactMap { event -> ProtectionWeekNote? in
-                guard let state = event.protectionState else { return nil }
-                return ProtectionWeekNote(state: state, weekday: ActivityCalendar.weekdayName(event.occurredAt))
-            }
-
         return ActivityWeeklySummary(
             scope: scope,
             period: period,
             homeworkDays: tasks.count,
             homeworkOnTime: tasks.filter { $0.taskTiming == .onTime }.count,
+            homeworkAfterDeadline: tasks.filter { $0.taskTiming == .afterDeadline }.count,
+            homeworkTimingUnverified: tasks.filter { $0.taskTiming == .timingUnverified }.count,
             requestsApproved: requests.filter { $0.outcome.kind == .approved }.count,
             requestsPartiallyApproved: requests.filter { $0.outcome.kind == .partiallyApproved }.count,
             requestsDeclined: requests.filter { $0.outcome.kind == .declined }.count,
@@ -283,8 +323,30 @@ struct ActivitySnapshot: Equatable, Sendable {
             focusInterrupted: sessions.filter { $0.outcome == ActivityStatus.interrupted }.count,
             freePassCount: passes.count,
             freePassMinutes: passes.compactMap(\.durationMinutes).reduce(0, +),
-            protectionNotes: notes
+            protection: protectionEvidence(for: scope, period: period)
         )
+    }
+
+    /// Week-level protection evidence. Every child in scope needs explicit evidence; otherwise
+    /// there is none. A recorded change is reported as a change; all-verified is the only way to
+    /// get `.protectedAllWeek`.
+    private func protectionEvidence(for scope: ActivityScope, period: ActivityPeriod) -> WeeklyProtectionSummary {
+        let parts = ActivityChild.allCases
+            .filter { scope.includes($0) }
+            .map { child -> WeeklyProtectionSummary in
+                switch protectionWeeks[ProtectionWeekKey(child: child, period: period)] {
+                case .protectedAllWeek?: return .protectedAllWeek
+                case let .changed(notes)? where !notes.isEmpty: return .changed(notes)
+                // A missing entry, or a "change" with no changes in it, is no evidence.
+                default: return .noEvidence
+                }
+            }
+        if parts.isEmpty || parts.contains(.noEvidence) { return .noEvidence }
+        let notes = parts.flatMap { part -> [ProtectionWeekNote] in
+            if case let .changed(changes) = part { return changes }
+            return []
+        }
+        return notes.isEmpty ? .protectedAllWeek : .changed(notes)
     }
 
     /// Consecutive events on the same day, in the order given.

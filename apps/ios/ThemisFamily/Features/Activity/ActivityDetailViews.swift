@@ -85,6 +85,9 @@ private struct ActivityNote: View {
 
 /// One child's Themis-owned outcomes for this week. No Apple data appears here; the Screen
 /// Time link only opens Apple's own, separately bounded screen.
+///
+/// Canonical (T-002): summary, this week's rows, the "which apps" note (Sam's only) and the
+/// Apple link. After a timing review (T-002 · Timing) the approved frame is the list alone.
 struct ChildActivityView: View {
     let child: ActivityChild
     let snapshot: ActivitySnapshot
@@ -92,11 +95,14 @@ struct ChildActivityView: View {
     var body: some View {
         let summary = snapshot.summary(for: ActivityScope(child), period: .thisWeek)
         let rows = ActivityPresentation.weekRows(for: child, snapshot: snapshot)
+        let isCanonical = (snapshot.presentation?.childActivityVariant ?? .canonical) == .canonical
 
         ActivityPage(title: child.firstName) {
-            KeyValueList(
-                items: ActivityPresentation.summaryItems(summary).map { KeyValueList.Item($0.key, $0.value) }
-            )
+            if isCanonical {
+                KeyValueList(
+                    items: ActivityPresentation.summaryItems(summary).map { KeyValueList.Item($0.key, $0.value) }
+                )
+            }
 
             if !rows.isEmpty {
                 ThemisGroupedSection(ActivityPeriod.thisWeek.title, data: rows) { row in
@@ -104,18 +110,20 @@ struct ChildActivityView: View {
                 }
             }
 
-            if ActivityPresentation.showsAppUsageNote(for: child) {
+            if isCanonical && ActivityPresentation.showsAppUsageNote(for: child) {
                 ActivityNote(text: ActivityCopy.appUsageNote(for: child))
             }
 
-            NavigationLink(value: ActivityRoute.appleScreenTime) {
-                Text(AppleScreenTimeCopy.childLinkTitle)
-                    .themisFont(.rowTitle)
-                    .foregroundStyle(ThemisColor.brandPrimary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity, minHeight: ThemisSize.tapMinimum)
+            if isCanonical {
+                NavigationLink(value: ActivityRoute.appleScreenTime) {
+                    Text(AppleScreenTimeCopy.childLinkTitle)
+                        .themisFont(.rowTitle)
+                        .foregroundStyle(ThemisColor.brandPrimary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, minHeight: ThemisSize.tapMinimum)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 }
@@ -268,10 +276,16 @@ struct ActivityPreviewHost<Content: View>: View {
     ActivityPreviewHost { RuleChangesView(snapshot: ActivityDemoData.snapshot) }
 }
 
-#Preview("T-002 · Timing unverified detail") {
-    ActivityPreviewHost {
+#Preview("T-002 · Timing resolved") {
+    ActivityPreviewHost(snapshot: ActivityDemoData.timingResolvedSnapshot) {
+        ChildActivityView(child: .sam, snapshot: ActivityDemoData.timingResolvedSnapshot)
+    }
+}
+
+#Preview("T-002 · Timing resolved detail") {
+    ActivityPreviewHost(snapshot: ActivityDemoData.timingResolvedSnapshot) {
         ActivityEventDetailView(
-            event: ActivityDemoData.snapshot.event(id: "sam-homework-timing-unverified") ?? ActivityDemoData.events[0]
+            event: ActivityDemoData.timingResolvedSnapshot.event(id: "sam-homework-timing-unverified") ?? ActivityDemoData.events[0]
         )
     }
 }

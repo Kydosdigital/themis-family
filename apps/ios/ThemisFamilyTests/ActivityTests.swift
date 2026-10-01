@@ -2,14 +2,31 @@ import XCTest
 @testable import ThemisFamily
 
 final class ActivityTests: XCTestCase {
+    /// Canonical frames: Thursday's homework still needs the parent.
     private let snapshot = ActivityDemoData.snapshot
+    /// T-002 after timing review: Thursday resolved as "Approved, timing unverified".
+    private let resolved = ActivityDemoData.timingResolvedSnapshot
 
     private func event(_ id: String) throws -> ActivityEvent {
         try XCTUnwrap(snapshot.event(id: id), "Missing demo event \(id)")
     }
 
+    private func resolvedEvent(_ id: String) throws -> ActivityEvent {
+        try XCTUnwrap(resolved.event(id: id), "Missing resolved demo event \(id)")
+    }
+
     private func summary(_ scope: ActivityScope, _ period: ActivityPeriod = .thisWeek) -> ActivityWeeklySummary {
         snapshot.summary(for: scope, period: period)
+    }
+
+    /// Full demo events with only the protection evidence given.
+    private func snapshotWithProtection(_ weeks: [ProtectionWeekKey: WeeklyProtectionSummary]) -> ActivitySnapshot {
+        ActivitySnapshot(
+            referenceDate: ActivityDemoData.referenceDate,
+            events: ActivityDemoData.events,
+            protectionNow: [],
+            protectionWeeks: weeks
+        )
     }
 
     /// Every sentence the Activity demo can show.
@@ -17,7 +34,7 @@ final class ActivityTests: XCTestCase {
         var copy: [String] = [ActivityCopy.overviewFooter, ActivityCopy.emptyTitle, ActivityCopy.emptyMessage,
                               ActivityCopy.timingExplanation, ActivityRetention.ruleChangesFooter,
                               ActivityRetention.requestsFooter]
-        for event in snapshot.events + ActivityDemoData.allProtectionStatesSnapshot.events {
+        for event in snapshot.events + resolved.events + ActivityDemoData.allProtectionStatesSnapshot.events {
             copy.append(contentsOf: [event.title, event.outcome.label])
             copy.append(contentsOf: [event.detail, event.resolverText, event.weekdayText].compactMap { $0 })
         }
@@ -144,7 +161,7 @@ final class ActivityTests: XCTestCase {
 
     // TEST 7
     func testTimingUnverifiedUsesTheExactOutcomeAndNeverOnTimeOrLate() throws {
-        let timing = try event("sam-homework-timing-unverified")
+        let timing = try resolvedEvent("sam-homework-timing-unverified")
         XCTAssertEqual(timing.outcome.label, "Approved, timing unverified")
         XCTAssertEqual(timing.outcome, .approvedTimingUnverified)
         XCTAssertEqual(timing.taskTiming, .timingUnverified)
@@ -159,28 +176,48 @@ final class ActivityTests: XCTestCase {
 
     // TEST 8
     func testTimingUnverifiedExampleKeepsBothTimes() throws {
-        let timing = try XCTUnwrap(try event("sam-homework-timing-unverified").timing)
+        let timing = try XCTUnwrap(try resolvedEvent("sam-homework-timing-unverified").timing)
         XCTAssertEqual(timing.claimedText, "5:58 PM")
         XCTAssertEqual(timing.serverReceivedText, "6:02 PM")
-        // No other event carries timing evidence.
-        XCTAssertEqual(snapshot.events.filter { $0.timing != nil }.count, 1)
+        // No other event carries timing evidence, and the canonical state carries none.
+        XCTAssertEqual(resolved.events.filter { $0.timing != nil }.count, 1)
+        XCTAssertEqual(snapshot.events.filter { $0.timing != nil }.count, 0)
     }
 
-    func testTimingUnverifiedWeekdayRowReadsApprovedTimingUnverifiedAndOpensTheDetail() throws {
-        let rows = ActivityPresentation.weekRows(for: .sam, snapshot: snapshot)
-        let thursday = try XCTUnwrap(rows.first { $0.title == "Thursday" })
+    func testTimingResolvedVariantReadsApprovedTimingUnverifiedAndOpensTheDetail() throws {
+        let rows = ActivityPresentation.weekRows(for: .sam, snapshot: resolved)
+        XCTAssertEqual(rows.map(\.title), ["Monday", "Tuesday", "Wednesday", "Thursday"])
+        let thursday = try XCTUnwrap(rows.last)
         XCTAssertEqual(thursday.subtitle, "Approved, timing unverified")
+        XCTAssertEqual(thursday.status, .approved)
         XCTAssertEqual(thursday.detailEventID, "sam-homework-timing-unverified")
         XCTAssertEqual(rows.filter { $0.detailEventID != nil }.count, 1)
+        XCTAssertEqual(resolved.presentation?.childActivityVariant, .afterTimingReview)
+        XCTAssertEqual(snapshot.presentation?.childActivityVariant, .canonical)
     }
 
-    func testTimingUnverifiedIsNotCountedOnTimeAndNotLabelledLate() {
-        let sam = summary(.sam)
-        XCTAssertEqual(sam.homeworkDays, 5)
-        XCTAssertEqual(sam.homeworkOnTime, 4)
-        XCTAssertLessThan(sam.homeworkOnTime, sam.homeworkDays, "The timing-unverified day is the one not counted on time")
-        let items = ActivityPresentation.summaryItems(sam)
-        XCTAssertFalse(items.contains { $0.value.localizedCaseInsensitiveContains("late") })
+    func testCanonicalSamThursdayIsTimingCouldNotBeVerifiedNeedsYou() throws {
+        let thursday = try XCTUnwrap(ActivityPresentation.weekRows(for: .sam, snapshot: snapshot).last)
+        XCTAssertEqual(thursday.title, "Thursday")
+        XCTAssertEqual(thursday.subtitle, "Timing could not be verified.")
+        XCTAssertEqual(thursday.status, .needsYou)
+        XCTAssertEqual(thursday.status?.label, "Needs you")
+        // Review is owned by the task flow, so the canonical row opens nothing here.
+        XCTAssertNil(thursday.detailEventID)
+        XCTAssertFalse(snapshot.events.contains { $0.outcome == .approvedTimingUnverified })
+    }
+
+    func testResolvedTimingVariantIsExcludedFromOnTimeAndLateCounts() {
+        for variant in [snapshot, resolved] {
+            let sam = variant.summary(for: .sam, period: .thisWeek)
+            XCTAssertEqual(sam.homeworkDays, 5)
+            XCTAssertEqual(sam.homeworkOnTime, 4)
+            XCTAssertEqual(sam.homeworkAfterDeadline, 0, "Timing unverified is never counted late")
+            XCTAssertEqual(sam.homeworkTimingUnverified, 1)
+            XCTAssertEqual(sam.homeworkOnTime + sam.homeworkAfterDeadline + sam.homeworkTimingUnverified, sam.homeworkDays)
+            let items = ActivityPresentation.summaryItems(sam)
+            XCTAssertFalse(items.contains { $0.value.localizedCaseInsensitiveContains("late") })
+        }
     }
 
     // MARK: Focus Sessions and protection
@@ -388,31 +425,54 @@ final class ActivityTests: XCTestCase {
         ])
     }
 
-    func testSamWeekdayRowsMatchTheApprovedFrame() {
+    func testSamWeekdayRowsMatchTheApprovedCanonicalFrame() {
         let rows = ActivityPresentation.weekRows(for: .sam, snapshot: snapshot)
-        XCTAssertEqual(rows.map(\.title), ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
+        XCTAssertEqual(rows.map(\.title), ["Monday", "Tuesday", "Wednesday", "Thursday"])
         XCTAssertEqual(rows.map(\.subtitle), [
             "Homework approved 5:52 PM",
             "Sent 5:42 · approved 6:13 PM",
             "Approved after the deadline",
-            "Approved, timing unverified",
-            "Homework approved 5:48 PM"
+            "Timing could not be verified."
         ])
-        XCTAssertEqual(rows.map { $0.status?.label }, ["Approved", "Approved", "After 6:00", "Approved", "Approved"])
+        XCTAssertEqual(rows.map { $0.status?.label }, ["Approved", "Approved", "After 6", "Needs you"])
     }
 
-    func testMayaWeekRowsListRequestsAndFocusSessionsNewestFirst() throws {
+    func testSamSummaryIsFourOfFiveEvenThoughOnlyFourRowsAreVisible() {
+        XCTAssertEqual(ActivityPresentation.weekRows(for: .sam, snapshot: snapshot).count, 4)
+        let sam = summary(.sam)
+        XCTAssertEqual(sam.homeworkDays, 5)
+        XCTAssertEqual(sam.homeworkOnTime, 4)
+        XCTAssertEqual(ActivityPresentation.summaryItems(sam).first?.value, "On time 4 of 5 school days")
+        // Friday stays in the data; it is simply not part of the canonical frame.
+        XCTAssertNotNil(snapshot.event(id: "sam-homework-2026-10-02"))
+        XCTAssertFalse(ActivityPresentation.weekRows(for: .sam, snapshot: snapshot).contains { $0.title == "Friday" })
+    }
+
+    func testWednesdayAfterSixChipIsNotOverdue() throws {
+        let wednesday = try XCTUnwrap(ActivityPresentation.weekRows(for: .sam, snapshot: snapshot).first { $0.title == "Wednesday" })
+        let chip = try XCTUnwrap(wednesday.status)
+        XCTAssertEqual(chip.label, "After 6")
+        XCTAssertNotEqual(chip.kind, .overdue)
+        XCTAssertEqual(chip.kind, .grace)
+        XCTAssertEqual(ActivityStatus.afterDeadline.kind, .grace)
+        XCTAssertEqual(try event("sam-homework-2026-09-30").taskTiming, .onTime)
+    }
+
+    func testCanonicalMayaRowsAreExactlyTheTwoApprovedRows() throws {
         let rows = ActivityPresentation.weekRows(for: .maya, snapshot: snapshot)
-        XCTAssertEqual(rows.count, 7)
-        let tuesday = try XCTUnwrap(rows.first { $0.id == "maya-instagram-15-tue" })
-        XCTAssertEqual(tuesday.title, "Instagram · 15 min")
-        XCTAssertEqual(tuesday.subtitle, "Tuesday · partly approved")
-        XCTAssertEqual(tuesday.status, .partiallyApproved)
-        let monday = try XCTUnwrap(rows.first { $0.id == "maya-focus-2026-09-28" })
-        XCTAssertEqual(monday.title, "Focus Session · 30 min")
-        XCTAssertEqual(monday.subtitle, "Monday")
-        XCTAssertEqual(monday.status, .completed)
-        XCTAssertEqual(rows.first?.id, "maya-focus-2026-10-02")
+        XCTAssertEqual(rows.map(\.title), ["Instagram · 15 min", "Focus Session · 30 min"])
+        XCTAssertEqual(rows.map(\.subtitle), ["Tuesday · partly approved", "Monday"])
+        XCTAssertEqual(rows.map { $0.status?.label }, ["Partially approved", "Completed"])
+        XCTAssertEqual(rows.first?.status, .partiallyApproved)
+        XCTAssertEqual(rows.last?.status, .completed)
+
+        // The rest of Maya's week stays in the data and in the counts.
+        XCTAssertEqual(summary(.maya).requestCount, 3)
+        XCTAssertEqual(summary(.maya).focusCompleted, 3)
+        XCTAssertEqual(summary(.maya).focusInterrupted, 1)
+        XCTAssertEqual(ActivityPresentation.weekRows(for: .maya, snapshot: ActivitySnapshot(
+            referenceDate: ActivityDemoData.referenceDate, events: ActivityDemoData.events, protectionNow: []
+        )).count, 7, "Without frame presentation every matching event is listed")
     }
 
     func testAppUsageNoteAppearsForSamOnlyAsDrawn() {
@@ -456,14 +516,73 @@ final class ActivityTests: XCTestCase {
         XCTAssertEqual(now.map { $0.status?.kind }, [.protected, .syncPending])
 
         let earlier = ActivityPresentation.protectionEarlierRows(snapshot: snapshot)
-        let attention = earlier.first { $0.id == "sam-protection-needs-attention" }
-        XCTAssertEqual(attention?.title, "Apple permission turned off")
-        XCTAssertEqual(attention?.subtitle, "Sam · Mon 7:10 PM · fixed 7:24 PM")
-        XCTAssertEqual(attention?.status?.label, "Fixed")
-        let offline = earlier.first { $0.id == "maya-protection-offline-sat" }
-        XCTAssertEqual(offline?.title, "Offline for 3 hr")
-        XCTAssertEqual(offline?.subtitle, "Maya · Sat · reconnected")
-        XCTAssertEqual(offline?.status?.label, "Reconnected")
+        XCTAssertEqual(earlier.map(\.title), ["Apple permission turned off", "Offline for 3 hr"])
+        XCTAssertEqual(earlier.map(\.subtitle), ["Sam · Mon 7:10 PM · fixed 7:24 PM", "Maya · Sat · reconnected"])
+        XCTAssertEqual(earlier.map { $0.status?.label }, ["Fixed", "Reconnected"])
+    }
+
+    func testCanonicalProtectionEarlierShowsOnlyTheApprovedRowsWhileTheDataKeepsMore() {
+        let canonical = ActivityPresentation.protectionEarlierRows(snapshot: snapshot).map(\.id)
+        XCTAssertEqual(canonical, ["sam-protection-needs-attention", "maya-protection-offline-sat"])
+        // A supporting change is still recorded and still feeds the weekly evidence.
+        XCTAssertNotNil(snapshot.event(id: "maya-protection-sync-pending-tue"))
+        XCTAssertFalse(canonical.contains("maya-protection-sync-pending-tue"))
+        // Without frame presentation (review data) every recorded change is listed.
+        let review = ActivityPresentation.protectionEarlierRows(snapshot: ActivityDemoData.allProtectionStatesSnapshot)
+        XCTAssertGreaterThan(review.count, canonical.count)
+    }
+
+    // MARK: Protected all week needs explicit evidence
+
+    func testProtectedAllWeekRequiresExplicitEvidence() {
+        let explicit = snapshotWithProtection([ProtectionWeekKey(child: .sam, period: .thisWeek): .protectedAllWeek])
+            .summary(for: .sam, period: .thisWeek)
+        XCTAssertEqual(explicit.protection, .protectedAllWeek)
+        XCTAssertEqual(ActivityPresentation.protectionValue(explicit), "Protected all week")
+
+        // The canonical Sam demo carries that evidence explicitly.
+        XCTAssertEqual(summary(.sam).protection, .protectedAllWeek)
+        XCTAssertEqual(ActivityPresentation.protectionValue(summary(.sam)), "Protected all week")
+    }
+
+    func testAbsenceOfProtectionEventsAloneNeverProducesProtectedAllWeek() {
+        // Sam has no recorded problem this week, but nothing explicitly verifies the week.
+        let noEvidence = snapshotWithProtection([:]).summary(for: .sam, period: .thisWeek)
+        XCTAssertFalse(snapshot.events(for: .sam).contains {
+            $0.category == .protection && ActivityPeriod.thisWeek.contains($0.occurredAt, reference: ActivityDemoData.referenceDate)
+        }, "Precondition: no protection event for Sam this week")
+        XCTAssertEqual(noEvidence.protection, .noEvidence)
+        XCTAssertNotEqual(ActivityPresentation.protectionValue(noEvidence), "Protected all week")
+        XCTAssertEqual(ActivityPresentation.protectionValue(noEvidence), "Not confirmed")
+
+        // With no events at all the result is the same.
+        let empty = ActivitySnapshot(referenceDate: ActivityDemoData.referenceDate, events: [], protectionNow: [])
+        XCTAssertNotEqual(ActivityPresentation.protectionValue(empty.summary(for: .sam, period: .thisWeek)), "Protected all week")
+
+        // All needs evidence for every child.
+        let oneChild = snapshotWithProtection([ProtectionWeekKey(child: .sam, period: .thisWeek): .protectedAllWeek])
+        XCTAssertEqual(oneChild.summary(for: .all, period: .thisWeek).protection, .noEvidence)
+        let both = snapshotWithProtection([
+            ProtectionWeekKey(child: .sam, period: .thisWeek): .protectedAllWeek,
+            ProtectionWeekKey(child: .maya, period: .thisWeek): .protectedAllWeek
+        ])
+        XCTAssertEqual(both.summary(for: .all, period: .thisWeek).protection, .protectedAllWeek)
+    }
+
+    func testExplicitSyncPendingEvidenceReadsSyncPendingOnTuesday() {
+        let changed = snapshotWithProtection([
+            ProtectionWeekKey(child: .maya, period: .thisWeek): .changed([ProtectionWeekNote(state: .syncPending, weekday: "Tuesday")])
+        ]).summary(for: .maya, period: .thisWeek)
+        XCTAssertEqual(ActivityPresentation.protectionValue(changed), "Sync pending on Tuesday")
+        XCTAssertEqual(ActivityPresentation.protectionValue(summary(.maya)), "Sync pending on Tuesday")
+        // An empty change list is not evidence of anything.
+        let empty = WeeklyProtectionSummary.changed([])
+        XCTAssertNotEqual(
+            ActivityPresentation.protectionValue(
+                snapshotWithProtection([ProtectionWeekKey(child: .sam, period: .thisWeek): empty]).summary(for: .sam, period: .thisWeek)
+            ),
+            "Protected all week"
+        )
     }
 
     func testOverviewFooterMatchesTheApprovedFrame() {

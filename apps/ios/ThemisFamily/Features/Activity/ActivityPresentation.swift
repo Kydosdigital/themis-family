@@ -94,11 +94,18 @@ enum ActivityPresentation {
         return "\(summary.requestCount) · \(breakdown)"
     }
 
-    /// "Protected all week" when no change from Protected was recorded, otherwise
-    /// "Sync pending on Tuesday".
+    /// "Protected all week" only with explicit evidence that protection was verified for the whole
+    /// period. A recorded change reads "Sync pending on Tuesday". With no evidence it reads
+    /// "Not confirmed": no recorded problem is not proof of continuous protection.
     static func protectionValue(_ summary: ActivityWeeklySummary) -> String {
-        guard !summary.protectionNotes.isEmpty else { return "Protected all week" }
-        return summary.protectionNotes.map { "\($0.state.title) on \($0.weekday)" }.joined(separator: ", ")
+        switch summary.protection {
+        case .protectedAllWeek:
+            return "Protected all week"
+        case let .changed(notes) where !notes.isEmpty:
+            return notes.map { "\($0.state.title) on \($0.weekday)" }.joined(separator: ", ")
+        case .changed, .noEvidence:
+            return "Not confirmed"
+        }
     }
 
     // MARK: T-002 · this week's list
@@ -109,8 +116,16 @@ enum ActivityPresentation {
     }
 
     /// Sam's list is one row per school day, Monday first. Maya's is her requests and Focus
-    /// Sessions, newest first. A child with resolved homework this week gets the school-day list.
+    /// Sessions, newest first. When the snapshot carries frame presentation, only the rows the
+    /// approved frame shows are returned, in frame order; the other events still feed the counts.
     static func weekRows(for child: ActivityChild, snapshot: ActivitySnapshot) -> [ActivityListRow] {
+        let all = allWeekRows(for: child, snapshot: snapshot)
+        guard let ids = snapshot.presentation?.childWeekRowIDs[child] else { return all }
+        let byID = Dictionary(all.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return ids.compactMap { byID[$0] }
+    }
+
+    private static func allWeekRows(for child: ActivityChild, snapshot: ActivitySnapshot) -> [ActivityListRow] {
         let scope = ActivityScope(child)
         let week = snapshot.events(for: scope).filter {
             ActivityPeriod.thisWeek.contains($0.occurredAt, reference: snapshot.referenceDate)
@@ -124,14 +139,15 @@ enum ActivityPresentation {
         return week.filter { $0.category == .request || $0.category == .session }.map(outcomeRow)
     }
 
-    /// "Monday" · "Homework approved 5:52 PM" · Approved. A timing-unverified day reads
-    /// "Approved, timing unverified" and is never restated as on time or late.
+    /// "Monday" · "Homework approved 5:52 PM" · Approved. Before review, a timing-unverified day
+    /// reads "Timing could not be verified." with "Needs you"; after review it reads "Approved,
+    /// timing unverified". Neither is ever restated as on time or late.
     private static func schoolDayRow(_ event: ActivityEvent) -> ActivityListRow {
         ActivityListRow(
             id: event.id,
             title: ActivityCalendar.weekdayName(event.occurredAt),
             subtitle: event.weekdayText ?? event.outcome.label,
-            status: event.taskTiming == .timingUnverified ? ThemisStatus.approved : event.outcome,
+            status: event.outcome == .approvedTimingUnverified ? ThemisStatus.approved : event.outcome,
             detailEventID: event.timing == nil ? nil : event.id
         )
     }
@@ -203,11 +219,15 @@ enum ActivityPresentation {
         }
     }
 
-    /// "Earlier": recorded changes, newest first. "Sam · Mon 7:10 PM · fixed 7:24 PM".
+    /// "Earlier": recorded changes. With frame presentation only the approved rows, in frame
+    /// order; otherwise every recorded change, newest first. "Sam · Mon 7:10 PM · fixed 7:24 PM".
     static func protectionEarlierRows(snapshot: ActivitySnapshot) -> [ActivityListRow] {
-        snapshot.events(for: .all, categories: [.protection]).map { event in
+        let all = snapshot.events(for: .all, categories: [.protection]).map { event -> ActivityListRow in
             let subtitle = [event.child.firstName, event.detail].compactMap { $0 }.joined(separator: " · ")
             return ActivityListRow(id: event.id, title: event.title, subtitle: subtitle, status: event.outcome, detailEventID: nil)
         }
+        guard let ids = snapshot.presentation?.protectionEarlierIDs else { return all }
+        let byID = Dictionary(all.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return ids.compactMap { byID[$0] }
     }
 }

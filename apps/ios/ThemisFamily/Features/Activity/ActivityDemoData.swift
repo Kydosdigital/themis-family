@@ -15,26 +15,64 @@ enum ActivityDemoData {
         ActivityCalendar.date(2026, month, day, hour, minute)
     }
 
-    static let snapshot = ActivitySnapshot(
-        referenceDate: referenceDate,
-        events: events,
-        protectionNow: protectionNow
-    )
-
     static let protectionNow: [ProtectionNow] = [
         ProtectionNow(child: .sam, status: .protected, evidence: "Verified 2 min ago"),
         ProtectionNow(child: .maya, status: .syncPending, evidence: "Verified 14 min ago")
     ]
 
-    /// Review state: the same family plus one recorded change for each of the five
-    /// protection states, so T-005 can be reviewed with every state.
+    /// Explicit week-level protection evidence. The demo states it deterministically, as the
+    /// approved frames show it; production will have to be supplied this by the repository.
+    /// Missing evidence is never read as "Protected all week".
+    static let protectionWeeks: [ProtectionWeekKey: WeeklyProtectionSummary] = [
+        ProtectionWeekKey(child: .sam, period: .thisWeek): .protectedAllWeek,
+        ProtectionWeekKey(child: .maya, period: .thisWeek): .changed([ProtectionWeekNote(state: .syncPending, weekday: "Tuesday")]),
+        ProtectionWeekKey(child: .sam, period: .lastWeek): .changed([ProtectionWeekNote(state: .needsAttention, weekday: "Monday")]),
+        ProtectionWeekKey(child: .maya, period: .lastWeek): .changed([ProtectionWeekNote(state: .deviceOffline, weekday: "Saturday")])
+    ]
+
+    // MARK: Variants
+
+    /// Canonical frames (T-001 to T-006): Thursday's homework is still waiting for review, so
+    /// T-002 reads "Timing could not be verified." with "Needs you". The visible rows are the
+    /// ones the approved frames show; the other events still feed counts and filters.
+    static let snapshot = makeSnapshot(thursday: thursdayAwaitingReview, variant: .canonical)
+
+    /// T-002 after timing review: the same week with Thursday resolved as "Approved, timing
+    /// unverified". Activity only presents this; the review itself belongs to the task flow.
+    static let timingResolvedSnapshot = makeSnapshot(thursday: thursdayResolved, variant: .afterTimingReview)
+
+    /// Review state: the canonical family plus one recorded change for each of the five
+    /// protection states, shown without frame presentation so T-005 lists every change.
     static let allProtectionStatesSnapshot = ActivitySnapshot(
         referenceDate: referenceDate,
         events: events + allProtectionStateEvents,
-        protectionNow: protectionNow
+        protectionNow: protectionNow,
+        protectionWeeks: protectionWeeks
     )
 
-    static let events: [ActivityEvent] = [samHomework, samOther, mayaRequests, mayaSessions, mayaOther, ruleChanges].flatMap { $0 }
+    /// The canonical events.
+    static let events: [ActivityEvent] = eventList(thursday: thursdayAwaitingReview)
+
+    private static func eventList(thursday: ActivityEvent) -> [ActivityEvent] {
+        [samHomework, [thursday], samOther, mayaRequests, mayaSessions, mayaOther, ruleChanges].flatMap { $0 }
+    }
+
+    private static func makeSnapshot(thursday: ActivityEvent, variant: ChildActivityVariant) -> ActivitySnapshot {
+        ActivitySnapshot(
+            referenceDate: referenceDate,
+            events: eventList(thursday: thursday),
+            protectionNow: protectionNow,
+            protectionWeeks: protectionWeeks,
+            presentation: ActivityFramePresentation(
+                childWeekRowIDs: [
+                    .sam: ["sam-homework-2026-09-28", "sam-homework-2026-09-29", "sam-homework-2026-09-30", thursday.id],
+                    .maya: ["maya-instagram-15-tue", "maya-focus-2026-09-28"]
+                ],
+                protectionEarlierIDs: ["sam-protection-needs-attention", "maya-protection-offline-sat"],
+                childActivityVariant: variant
+            )
+        )
+    }
 
     // MARK: Sam · homework, one resolved task per school day
 
@@ -45,13 +83,6 @@ enum ActivityDemoData {
         // Approved after the deadline. Modelled as an on-time submission approved within the
         // 30-minute grace period (DEC-40), so it counts toward "on time".
         homework("sam-homework-2026-09-30", at(9, 30, 18, 25), text: "Approved after the deadline", outcome: ActivityStatus.afterDeadline),
-        ActivityEvent(
-            id: "sam-homework-timing-unverified", child: .sam, occurredAt: at(10, 1, 18, 20), category: .task,
-            title: "Homework Deadline", outcome: .approvedTimingUnverified,
-            detail: ActivityCopy.timingExplanation, resolver: owner,
-            timing: TimingEvidence(claimedByChildDevice: at(10, 1, 17, 58), serverReceived: at(10, 1, 18, 2)),
-            taskTiming: .timingUnverified
-        ),
         homework("sam-homework-2026-10-02", at(10, 2, 17, 48), text: "Homework approved 5:48 PM"),
         // Last week
         homework("sam-homework-2026-09-21", at(9, 21, 17, 50), text: "Homework approved 5:50 PM"),
@@ -60,6 +91,24 @@ enum ActivityDemoData {
         homework("sam-homework-2026-09-24", at(9, 24, 17, 58), text: "Homework approved 5:58 PM"),
         homework("sam-homework-2026-09-25", at(9, 25, 17, 45), text: "Homework approved 5:45 PM")
     ]
+
+    /// Thursday before review: timing could not be verified, so it needs the parent.
+    private static let thursdayAwaitingReview = ActivityEvent(
+        id: "sam-homework-timing-needs-review", child: .sam, occurredAt: at(10, 1, 18, 5), category: .task,
+        title: "Homework Deadline", outcome: .needsYou,
+        detail: nil, resolver: nil,
+        taskTiming: .timingUnverified, weekdayText: "Timing could not be verified."
+    )
+
+    /// Thursday after review: approved by Sarah with timing still unverified. Never restated as
+    /// on time or late.
+    private static let thursdayResolved = ActivityEvent(
+        id: "sam-homework-timing-unverified", child: .sam, occurredAt: at(10, 1, 18, 20), category: .task,
+        title: "Homework Deadline", outcome: .approvedTimingUnverified,
+        detail: ActivityCopy.timingExplanation, resolver: owner,
+        timing: TimingEvidence(claimedByChildDevice: at(10, 1, 17, 58), serverReceived: at(10, 1, 18, 2)),
+        taskTiming: .timingUnverified
+    )
 
     private static func homework(
         _ id: String,
