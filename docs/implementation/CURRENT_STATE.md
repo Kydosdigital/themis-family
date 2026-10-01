@@ -2,9 +2,9 @@
 
 Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: UI-04 Onboarding is merged and verified. UI-05 Rules & School Access is next and has not started.
-Active slice: UI-04 Onboarding - COMPLETE
-Allowed scope: UI-04 is closed. UI-05 must begin as a new dedicated slice/branch from the approved requirements and final design package.
+Current objective: UI-05 Rules & School Access is in progress on its dedicated branch. The implementation prompt is committed and source implementation is beginning.
+Active slice: UI-05 Rules & School Access - IN PROGRESS
+Allowed scope: R-001 through R-015 and S-001 through S-005 only, plus supporting presentation models, deterministic mocks/tests and visual-review states. UI-06 is not started.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
@@ -12,7 +12,8 @@ Completed slice prompt: docs/implementation/CLAUDE_CODE_UI04_ONBOARDING_PROMPT.m
 Last verification: UI-04 final source commit 648e09a607dcecdccac742525c2662d735c20265 passed the real macOS/Xcode build and full XCTest suite in GitHub Actions run 36742816233. Release Simulator run 36742808418 passed and produced the final ui-visual-review artifact. All 12 standard/accessibility captures were reviewed. P-002 Bedtime and Maya Teen Home Social apps pause clipping found in the earlier review were corrected through the shared open-ended AgreementTimeline rendering, and the final captures are clean.
 UI-04 review: onboarding remains mock-driven and preserves Apple/system-owned boundaries. Generic Homework uses Parent Approval only. Phone, Messages and Maps remain where-supported/spike-gated. Protected is not shown before activation readiness. Parent, Child and Teen regression captures remain visually intact.
 UI-04 merge: PR #10 squash-merged to main as 3573bef823c00a5453e119116dd5a437051de830.
-Next action: Prepare the dedicated UI-05 Rules & School Access implementation prompt, then implement UI-05 only. Do not begin UI-06 in the same run.
+UI-05 branch: feat/ui-05-rules-school-access. Dedicated prompt commit: 1660497bc6f87be30773e3634ebac7dce0613762.
+Next action: Continue UI-05 source implementation on the existing branch, create/resume its draft PR, then run real Xcode/XCTest and Release Simulator review. Do not begin UI-06.
 
 ## Current readiness
 
@@ -88,8 +89,8 @@ Airtable is not a replacement for the approved requirements or GitHub implementa
 ## Next implementation slice
 
 UI-05 Rules & School Access:
-- not started
-- next active implementation slice
-- prepare a dedicated slice prompt from the approved rule, Scheduled Rule, Deadline Lock, Earn First, Always Allowed and school-access frames
+- in progress on feat/ui-05-rules-school-access
+- dedicated implementation prompt committed
+- source implementation and draft PR are the current checkpoint
 - continue to use the merged design system and verified UI-02/UI-03/UI-04 patterns
 - do not bypass backend or Apple production gates
