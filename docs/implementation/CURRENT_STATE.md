@@ -2,16 +2,17 @@
 
 Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: UI-04 Onboarding is implemented, technically verified and visually reviewed. PR #10 is ready for final merge reconciliation.
-Active slice: UI-04 Onboarding - COMPLETE, pending merge
-Allowed scope: P-001 through P-022 Parent onboarding, P-010 pairing variants, P-021 protection-test result variants, supporting presentation models/components, deterministic previews/tests and Simulator review harness. UI-05 is not started.
+Current objective: UI-04 Onboarding is merged and verified. UI-05 Rules & School Access is next and has not started.
+Active slice: UI-04 Onboarding - COMPLETE
+Allowed scope: UI-04 is closed. UI-05 must begin as a new dedicated slice/branch from the approved requirements and final design package.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
 Completed slice prompt: docs/implementation/CLAUDE_CODE_UI04_ONBOARDING_PROMPT.md
 Last verification: UI-04 final source commit 648e09a607dcecdccac742525c2662d735c20265 passed the real macOS/Xcode build and full XCTest suite in GitHub Actions run 36742816233. Release Simulator run 36742808418 passed and produced the final ui-visual-review artifact. All 12 standard/accessibility captures were reviewed. P-002 Bedtime and Maya Teen Home Social apps pause clipping found in the earlier review were corrected through the shared open-ended AgreementTimeline rendering, and the final captures are clean.
 UI-04 review: onboarding remains mock-driven and preserves Apple/system-owned boundaries. Generic Homework uses Parent Approval only. Phone, Messages and Maps remain where-supported/spike-gated. Protected is not shown before activation readiness. Parent, Child and Teen regression captures remain visually intact.
-Next action: Merge PR #10, reconcile Airtable and create a fresh Chat Handoff. Do not start UI-05 in this run.
+UI-04 merge: PR #10 squash-merged to main as 3573bef823c00a5453e119116dd5a437051de830.
+Next action: Prepare the dedicated UI-05 Rules & School Access implementation prompt, then implement UI-05 only. Do not begin UI-06 in the same run.
 
 ## Current readiness
 
@@ -21,7 +22,7 @@ Next action: Merge PR #10, reconcile Airtable and create a fresh Chat Handoff. D
 - Design System: APPROVED
 - Final prototype: APPROVED
 - Engineering Handoff: APPROVED
-- SwiftUI UI implementation: IN PROGRESS, 4 of 15 slices complete after UI-04 merge
+- SwiftUI UI implementation: IN PROGRESS, 4 of 15 slices complete
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
@@ -54,7 +55,7 @@ UI-04 Onboarding:
 - deterministic onboarding tests and Simulator capture states
 - final real macOS/Xcode/XCTest verification passed
 - final 12-image Release Simulator review passed after correcting open-ended timeline label clipping
-- PR #10 ready for merge reconciliation
+- merged through PR #10 as 3573bef823c00a5453e119116dd5a437051de830
 
 ## Production gates
 
@@ -88,7 +89,7 @@ Airtable is not a replacement for the approved requirements or GitHub implementa
 
 UI-05 Rules & School Access:
 - not started
-- begin only in a later run after UI-04 is merged and tracker state is reconciled
+- next active implementation slice
 - prepare a dedicated slice prompt from the approved rule, Scheduled Rule, Deadline Lock, Earn First, Always Allowed and school-access frames
 - continue to use the merged design system and verified UI-02/UI-03/UI-04 patterns
 - do not bypass backend or Apple production gates
