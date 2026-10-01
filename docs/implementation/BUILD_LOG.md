@@ -195,3 +195,36 @@ Verification:
 - Parent P-023 was recaptured as a regression check and remains aligned with the UI-02 implementation.
 
 Not changed: frozen requirements, production Supabase, Apple enforcement, OQ-30 capability assumptions, C-002 through C-011 implementation or UI-04.
+
+
+## 2026-09-30: UI-04 Onboarding
+
+Status: COMPLETE; merged through PR #10 after real Xcode/XCTest and Release Simulator review.
+
+Source of truth: approved onboarding requirements, final clickable prototype, Design System, Engineering Handoff and `docs/implementation/CLAUDE_CODE_UI04_ONBOARDING_PROMPT.md`.
+
+Work:
+- Implemented P-001 through P-022 as one coherent onboarding state machine.
+- Added the approved five-chapter onboarding structure, native Sign in with Apple, explicit Apple/system-owned permission and picker handoffs, Sarah/Sam canonical setup, Homework Deadline starter, Roblox + Minecraft, 6:00 PM school-days deadline, Parent Approval, Always Allowed guidance, agreement review, protection test and activation.
+- Added P-010 pairing variants, including child-device entry, expired code, already-paired and secure-recovery presentation states.
+- Added P-021 success, retry and permission-result variants.
+- Preserved mock-driven UI boundaries: production Family Controls, backend identity/session wiring and real protection behaviour remain behind their existing gates.
+- Added deterministic visual-review launch states and kept Parent, Sam Child and Maya Teen homes as regression captures.
+
+Review corrections:
+- Re-aligned the first implementation pass against the final prototype package, including the exact five onboarding chapters, welcome treatment, Child/Teen cards, Apple-owned placeholders and the P-022 activation presentation.
+- Native Sign in with Apple only advances after a successful result.
+- Account creation never claims protection is active.
+- Generic Homework exposes Parent Approval only.
+- Essential-access copy keeps Phone, Messages and Maps as where-supported / spike-gated and never deliberately restricts emergency calling.
+- Open-ended `AgreementTimeline` bands now stay inside visible bounds, fixing clipped Bedtime on P-002 and Social apps pause on Maya Teen Home without changing rule semantics.
+- Deferred pairing setup routes to the existing Parent Home setup-incomplete state rather than pretending protection is complete.
+
+Verification:
+- Final verified UI-04 source commit `648e09a607dcecdccac742525c2662d735c20265` passed real macOS/Xcode build and full XCTest in run `36742816233`.
+- Final Release Simulator run `36742808418` passed and produced the `ui-visual-review` artifact.
+- All 12 captured standard/accessibility screens were reviewed. Parent, Sam and Maya regressions remained intact; P-002, P-010, P-019 and P-022 matched the approved direction; accessibility timelines used the stacked semantic fallback.
+- Final documentation head `c038a0d832dca9044b4c11df04d75e788d4d3e03` also passed iOS build/tests and workflow checks before merge.
+- PR #10 squash-merged to main as `3573bef823c00a5453e119116dd5a437051de830`.
+
+Not changed: production Supabase, Family Controls entitlement, Apple enforcement assumptions, unresolved OQ-30 behaviour, UI-05 or later slices.
