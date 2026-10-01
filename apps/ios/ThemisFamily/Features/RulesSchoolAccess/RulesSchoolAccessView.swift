@@ -68,7 +68,7 @@ struct AlwaysAllowedCard: View {
         ThemisCard {
             VStack(alignment: .leading, spacing: 10) {
                 Label("Always Allowed", systemImage: "checkmark.shield")
-                    .themisFont(.sectionHeader)
+                    .themisFont(.headline)
                 Text("These stay available even when another rule would restrict them.")
                     .themisFont(.secondary)
                     .foregroundStyle(ThemisColor.textSecondary)
@@ -149,7 +149,7 @@ struct SchoolAccessView: View {
                 PageHeader(title: "School Access", subtitle: "Keep school essentials available during school hours")
                 ThemisCard {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("School essentials").themisFont(.sectionHeader)
+                        Text("School essentials").themisFont(.headline)
                         ForEach(state.schoolTargets) { Text($0.name).themisFont(.rowTitle) }
                         Text("Chosen school apps and sites are Always Allowed.")
                             .themisFont(.meta).foregroundStyle(ThemisColor.textSecondary)
@@ -157,7 +157,7 @@ struct SchoolAccessView: View {
                 }
                 ThemisCard {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Entertainment during school hours").themisFont(.sectionHeader)
+                        Text("Entertainment during school hours").themisFont(.headline)
                         Text(state.entertainmentTargets.map(\.name).joined(separator: ", "))
                             .themisFont(.secondary)
                         Text("Temporary educational access uses the same Request and Grant flow.")
@@ -167,7 +167,7 @@ struct SchoolAccessView: View {
                 InlineBanner(.info, RulesSchoolAccessPolicy.schoolAccessCapabilityMessage)
                 ThemisCard {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Essential access").themisFont(.sectionHeader)
+                        Text("Essential access").themisFont(.headline)
                         Text(RulesSchoolAccessPolicy.essentialAccessMessage).themisFont(.secondary)
                         Text(RulesSchoolAccessPolicy.emergencyAccessMessage).themisFont(.meta).foregroundStyle(ThemisColor.textSecondary)
                         Text(state.singleDevicePerChildNote).themisFont(.meta).foregroundStyle(ThemisColor.textSecondary)
