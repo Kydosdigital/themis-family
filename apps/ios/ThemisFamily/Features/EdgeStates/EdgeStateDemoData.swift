@@ -14,6 +14,7 @@ import Foundation
 /// design system. The view layer maps these onto the real `ThemisStatus`.
 enum EdgeStateStatusKind: String, Sendable {
     case protectionUnavailable
+    case unconfirmed
     case deviceOffline
     case syncPending
     case approvedTimingUnverified
@@ -71,8 +72,8 @@ enum EdgeStateDemoData {
                 severity: .unavailable,
                 title: EdgeStateCopy.serversUnreachableTitle,
                 message: EdgeStateCopy.serversUnreachableMessage,
-                statusKind: .protectionUnavailable,
-                statusLabel: nil,
+                statusKind: .unconfirmed,
+                statusLabel: "Unconfirmed",
                 lastVerifiedText: "\(EdgeStateCopy.lastVerifiedPrefix) 2 hr ago",
                 timingEvidence: nil,
                 actions: [EdgeStateAction(title: "Try again", kind: .secondary)]
@@ -231,7 +232,7 @@ enum EdgeStateDemoData {
                 id: scenario,
                 screenID: scenario.screenID,
                 frameName: scenario.frameName,
-                audience: .child,
+                audience: .teen,
                 severity: .offline,
                 title: EdgeStateCopy.requestSavedOfflineTitle,
                 message: EdgeStateCopy.requestSavedOfflineMessage,
