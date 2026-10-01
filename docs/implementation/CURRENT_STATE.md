@@ -2,17 +2,16 @@
 
 Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: UI-03 Child + Teen Home is merged and verified. UI-04 Onboarding is the next slice, but it has not started.
-Active slice: UI-03 Child + Teen Home - COMPLETE
-Allowed scope: C-001 Child Home, C-001 Teen Home, C-012 Themis is active, C-013 Child/Teen transparency, C-014 essential access, supporting presentation models/components, previews and tests. UI-03 is closed.
+Current objective: UI-04 Onboarding is implemented, technically verified and visually reviewed. PR #10 is ready for final merge reconciliation.
+Active slice: UI-04 Onboarding - COMPLETE, pending merge
+Allowed scope: P-001 through P-022 Parent onboarding, P-010 pairing variants, P-021 protection-test result variants, supporting presentation models/components, deterministic previews/tests and Simulator review harness. UI-05 is not started.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
-Completed slice prompt: docs/implementation/CLAUDE_CODE_UI03_CHILD_TEEN_HOME_PROMPT.md
-Last verification: UI-03 source through commit e8b1ed1bad1e88579b143c4b502ab642ecb050e6 passed a real macOS/Xcode build and XCTest run in GitHub Actions. Release Simulator screenshots for Sam Child Home, Maya Teen Home, Parent Home regression, and their approved large-text review states were captured and reviewed against the approved design direction.
-UI-03 review: Sam keeps the warmer, larger Child treatment and homework-first hierarchy. Maya stays mature and closer to Parent, with a compact active row, schedule timeline and visible Focus Session actions. Status chips remain single-line, AgreementTimeline stacks at accessibility sizes, and the Home / My Rules / Requests tab IA is unchanged. C-012/C-013/C-014 use mock-driven UI and honest Apple/privacy wording only.
-UI-03 merge: PR #9 squash-merged to main as ee61ed1f2e934f977440e95b6d68a5fc1cffd32a.
-Next action: Prepare the dedicated UI-04 Onboarding implementation prompt from the approved requirements and final design package. Start UI-04 only as a new slice/branch and stop before UI-05.
+Completed slice prompt: docs/implementation/CLAUDE_CODE_UI04_ONBOARDING_PROMPT.md
+Last verification: UI-04 final source commit 648e09a607dcecdccac742525c2662d735c20265 passed the real macOS/Xcode build and full XCTest suite in GitHub Actions run 36742816233. Release Simulator run 36742808418 passed and produced the final ui-visual-review artifact. All 12 standard/accessibility captures were reviewed. P-002 Bedtime and Maya Teen Home Social apps pause clipping found in the earlier review were corrected through the shared open-ended AgreementTimeline rendering, and the final captures are clean.
+UI-04 review: onboarding remains mock-driven and preserves Apple/system-owned boundaries. Generic Homework uses Parent Approval only. Phone, Messages and Maps remain where-supported/spike-gated. Protected is not shown before activation readiness. Parent, Child and Teen regression captures remain visually intact.
+Next action: Merge PR #10, reconcile Airtable and create a fresh Chat Handoff. Do not start UI-05 in this run.
 
 ## Current readiness
 
@@ -22,63 +21,40 @@ Next action: Prepare the dedicated UI-04 Onboarding implementation prompt from t
 - Design System: APPROVED
 - Final prototype: APPROVED
 - Engineering Handoff: APPROVED
-- SwiftUI UI implementation: IN PROGRESS, 3 of 15 slices complete
+- SwiftUI UI implementation: IN PROGRESS, 4 of 15 slices complete after UI-04 merge
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
-## Completed implementation slice
+## Completed implementation slices
 
 UI-01 Design System Foundation:
-- tokens
-- typography API
-- reusable primitives
-- status system
-- navigation shell
-- tests
-- macOS GitHub Actions build/test verification
-- structural/design-spec review against approved Design System
-- representative Simulator screenshot QA carried into UI-02
-
-UI-01 is merged. Do not attempt all 216 screens in one context.
-
-## Completed implementation slice
+- tokens, typography API, reusable primitives, status system and navigation shell
+- tests and real macOS/Xcode verification
+- merged through PR #6
 
 UI-02 Parent Home:
-- P-023 canonical needs-attention state
-- nothing-pending state
-- setup-incomplete state
-- protection-problem state
-- NeedsYouCard
-- GraceBar
-- ChildStatusRow
-- QuickActionDock
-- deterministic previews/review states
-- Parent Home presentation/state tests
-- GitHub macOS CI verification
-- Release Simulator visual review
-
-Source and verification status: COMPLETE. See BUILD_LOG "UI-02 Parent Home" and IMP-UI-002.
-
-UI-02 is merged.
-
-## Completed implementation slice
+- P-023 canonical Parent Home and approved states
+- deterministic previews/review states and tests
+- real macOS/Xcode/XCTest and Release Simulator visual review
+- merged through PR #7
 
 UI-03 Child + Teen Home:
-- C-001 Sam Child Home
-- C-001 Maya Teen Home
-- C-012 Themis is active
-- C-013 Child transparency
-- C-013 Teen privacy/transparency
-- C-014 essential access
-- deterministic previews/review states
-- presentation/state tests
-- GitHub macOS Xcode/XCTest verification
-- Release Simulator visual review at standard and approved large-text sizes
-- Parent Home visual regression capture
+- C-001 Sam Child Home and Maya Teen Home
+- C-012, C-013 Child/Teen and C-014
+- deterministic previews/review states and tests
+- real macOS/Xcode/XCTest and Release Simulator visual review
+- merged through PR #9
 
-Source and verification status: COMPLETE. See BUILD_LOG "UI-03 Child + Teen Home" and IMP-UI-003.
-
-UI-03 is merged through PR #9.
+UI-04 Onboarding:
+- P-001 through P-022
+- P-010 pairing code, already-paired and recovery-required presentation variants
+- P-021 success, retry and permission-result variants
+- canonical Sarah/Sam Homework setup through activation
+- Apple/system-owned handoff boundaries preserved
+- deterministic onboarding tests and Simulator capture states
+- final real macOS/Xcode/XCTest verification passed
+- final 12-image Release Simulator review passed after correcting open-ended timeline label clipping
+- PR #10 ready for merge reconciliation
 
 ## Production gates
 
@@ -110,8 +86,9 @@ Airtable is not a replacement for the approved requirements or GitHub implementa
 
 ## Next implementation slice
 
-UI-04 Onboarding:
+UI-05 Rules & School Access:
 - not started
-- prepare a dedicated slice prompt from the approved onboarding frames and requirements
-- continue to use the merged UI-01 design system and verified UI-02/UI-03 patterns
+- begin only in a later run after UI-04 is merged and tracker state is reconciled
+- prepare a dedicated slice prompt from the approved rule, Scheduled Rule, Deadline Lock, Earn First, Always Allowed and school-access frames
+- continue to use the merged design system and verified UI-02/UI-03/UI-04 patterns
 - do not bypass backend or Apple production gates

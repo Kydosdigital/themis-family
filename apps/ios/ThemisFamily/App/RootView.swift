@@ -16,6 +16,21 @@ struct RootView: View {
             childShell(segment: .child, childID: DemoData.samID)
         case .teen:
             childShell(segment: .teen, childID: DemoData.mayaID)
+        case .onboarding:
+            OnboardingView(
+                initialStep: container.onboardingInitialStep ?? .launch,
+                onComplete: {
+                    container.scenario = .normal
+                    container.onboardingInitialStep = nil
+                    container.perspective = .parent
+                },
+                onDefer: {
+                    container.scenario = .setupIncomplete
+                    container.onboardingInitialStep = nil
+                    container.perspective = .parent
+                }
+            )
+            .demoControls()
         }
     }
 
