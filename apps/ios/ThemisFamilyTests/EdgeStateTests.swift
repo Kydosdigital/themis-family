@@ -72,7 +72,7 @@ final class EdgeStateTests: XCTestCase {
 
     func testServersUnreachableNeverClaimsProtectedOrInstantUpdates() {
         let presentation = EdgeStateDemoData.presentation(for: .serversUnreachable)
-        XCTAssertEqual(presentation.statusKind, .protectionUnavailable)
+        XCTAssertEqual(presentation.statusKind, .unconfirmed)
         XCTAssertFalse(presentation.title.lowercased().contains("protected"))
         XCTAssertFalse(presentation.message.lowercased().contains("everything will update instantly"))
     }
@@ -326,3 +326,36 @@ final class EdgeStateTests: XCTestCase {
         XCTAssertEqual(Set(ids).count, ids.count)
     }
 }
+
+
+    func testApprovedAudienceMappingForTeenAndChildEdgeStates() {
+        XCTAssertEqual(EdgeStateScenario.requestSavedOffline.audience, .teen)
+        XCTAssertEqual(
+            EdgeStateDemoData.presentation(for: .requestSavedOffline).audience,
+            .teen
+        )
+        XCTAssertEqual(EdgeStateScenario.sessionAbandoned.audience, .child)
+        XCTAssertEqual(
+            EdgeStateDemoData.presentation(for: .sessionAbandoned).audience,
+            .child
+        )
+    }
+
+    func testServersUnreachableUsesApprovedUnconfirmedStatus() {
+        let presentation = EdgeStateDemoData.presentation(for: .serversUnreachable)
+        XCTAssertEqual(presentation.statusKind, .unconfirmed)
+        XCTAssertEqual(presentation.statusLabel, "Unconfirmed")
+        XCTAssertNotNil(presentation.lastVerifiedText)
+    }
+
+    func testQueuedOfflineCopyDoesNotPromiseImmediateSendTiming() {
+        let message = EdgeStateCopy.childQueuedMessage.lowercased()
+        XCTAssertFalse(message.contains("as soon as"))
+        XCTAssertTrue(message.contains("wait to send"))
+    }
+
+    func testPairingInterruptedDoesNotClaimThereIsNothingPartialToUndo() {
+        let message = EdgeStateCopy.pairingInterruptedMessage.lowercased()
+        XCTAssertFalse(message.contains("nothing partial to undo"))
+        XCTAssertTrue(message.contains("hasn't confirmed"))
+    }
