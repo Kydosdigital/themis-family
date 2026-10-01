@@ -23,7 +23,9 @@ enum SettingsRole: String, CaseIterable, Sendable {
     func can(_ capability: SettingsCapability) -> Bool {
         switch self {
         case .owner: return true
-        case .guardian: return !SettingsCapability.ownerOnly.contains(capability)
+        case .guardian:
+            return !SettingsCapability.ownerOnly.contains(capability)
+                && !SettingsCapability.unresolvedAuthority.contains(capability)
         }
     }
 }
@@ -34,7 +36,6 @@ enum SettingsCapability: String, CaseIterable, Sendable {
     // Shared by Owner and Guardian.
     case addChild
     case editChildProfile
-    case removeChild
     case addChildDevice
     case removeChildDevice
     case viewReporting
@@ -48,10 +49,20 @@ enum SettingsCapability: String, CaseIterable, Sendable {
     case manageSubscription
     case transferOwnership
     case deleteHousehold
+    // Authority not specified.
+    case removeChildProfile
 
+    /// The Owner-only powers the frozen permissions specification confirms.
     static let ownerOnly: Set<SettingsCapability> = [
         .inviteGuardian, .removeGuardian, .manageSubscription, .transferOwnership, .deleteHousehold
     ]
+
+    /// Child-profile removal authority is not explicitly assigned in the frozen permissions
+    /// specification. UI-11 exposes the approved removal flow only in the canonical Owner
+    /// presentation until integration/product clarification. This is a conservative UI gate,
+    /// not a permanent backend authorisation rule: it neither confirms nor forbids Guardian
+    /// removal of a child profile.
+    static let unresolvedAuthority: Set<SettingsCapability> = [.removeChildProfile]
 }
 
 // MARK: - Household

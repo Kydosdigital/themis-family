@@ -314,6 +314,41 @@ final class SettingsTests: XCTestCase {
         XCTAssertNotNil(viewModel.household.child(id: "sam")?.device, "No device is claimed unbound")
     }
 
+    // Child-profile removal authority is unresolved: Owner-canonical, no Guardian rule asserted.
+    @MainActor
+    func testChildProfileRemovalIsAConservativeOwnerCanonicalGate() async {
+        XCTAssertTrue(SettingsRole.owner.can(.removeChildProfile), "P-033 · Remove stays for the canonical Owner")
+        XCTAssertFalse(SettingsRole.guardian.can(.removeChildProfile), "Guardian authority is not confirmed")
+        XCTAssertTrue(SettingsCapability.unresolvedAuthority.contains(.removeChildProfile))
+        XCTAssertFalse(SettingsCapability.ownerOnly.contains(.removeChildProfile), "Not recorded as a confirmed Owner-only power")
+        XCTAssertEqual(SettingsCapability.unresolvedAuthority, [.removeChildProfile])
+
+        let guardianModel = model(.guardian)
+        let removed = await guardianModel.removeChild(id: "sam")
+        XCTAssertFalse(removed)
+        XCTAssertNil(guardianModel.childRemoval["sam"])
+        XCTAssertNotNil(guardianModel.household.child(id: "sam"))
+
+        // The Guardian can still edit the profile and manage devices.
+        XCTAssertTrue(SettingsRole.guardian.can(.editChildProfile))
+        let saved = await guardianModel.saveChild(id: "sam", firstName: "Sam", experience: .teen)
+        XCTAssertTrue(saved)
+        XCTAssertTrue(SettingsRole.guardian.can(.addChildDevice))
+        XCTAssertTrue(SettingsRole.guardian.can(.removeChildDevice))
+        let deviceRemoval = await guardianModel.requestDeviceRemoval(childID: "sam")
+        XCTAssertTrue(deviceRemoval)
+    }
+
+    func testGuardianCopyNamesOnlyConfirmedOwnerOnlyPowers() {
+        let copy = SettingsCopy.guardianCannot
+        XCTAssertFalse(copy.lowercased().contains("remove anyone"))
+        for phrase in ["subscription", "invite or remove the Guardian", "transfer ownership", "delete the household"] {
+            XCTAssertTrue(copy.contains(phrase), phrase)
+        }
+        XCTAssertFalse(copy.lowercased().contains("device"), "Guardians may remove child devices")
+        XCTAssertFalse(copy.lowercased().contains("child"))
+    }
+
     @MainActor
     func testEditingAChildChangesOnlyNameAndExperience() async {
         let viewModel = model(.owner)
@@ -748,7 +783,10 @@ final class SettingsTests: XCTestCase {
 
     func testGuardianAndInviteCopyMatchTheApprovedFrames() {
         XCTAssertEqual(SettingsCopy.guardianCan, "Approve tasks and requests, give Free Passes, edit rules, manage devices")
-        XCTAssertEqual(SettingsCopy.guardianCannot, "Change the subscription, invite or remove anyone, delete the household")
+        XCTAssertEqual(
+            SettingsCopy.guardianCannot,
+            "Change the subscription, invite or remove the Guardian, transfer ownership, or delete the household"
+        )
         XCTAssertEqual(SettingsCopy.removeGuardianTitle("Alex"), "Remove Alex as Guardian?")
         XCTAssertEqual(SettingsCopy.removeGuardianLine("Alex"), "Anything waiting for Alex stays waiting for you.")
         XCTAssertEqual(SettingsCopy.inviteFieldLabel, "Their email or phone number")
@@ -821,7 +859,7 @@ final class SettingsTests: XCTestCase {
 
     func testSharedCapabilitiesBelongToBothRolesAndOwnerOnlyOnesDoNot() {
         let shared: [SettingsCapability] = [
-            .addChild, .editChildProfile, .removeChild, .addChildDevice, .removeChildDevice,
+            .addChild, .editChildProfile, .addChildDevice, .removeChildDevice,
             .viewReporting, .editRules, .grantFreePass, .approveTasks, .changeSchoolAllowlist
         ]
         for capability in shared {

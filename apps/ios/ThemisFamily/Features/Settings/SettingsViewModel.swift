@@ -106,7 +106,7 @@ final class SettingsViewModel: ObservableObject {
     /// A request, like device removal: the profile stays until the removal is acknowledged.
     @discardableResult
     func removeChild(id: String) async -> Bool {
-        guard allowed(.removeChild), household.child(id: id) != nil else { return refuse("This child can’t be removed here.") }
+        guard allowed(.removeChildProfile), household.child(id: id) != nil else { return refuse("Removing a child profile isn’t available from this account here.") }
         guard await accepted(.removeChild(id: id)) else { return false }
         childRemoval[id] = .requested
         return true

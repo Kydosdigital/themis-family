@@ -250,7 +250,7 @@ struct EditChildView: View {
             ExperienceChoiceCard(segment: .teen, isSelected: experience == .teen) { experience = .teen }
             SettingsNote(text: SettingsCopy.experienceChangeNote(child.firstName))
         } bottom: {
-            if model.can(.removeChild) {
+            if model.can(.removeChildProfile) {
                 ThemisButton(title: "Remove \(child.firstName) from household", style: .destructive) {
                     showsRemoval = true
                 }

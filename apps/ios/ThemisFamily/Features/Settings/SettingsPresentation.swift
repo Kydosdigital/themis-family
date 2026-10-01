@@ -51,7 +51,7 @@ enum SettingsCopy {
     }
 
     static let guardianCan = "Approve tasks and requests, give Free Passes, edit rules, manage devices"
-    static let guardianCannot = "Change the subscription, invite or remove anyone, delete the household"
+    static let guardianCannot = "Change the subscription, invite or remove the Guardian, transfer ownership, or delete the household"
 
     static func removeGuardianTitle(_ name: String) -> String { "Remove \(name) as Guardian?" }
     /// Pending approvals are not cancelled and ownership does not move.
