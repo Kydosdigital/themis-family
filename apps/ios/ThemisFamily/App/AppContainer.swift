@@ -21,6 +21,16 @@ final class AppContainer: ObservableObject {
         case needsWork = "Needs Work"
         case approvalPending = "Approval Pending"
         case approvalApplied = "Approval Applied"
+        case requestEntry = "Request Entry"
+        case requestPending = "Request Pending"
+        case requestClarification = "Request Clarification"
+        case requestPartial = "Request Partial"
+        case requestExpired = "Request Expired"
+        case requestDetail = "Request Detail"
+        case requestAskClarification = "Ask Clarification"
+        case requestWaitingReply = "Waiting Reply"
+        case requestAlreadyResolved = "Request Resolved"
+        case requestApprovalPending = "Request Approval Pending"
 
         var id: String { rawValue }
     }
@@ -84,6 +94,16 @@ final class AppContainer: ObservableObject {
         case "needs-work": return .needsWork
         case "approval-pending": return .approvalPending
         case "approval-applied": return .approvalApplied
+        case "request-entry": return .requestEntry
+        case "request-pending": return .requestPending
+        case "request-clarification": return .requestClarification
+        case "request-partial": return .requestPartial
+        case "request-expired": return .requestExpired
+        case "request-detail": return .requestDetail
+        case "request-ask-clarification": return .requestAskClarification
+        case "request-waiting-reply": return .requestWaitingReply
+        case "request-already-resolved": return .requestAlreadyResolved
+        case "request-approval-pending": return .requestApprovalPending
         default: return nil
         }
     }

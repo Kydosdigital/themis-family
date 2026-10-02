@@ -79,7 +79,7 @@ struct ChildHomeView: View {
         case .submitHomework:
             TaskSubmissionFlowView()
         case .requestMoreTime:
-            ShellPlaceholderView(title: "Ask for more time", screenID: "Q-001", isTabRoot: false)
+            RequestComposerView(audience: state.audience)
         case .focusSession:
             ShellPlaceholderView(title: "Focus Session", screenID: "E-004", isTabRoot: false)
         }

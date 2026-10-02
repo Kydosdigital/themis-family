@@ -82,6 +82,36 @@ struct RootView: View {
                 ApprovalApplicationStatusView(state: TasksDeadlineLockDemoData.appliedOnDevice)
             }
             .demoControls()
+        case .requestEntry:
+            NavigationStack { RequestComposerView(audience: .teen) }
+                .demoControls()
+        case .requestPending:
+            NavigationStack { RequestStateView(state: RequestsDemoData.pending) }
+                .demoControls()
+        case .requestClarification:
+            NavigationStack { RequestStateView(state: RequestsDemoData.clarificationReceived) }
+                .demoControls()
+        case .requestPartial:
+            NavigationStack { RequestStateView(state: RequestsDemoData.partial) }
+                .demoControls()
+        case .requestExpired:
+            NavigationStack { RequestStateView(state: RequestsDemoData.expired) }
+                .demoControls()
+        case .requestDetail:
+            NavigationStack { RequestStateView(state: RequestsDemoData.parentDetail, surfaceAudience: .parent) }
+                .demoControls()
+        case .requestAskClarification:
+            NavigationStack { ParentRequestFlowView(initial: .askClarification) }
+                .demoControls()
+        case .requestWaitingReply:
+            NavigationStack { RequestStateView(state: RequestsDemoData.waitingForReply, surfaceAudience: .parent) }
+                .demoControls()
+        case .requestAlreadyResolved:
+            NavigationStack { RequestStateView(state: RequestsDemoData.alreadyResolved, surfaceAudience: .parent) }
+                .demoControls()
+        case .requestApprovalPending:
+            NavigationStack { RequestStateView(state: RequestsDemoData.approvedPendingDevice, surfaceAudience: .parent) }
+                .demoControls()
         case .onboarding:
             OnboardingView(
                 initialStep: container.onboardingInitialStep ?? .launch,
@@ -125,8 +155,10 @@ struct RootView: View {
                         repository: container.childRepository,
                         scenario: container.scenario
                     )
-                case .myRules, .requests:
+                case .myRules:
                     ShellPlaceholderView(title: tab.title, screenID: tab.rootScreenID(for: segment))
+                case .requests:
+                    RequestHistoryView(audience: segment)
                 }
             }
             .demoControls()
