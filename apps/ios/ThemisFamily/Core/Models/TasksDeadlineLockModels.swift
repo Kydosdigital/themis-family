@@ -27,8 +27,8 @@ enum TaskDecisionAttemptResult: Equatable, Sendable {
 /// Production durability remains a backend concern; this proves the UI contract
 /// that only Owner/Guardian may decide and the first recorded adult decision wins.
 struct TaskDecisionLedger: Equatable, Sendable {
-    private(set) var decision: TaskAdultDecision?
-    private(set) var decidedBy: TaskApproverRole?
+    private(set) var decision: TaskAdultDecision? = nil
+    private(set) var decidedBy: TaskApproverRole? = nil
 
     mutating func record(_ attemptedDecision: TaskAdultDecision, by role: TaskApproverRole) -> TaskDecisionAttemptResult {
         guard role.canDecide else { return .notAuthorised }
