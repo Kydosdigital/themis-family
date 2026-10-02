@@ -31,6 +31,16 @@ final class AppContainer: ObservableObject {
         case requestWaitingReply = "Waiting Reply"
         case requestAlreadyResolved = "Request Resolved"
         case requestApprovalPending = "Request Approval Pending"
+        case freePassEntry = "Free Pass Entry"
+        case freePassChild = "Free Pass Child"
+        case freePassScope = "Free Pass Scope"
+        case freePassDuration = "Free Pass Duration"
+        case freePassPreview = "Free Pass Preview"
+        case freePassConfirm = "Free Pass Confirm"
+        case freePassActive = "Free Pass Active"
+        case freePassRevoke = "Free Pass Revoke"
+        case freePassRevocationSent = "Free Pass Revocation Sent"
+        case freePassRevoked = "Free Pass Revoked"
 
         var id: String { rawValue }
     }
@@ -104,6 +114,16 @@ final class AppContainer: ObservableObject {
         case "request-waiting-reply": return .requestWaitingReply
         case "request-already-resolved": return .requestAlreadyResolved
         case "request-approval-pending": return .requestApprovalPending
+        case "free-pass-entry": return .freePassEntry
+        case "free-pass-child": return .freePassChild
+        case "free-pass-scope": return .freePassScope
+        case "free-pass-duration": return .freePassDuration
+        case "free-pass-preview": return .freePassPreview
+        case "free-pass-confirm": return .freePassConfirm
+        case "free-pass-active": return .freePassActive
+        case "free-pass-revoke": return .freePassRevoke
+        case "free-pass-revocation-sent": return .freePassRevocationSent
+        case "free-pass-revoked": return .freePassRevoked
         default: return nil
         }
     }
