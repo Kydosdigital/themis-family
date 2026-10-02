@@ -4,7 +4,7 @@ import { articles, articleContent } from "@/lib/articles";
 import { ArticleCards } from "@/components/articles";
 import { PageHero, CTA } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
-import { site } from "@/lib/config";
+import { publicOrigin } from "@/lib/site-origin";
 import { metadata as meta } from "@/lib/metadata";
 
 export const dynamicParams = false;
@@ -42,6 +42,7 @@ export default async function Page({
   if (!a) notFound();
 
   const { default: Content } = await articleContent(slug);
+  const origin = publicOrigin();
 
   return (
     <>
@@ -105,7 +106,7 @@ export default async function Page({
 
       <CTA />
 
-      {!a.draft && site.origin && (
+      {!a.draft && origin && (
         <JsonLd
           data={{
             "@context": "https://schema.org",
@@ -117,7 +118,7 @@ export default async function Page({
             dateModified: a.updated,
             author: { "@type": "Organization", name: "Themis Family" },
             publisher: { "@type": "Organization", name: "Themis Family" },
-            mainEntityOfPage: site.origin + "/insights/" + slug,
+            mainEntityOfPage: origin + "/insights/" + slug,
           }}
         />
       )}

@@ -1,18 +1,20 @@
 import type { MetadataRoute } from "next";
-import { site, publicPaths } from "@/lib/config";
+import { publicPaths } from "@/lib/config";
 import { articles } from "@/lib/articles";
+import { publicOrigin } from "@/lib/site-origin";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  if (!site.origin || process.env.VERCEL_ENV === "preview") return [];
+  const origin = publicOrigin();
+  if (!origin || process.env.VERCEL_ENV === "preview") return [];
 
   const staticPages = publicPaths.map((path) => ({
-    url: new URL(path, site.origin).href,
+    url: new URL(path, origin).href,
   }));
 
   const editorialPages = articles
     .filter((article) => !article.draft)
     .map((article) => ({
-      url: new URL("/insights/" + article.slug, site.origin).href,
+      url: new URL("/insights/" + article.slug, origin).href,
       lastModified: new Date(article.updated + "T00:00:00Z"),
     }));
 
