@@ -35,7 +35,7 @@ export const articles = [
       "https://images.pexels.com/photos/6267061/pexels-photo-6267061.jpeg?auto=compress&cs=tinysrgb&w=1600",
     imageAlt:
       "A teenager studying at a desk with a laptop, notebook and books.",
-    imageCredit: "Antoni Shkraba Studio / Pexels",
+    imageCredit: "Antoni Shkraba / Pexels",
     imageSource:
       "https://www.pexels.com/photo/teenager-studying-by-desk-with-laptop-6267061/",
     draft: false,
