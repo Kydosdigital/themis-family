@@ -1,5 +1,46 @@
 import Foundation
 
+
+enum TaskApproverRole: String, Equatable, Sendable {
+    case owner
+    case guardian
+    case child
+    case teen
+
+    var canDecide: Bool {
+        self == .owner || self == .guardian
+    }
+}
+
+enum TaskAdultDecision: String, Equatable, Sendable {
+    case approve
+    case needsWork
+}
+
+enum TaskDecisionAttemptResult: Equatable, Sendable {
+    case recorded(TaskAdultDecision, by: TaskApproverRole)
+    case alreadyResolved(TaskAdultDecision, by: TaskApproverRole)
+    case notAuthorised
+}
+
+/// Deterministic presentation-side race model for BR-102.
+/// Production durability remains a backend concern; this proves the UI contract
+/// that only Owner/Guardian may decide and the first recorded adult decision wins.
+struct TaskDecisionLedger: Equatable, Sendable {
+    private(set) var decision: TaskAdultDecision?
+    private(set) var decidedBy: TaskApproverRole?
+
+    mutating func record(_ attemptedDecision: TaskAdultDecision, by role: TaskApproverRole) -> TaskDecisionAttemptResult {
+        guard role.canDecide else { return .notAuthorised }
+        if let decision, let decidedBy {
+            return .alreadyResolved(decision, by: decidedBy)
+        }
+        decision = attemptedDecision
+        decidedBy = role
+        return .recorded(attemptedDecision, by: role)
+    }
+}
+
 enum TaskSubmissionTransportState: String, Equatable, Sendable {
     case notSubmitted
     case submitting
