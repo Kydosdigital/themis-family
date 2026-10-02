@@ -2,6 +2,19 @@ import XCTest
 @testable import ThemisFamily
 
 final class TasksDeadlineLockTests: XCTestCase {
+    func testOnlyTaskOwnerCanSubmitCanonicalHomework() {
+        let route = TasksDeadlineLockDemoData.homeworkSubmissionRoute
+        XCTAssertTrue(route.maySubmit(actorID: DemoData.samID))
+        XCTAssertFalse(route.maySubmit(actorID: DemoData.mayaID))
+    }
+
+    func testSubmissionRoutesToAllEligibleAdultApprovers() {
+        XCTAssertEqual(
+            TasksDeadlineLockDemoData.homeworkSubmissionRoute.approversToNotify,
+            [.owner, .guardian]
+        )
+    }
+
     func testHomeworkUsesParentApprovalPresentation() {
         let state = TasksDeadlineLockDemoData.taskDetail
         XCTAssertEqual(state.taskTitle, "Homework")
@@ -23,6 +36,15 @@ final class TasksDeadlineLockTests: XCTestCase {
         XCTAssertEqual(state.graceLengthMinutes, 30)
         XCTAssertEqual(state.graceMinutesRemaining, 18)
         XCTAssertTrue(state.activeRestrictions.isEmpty)
+    }
+
+    func testApprovalDuringGraceAvoidsDeadlineLock() {
+        let approved = TasksDeadlineLockDemoData.approvalGrace.applyingApproval(deviceAcknowledged: false)
+        XCTAssertEqual(approved.decision, .approved)
+        XCTAssertEqual(approved.deadlinePhase, .cleared)
+        XCTAssertFalse(approved.activeRestrictions.contains(.homeworkDeadline))
+        XCTAssertEqual(approved.deviceApplication, .pending)
+        XCTAssertFalse(approved.mayClaimUnlocked)
     }
 
     func testGraceExpiryActivatesDeadlineLock() {
@@ -53,6 +75,7 @@ final class TasksDeadlineLockTests: XCTestCase {
         XCTAssertEqual(pending.decision, .approved)
         XCTAssertEqual(pending.deviceApplication, .pending)
         XCTAssertEqual(pending.screenID, "P-027")
+        XCTAssertNotEqual(pending.screenID, "P-028")
         XCTAssertFalse(pending.mayClaimUnlocked)
 
         let applied = TasksDeadlineLockDemoData.appliedOnDevice
@@ -154,6 +177,25 @@ final class TasksDeadlineLockTests: XCTestCase {
         XCTAssertEqual(waiting.decision, .awaitingApproval)
         XCTAssertNotEqual(waiting.decision, .approved)
         XCTAssertTrue(waiting.activeRestrictions.contains(.homeworkDeadline))
+    }
+
+    func testAlwaysAllowedRemainsAbsoluteAgainstRestrictiveRules() {
+        let target = RulesSchoolAccessDemoData.schoolPortal
+        let restrictiveRule = RulesSchoolAccessDemoData.deadlineLock
+        let result = RulesSchoolAccessPolicy.applyAlwaysAllowed(
+            target: target,
+            to: [restrictiveRule],
+            currentAlwaysAllowed: []
+        )
+
+        XCTAssertTrue(result.state.targets.contains(where: { $0.id == target.id }))
+        XCTAssertFalse(result.rules[0].targets.contains(where: { $0.id == target.id }))
+        XCTAssertFalse(
+            RulesSchoolAccessPolicy.canAddRestrictedTarget(
+                target,
+                alwaysAllowed: result.state.targets
+            )
+        )
     }
 
     func testAlwaysAllowedBoundaryRemainsOutsideRestrictionList() {

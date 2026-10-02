@@ -1,6 +1,8 @@
 import Foundation
 
 enum TasksDeadlineLockDemoData {
+    static let homeworkSubmissionRoute = TaskSubmissionRoute.parentApproval(taskOwnerID: DemoData.samID)
+
     static let taskDetail = TaskDeadlineLockPresentation(
         screenID: "C-002",
         audience: .child,

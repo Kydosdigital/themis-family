@@ -41,6 +41,22 @@ struct TaskDecisionLedger: Equatable, Sendable {
     }
 }
 
+struct TaskSubmissionRoute: Equatable, Sendable {
+    let taskOwnerID: UUID
+    let approversToNotify: [TaskApproverRole]
+
+    func maySubmit(actorID: UUID) -> Bool {
+        actorID == taskOwnerID
+    }
+
+    static func parentApproval(taskOwnerID: UUID) -> TaskSubmissionRoute {
+        TaskSubmissionRoute(
+            taskOwnerID: taskOwnerID,
+            approversToNotify: [.owner, .guardian]
+        )
+    }
+}
+
 enum TaskSubmissionTransportState: String, Equatable, Sendable {
     case notSubmitted
     case submitting

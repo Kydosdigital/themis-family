@@ -27,14 +27,29 @@ struct RootView: View {
                 TasksDeadlineLockView(state: TasksDeadlineLockDemoData.taskDetail, surfaceAudience: .child)
             }
             .demoControls()
+        case .submittedOnTime:
+            NavigationStack {
+                TasksDeadlineLockView(state: TasksDeadlineLockDemoData.submittedOnTime, surfaceAudience: .child)
+            }
+            .demoControls()
         case .approvalGrace:
             NavigationStack {
                 TasksDeadlineLockView(state: TasksDeadlineLockDemoData.approvalGrace, surfaceAudience: .child)
             }
             .demoControls()
+        case .overdue:
+            NavigationStack {
+                TasksDeadlineLockView(state: TasksDeadlineLockDemoData.overdue, surfaceAudience: .child)
+            }
+            .demoControls()
         case .gamesPaused:
             NavigationStack {
                 TasksDeadlineLockView(state: TasksDeadlineLockDemoData.gamesPaused, surfaceAudience: .child)
+            }
+            .demoControls()
+        case .waitingRestricted:
+            NavigationStack {
+                TasksDeadlineLockView(state: TasksDeadlineLockDemoData.waitingRestricted, surfaceAudience: .child)
             }
             .demoControls()
         case .multipleRestrictions:
@@ -50,6 +65,11 @@ struct RootView: View {
         case .taskReview:
             NavigationStack {
                 TasksDeadlineLockView(state: TasksDeadlineLockDemoData.parentTaskReview, surfaceAudience: .parent)
+            }
+            .demoControls()
+        case .needsWork:
+            NavigationStack {
+                NeedsWorkTaskView(state: TasksDeadlineLockDemoData.needsWork)
             }
             .demoControls()
         case .approvalPending:

@@ -10,11 +10,15 @@ final class AppContainer: ObservableObject {
         case rules = "Rules"
         case schoolAccess = "School Access"
         case taskDetail = "Task Detail"
+        case submittedOnTime = "Submitted On Time"
         case approvalGrace = "Approval Grace"
+        case overdue = "Homework Overdue"
         case gamesPaused = "Games Paused"
+        case waitingRestricted = "Waiting Restricted"
         case multipleRestrictions = "Multiple Restrictions"
         case actionCentre = "Action Centre"
         case taskReview = "Task Review"
+        case needsWork = "Needs Work"
         case approvalPending = "Approval Pending"
         case approvalApplied = "Approval Applied"
 
@@ -69,11 +73,15 @@ final class AppContainer: ObservableObject {
         case "rules": return .rules
         case "school-access": return .schoolAccess
         case "task-detail": return .taskDetail
+        case "submitted-on-time": return .submittedOnTime
         case "approval-grace": return .approvalGrace
+        case "overdue": return .overdue
         case "games-paused": return .gamesPaused
+        case "waiting-restricted": return .waitingRestricted
         case "multiple-restrictions": return .multipleRestrictions
         case "action-centre": return .actionCentre
         case "task-review": return .taskReview
+        case "needs-work": return .needsWork
         case "approval-pending": return .approvalPending
         case "approval-applied": return .approvalApplied
         default: return nil
