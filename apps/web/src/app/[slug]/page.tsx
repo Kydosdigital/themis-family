@@ -54,12 +54,12 @@ const seo: Record<string, { title: string; description: string }> = {
       "Explore Themis Family features for screen time, homework, bedtime, gaming, requests, temporary access, focus sessions, school access and privacy.",
   },
   about: {
-    title: "About Themis Family",
+    title: "About",
     description:
       "Themis Family is building privacy-first parental controls around visible family agreements, clearer digital boundaries and growing independence.",
   },
   press: {
-    title: "Themis Family Press & Media",
+    title: "Press & Media",
     description:
       "Press and media information about Themis Family, a family digital-boundaries product for clearer parental controls on iPhone and iPad.",
   },
