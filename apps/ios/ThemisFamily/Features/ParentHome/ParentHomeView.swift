@@ -32,7 +32,14 @@ struct ParentHomeView: View {
             }
         }
         .navigationDestination(item: $destination) { route in
-            ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
+            switch route.screenID {
+            case "A-001":
+                ParentTaskApprovalFlowView(initial: .actionCentre)
+            case "A-002":
+                ParentTaskApprovalFlowView(initial: .review)
+            default:
+                ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
+            }
         }
         .task(id: scenario) {
             await viewModel.load(scenario: scenario)
