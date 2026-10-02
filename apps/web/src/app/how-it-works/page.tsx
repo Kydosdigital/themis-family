@@ -3,7 +3,7 @@ import { Boundary } from "@/components/boundary";
 import { RuleDemo } from "@/components/rule-demo";
 import { metadata as meta } from "@/lib/metadata";
 export const metadata = meta(
-  "How Themis Family Parental Controls Work",
+  "How Parental Controls Work",
   "See how Themis Family turns screen-time, homework, bedtime and gaming boundaries into visible family agreements on iPhone and iPad.",
   "/how-it-works",
 );
