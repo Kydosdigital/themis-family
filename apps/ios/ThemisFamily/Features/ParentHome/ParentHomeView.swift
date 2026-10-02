@@ -37,6 +37,8 @@ struct ParentHomeView: View {
                 ParentTaskApprovalFlowView(initial: .actionCentre)
             case "A-002":
                 ParentTaskApprovalFlowView(initial: .review)
+            case "A-004":
+                ParentRequestFlowView(initial: .detail)
             default:
                 ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
             }
