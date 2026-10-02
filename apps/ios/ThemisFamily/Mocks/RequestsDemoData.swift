@@ -66,6 +66,14 @@ enum RequestsDemoData {
         remainingRestrictions: []
     )
 
+    static let reminderSent: RequestPresentation = {
+        var value = pending.sendingManualNudge()
+        value.screenID = "Q-007"
+        value.headline = "Reminder sent"
+        value.message = "You have used your one reminder for this request. The automatic 15-minute reminder stays on its own schedule."
+        return value
+    }()
+
     static let clarificationReceived = RequestPresentation(
         screenID: "Q-008",
         audience: .teen,
@@ -261,7 +269,74 @@ enum RequestsDemoData {
         remainingRestrictions: []
     )
 
-    static let waitingForReply = parentDetail.askingClarification("How much longer do you actually need?")
+    static let parentApprove = RequestPresentation(
+        screenID: "A-005",
+        audience: .teen,
+        childID: DemoData.mayaID,
+        childName: "Maya",
+        type: .extraTime,
+        target: "Instagram",
+        requestedMinutes: 15,
+        grantedMinutes: 15,
+        reason: "I’m finishing a conversation with my friends.",
+        status: .needsYou,
+        headline: "Approve Maya’s request",
+        message: "Choose the duration to grant. The device change is not claimed until it acknowledges the update.",
+        lifecycle: .pending,
+        deviceApplication: .notApplicable,
+        reminder: RequestReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        clarification: RequestClarificationState(question: nil, reply: nil),
+        expiresText: nil,
+        remainingRestrictions: []
+    )
+
+    static let parentPartial = RequestPresentation(
+        screenID: "A-006",
+        audience: .teen,
+        childID: DemoData.mayaID,
+        childName: "Maya",
+        type: .extraTime,
+        target: "Instagram",
+        requestedMinutes: 30,
+        grantedMinutes: 15,
+        reason: "I’d like a little longer tonight.",
+        status: .needsYou,
+        headline: "Approve less time",
+        message: "Maya asked for 30 minutes. You can grant a smaller amount explicitly.",
+        lifecycle: .pending,
+        deviceApplication: .notApplicable,
+        reminder: RequestReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        clarification: RequestClarificationState(question: nil, reply: nil),
+        expiresText: nil,
+        remainingRestrictions: []
+    )
+
+    static let parentDecline = RequestPresentation(
+        screenID: "A-007",
+        audience: .teen,
+        childID: DemoData.mayaID,
+        childName: "Maya",
+        type: .extraTime,
+        target: "Instagram",
+        requestedMinutes: 15,
+        grantedMinutes: nil,
+        reason: "I’m finishing a conversation with my friends.",
+        status: .needsYou,
+        headline: "Decline request",
+        message: "Declining closes this request. A short reason is optional and does not create a reply thread.",
+        lifecycle: .pending,
+        deviceApplication: .notApplicable,
+        reminder: RequestReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        clarification: RequestClarificationState(question: nil, reply: nil),
+        expiresText: nil,
+        remainingRestrictions: []
+    )
+
+    static let waitingForReply: RequestPresentation = {
+        var value = parentDetail.askingClarification("How much longer do you actually need?")
+        value.screenID = "A-009"
+        return value
+    }()
 
     static let alreadyResolved = RequestPresentation(
         screenID: "A-010",

@@ -23,7 +23,7 @@ struct RequestStateView: View {
         }
         .themisAudience(audience)
         .themisGround(audience.homeGround)
-        .navigationTitle(state.screenID)
+        .navigationTitle("Request")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -275,8 +275,7 @@ struct RequestHistoryView: View {
     let audience: ExperienceSegment
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
+        ScrollView {
                 VStack(alignment: .leading, spacing: ThemisSpacing.block) {
                     PageHeader(title: "Requests", subtitle: audience == .child ? "Your requests" : "Your request history")
                     NavigationLink {
@@ -310,9 +309,9 @@ struct RequestHistoryView: View {
                 }
                 .padding(ThemisSpacing.screen)
             }
-            .themisAudience(ThemisAudience(audience))
-            .themisGround(ThemisAudience(audience).homeGround)
-        }
+        .themisAudience(ThemisAudience(audience))
+        .themisGround(ThemisAudience(audience).homeGround)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

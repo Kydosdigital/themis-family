@@ -38,8 +38,8 @@ enum RequestDecisionAttemptResult: Equatable, Sendable {
 }
 
 struct RequestDecisionLedger: Equatable, Sendable {
-    private(set) var decision: RequestAdultDecision?
-    private(set) var decidedBy: TaskApproverRole?
+    private(set) var decision: RequestAdultDecision? = nil
+    private(set) var decidedBy: TaskApproverRole? = nil
 
     mutating func record(_ attemptedDecision: RequestAdultDecision, by role: TaskApproverRole) -> RequestDecisionAttemptResult {
         guard role.canDecide else { return .notAuthorised }

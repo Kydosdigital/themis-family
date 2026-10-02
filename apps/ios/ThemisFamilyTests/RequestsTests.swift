@@ -20,6 +20,14 @@ final class RequestsTests: XCTestCase {
         XCTAssertEqual(RequestsDemoData.mayaRoute.approversToNotify, [.owner, .guardian])
     }
 
+    func testAllScopedDecisionAndReminderScreensAreExplicit() {
+        XCTAssertEqual(RequestsDemoData.reminderSent.screenID, "Q-007")
+        XCTAssertEqual(RequestsDemoData.parentApprove.screenID, "A-005")
+        XCTAssertEqual(RequestsDemoData.parentPartial.screenID, "A-006")
+        XCTAssertEqual(RequestsDemoData.parentDecline.screenID, "A-007")
+        XCTAssertEqual(RequestsDemoData.waitingForReply.screenID, "A-009")
+    }
+
     func testAutomaticReminderIntervalIsFifteenMinutes() {
         XCTAssertEqual(RequestReminderState.automaticReminderMinutes, 15)
     }
