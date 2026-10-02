@@ -289,6 +289,85 @@ struct ApprovalApplicationStatusView: View {
     }
 }
 
+
+
+/// Local deterministic interaction shell for the Child task flow.
+/// This proves UI behaviour without implying backend durability.
+struct TaskSubmissionFlowView: View {
+    @State private var state: TaskDeadlineLockPresentation
+
+    init(initialState: TaskDeadlineLockPresentation = TasksDeadlineLockDemoData.submitTask) {
+        _state = State(initialValue: initialState)
+    }
+
+    var body: some View {
+        TasksDeadlineLockView(
+            state: state,
+            surfaceAudience: .child,
+            onSubmit: submit,
+            onSendReminder: sendReminder
+        )
+    }
+
+    private func submit() {
+        switch state.screenID {
+        case "C-003":
+            state = TasksDeadlineLockDemoData.submittedOnTime
+        case "C-007", "C-008", "C-009":
+            state = TasksDeadlineLockDemoData.waitingRestricted
+        default:
+            break
+        }
+    }
+
+    private func sendReminder() {
+        guard state.reminder.canSendManualNudge else { return }
+        state = state.sendingManualReminder()
+    }
+}
+
+enum ParentTaskFlowStage: Equatable {
+    case actionCentre
+    case review
+    case pendingApplication
+    case needsWork
+}
+
+/// Local deterministic parent flow from Action Centre to review and decision.
+/// It intentionally stops at "waiting for device application"; a device acknowledgement
+/// is a separate deterministic review state and is never faked by the parent tap.
+struct ParentTaskApprovalFlowView: View {
+    @State private var stage: ParentTaskFlowStage
+
+    init(initial: ParentTaskFlowStage = .actionCentre) {
+        _stage = State(initialValue: initial)
+    }
+
+    var body: some View {
+        switch stage {
+        case .actionCentre:
+            TasksDeadlineLockView(
+                state: TasksDeadlineLockDemoData.actionCentre,
+                surfaceAudience: .parent,
+                onApprove: { stage = .review }
+            )
+        case .review:
+            TasksDeadlineLockView(
+                state: TasksDeadlineLockDemoData.parentTaskReview,
+                surfaceAudience: .parent,
+                onApprove: { stage = .pendingApplication },
+                onNeedsWork: { stage = .needsWork }
+            )
+        case .pendingApplication:
+            ApprovalApplicationStatusView(state: TasksDeadlineLockDemoData.approvedPendingDevice)
+        case .needsWork:
+            NeedsWorkTaskView(state: TasksDeadlineLockDemoData.needsWork) { _ in
+                stage = .actionCentre
+            }
+        }
+    }
+}
+
 // MARK: - Deterministic review states
 
 #Preview("C-002 · Task detail") {
