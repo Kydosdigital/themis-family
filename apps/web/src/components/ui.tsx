@@ -12,6 +12,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { primaryCta } from "@/lib/config";
+import { JsonLd } from "@/components/json-ld";
+import { publicOrigin } from "@/lib/site-origin";
 import type { ReactNode } from "react";
 export function ButtonLink({
   href = primaryCta.href,
@@ -87,6 +89,7 @@ export function PageHero({
       { label: "Home", href: "/" },
       { label },
     ];
+  const origin = publicOrigin();
 
   return (
     <section className="page-hero container">
@@ -98,6 +101,22 @@ export function PageHero({
           </span>
         ))}
       </nav>
+      {origin && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: crumbs.map((crumb, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: crumb.label,
+              ...(crumb.href
+                ? { item: new URL(crumb.href, origin).href }
+                : {}),
+            })),
+          }}
+        />
+      )}
       <Eyebrow>{label}</Eyebrow>
       <h1>{title}</h1>
       <p className="lede">{intro}</p>
