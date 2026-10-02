@@ -129,6 +129,14 @@ final class TasksDeadlineLockTests: XCTestCase {
         XCTAssertNil(ledger.decidedBy)
     }
 
+    func testSendingManualReminderIsBoundedToPresentationState() {
+        let sent = TasksDeadlineLockDemoData.submittedOnTime.sendingManualReminder()
+        XCTAssertTrue(sent.reminder.manualNudgeSent)
+        XCTAssertFalse(sent.reminder.canSendManualNudge)
+        XCTAssertEqual(sent.reminder.automaticReminderSent, TasksDeadlineLockDemoData.submittedOnTime.reminder.automaticReminderSent)
+        XCTAssertEqual(sent.decision, .awaitingApproval)
+    }
+
     func testManualNudgeAndAutomaticReminderAreIndependent() {
         let neither = TaskReminderState(automaticReminderSent: false, manualNudgeSent: false)
         let automaticOnly = TaskReminderState(automaticReminderSent: true, manualNudgeSent: false)
