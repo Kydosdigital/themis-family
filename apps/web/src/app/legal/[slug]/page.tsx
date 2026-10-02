@@ -20,7 +20,7 @@ export async function generateMetadata({
     titles[slug] || "Legal",
     "Themis Family legal information and review status.",
     "/legal/" + slug,
-    slug !== "cookies",
+    true,
   );
 }
 export default async function Page({

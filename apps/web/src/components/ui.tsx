@@ -12,6 +12,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { primaryCta } from "@/lib/config";
+import { JsonLd } from "@/components/json-ld";
+import { publicOrigin } from "@/lib/site-origin";
 import type { ReactNode } from "react";
 export function ButtonLink({
   href = primaryCta.href,
@@ -73,19 +75,48 @@ export function PageHero({
   title,
   intro,
   children,
+  breadcrumbs,
 }: {
   label: string;
   title: string;
   intro: string;
   children?: ReactNode;
+  breadcrumbs?: { label: string; href?: string }[];
 }) {
+  const crumbs: { label: string; href?: string }[] =
+    breadcrumbs ??
+    [
+      { label: "Home", href: "/" },
+      { label },
+    ];
+  const origin = publicOrigin();
+
   return (
     <section className="page-hero container">
       <nav aria-label="Breadcrumb" className="breadcrumb">
-        <Link href="/">Home</Link>
-        <span aria-hidden="true">/</span>
-        <span>{label}</span>
+        {crumbs.map((crumb, index) => (
+          <span className="breadcrumb-part" key={crumb.label}>
+            {index > 0 && <span aria-hidden="true">/</span>}
+            {crumb.href ? <Link href={crumb.href}>{crumb.label}</Link> : <span>{crumb.label}</span>}
+          </span>
+        ))}
       </nav>
+      {origin && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: crumbs.map((crumb, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: crumb.label,
+              ...(crumb.href
+                ? { item: new URL(crumb.href, origin).href }
+                : {}),
+            })),
+          }}
+        />
+      )}
       <Eyebrow>{label}</Eyebrow>
       <h1>{title}</h1>
       <p className="lede">{intro}</p>

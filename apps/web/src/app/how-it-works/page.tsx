@@ -3,8 +3,8 @@ import { Boundary } from "@/components/boundary";
 import { RuleDemo } from "@/components/rule-demo";
 import { metadata as meta } from "@/lib/metadata";
 export const metadata = meta(
-  "How it works",
-  "Create a family, agree a boundary and make the plan visible. A walkthrough of Themis Family.",
+  "How Parental Controls Work",
+  "See how Themis Family turns screen-time, homework, bedtime and gaming boundaries into visible family agreements on iPhone and iPad.",
   "/how-it-works",
 );
 const steps = [

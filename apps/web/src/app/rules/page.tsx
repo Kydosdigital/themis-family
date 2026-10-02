@@ -3,8 +3,8 @@ import { RuleDemo } from "@/components/rule-demo";
 import { rules } from "@/lib/content";
 import { metadata as meta } from "@/lib/metadata";
 export const metadata = meta(
-  "Rules & agreements",
-  "Explore schedules, Homework Deadline, Earn First, Focus Sessions, requests and Free Pass.",
+  "Screen Time Rules & Family Agreements",
+  "Explore Themis Family screen-time rules, homework deadlines, bedtime schedules, gaming boundaries, requests, Focus Sessions and temporary access.",
   "/rules",
 );
 export default function Page() {

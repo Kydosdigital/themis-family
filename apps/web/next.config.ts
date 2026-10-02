@@ -10,6 +10,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/insights/a-clearer-homework-agreement",
+        destination: "/insights/child-bypassing-parental-controls",
+        permanent: true,
+      },
+      {
+        source: "/insights/room-for-an-exception",
+        destination: "/rules",
+        permanent: true,
+      },
+      {
+        source: "/insights/privacy-is-part-of-the-conversation",
+        destination: "/insights/should-i-read-my-childs-text-messages",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

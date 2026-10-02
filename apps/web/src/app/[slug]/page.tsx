@@ -16,8 +16,55 @@ import {
   ProtectionStates,
   AgreementStory,
 } from "@/components/product";
-import { JsonLd } from "@/components/json-ld";
 import { site } from "@/lib/config";
+const seo: Record<string, { title: string; description: string }> = {
+  "for-parents": {
+    title: "Parental Controls for Families Without Constant Policing",
+    description:
+      "Themis Family helps parents create visible screen-time, homework, bedtime and gaming agreements with requests, approvals and privacy-first controls.",
+  },
+  "for-children": {
+    title: "Child-Friendly Parental Controls & Family Screen Rules",
+    description:
+      "See how Themis Family explains screen-time rules, homework deadlines, requests and paused apps clearly to children without covert monitoring.",
+  },
+  "for-teens": {
+    title: "Teen Parental Controls With Privacy & Clear Boundaries",
+    description:
+      "Themis Family gives teens visible digital agreements, requests and privacy-aware parental controls without message reading or a surveillance feed.",
+  },
+  "school-access": {
+    title: "Parental Controls That Keep School Apps Available",
+    description:
+      "Learn how Themis Family keeps configured school and essential apps available while entertainment rules, homework deadlines and screen-time boundaries apply.",
+  },
+  privacy: {
+    title: "Privacy-First Parental Controls for Families",
+    description:
+      "Understand what Themis Family parental controls can show parents, what stays private, and how the product avoids covert message reading and continuous location tracking.",
+  },
+  safety: {
+    title: "Safe & Transparent Parental Controls for Families",
+    description:
+      "See how Themis Family approaches protection status, device pairing, family roles, essential access and honest reporting when a device needs attention.",
+  },
+  features: {
+    title: "Parental Control App Features for Family Routines",
+    description:
+      "Explore Themis Family features for screen time, homework, bedtime, gaming, requests, temporary access, focus sessions, school access and privacy.",
+  },
+  about: {
+    title: "About",
+    description:
+      "Themis Family is building privacy-first parental controls around visible family agreements, clearer digital boundaries and growing independence.",
+  },
+  press: {
+    title: "Press & Media",
+    description:
+      "Press and media information about Themis Family, a family digital-boundaries product for clearer parental controls on iPhone and iPad.",
+  },
+};
+
 export const dynamicParams = false;
 export function generateStaticParams() {
   return Object.keys(pages).map((slug) => ({ slug }));
@@ -29,7 +76,14 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const p = pages[slug];
-  return p ? metadata(p.label, p.intro, "/" + slug) : {};
+  const search = seo[slug];
+  return p
+    ? metadata(
+        search?.title ?? p.label,
+        search?.description ?? p.intro,
+        "/" + slug,
+      )
+    : {};
 }
 export default async function ContentPage({
   params,
@@ -118,28 +172,6 @@ export default async function ContentPage({
         )}
       </div>
       <CTA />
-      {site.origin && (
-        <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              {
-                "@type": "ListItem",
-                position: 1,
-                name: "Home",
-                item: site.origin,
-              },
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: p.label,
-                item: site.origin + "/" + slug,
-              },
-            ],
-          }}
-        />
-      )}
     </>
   );
 }

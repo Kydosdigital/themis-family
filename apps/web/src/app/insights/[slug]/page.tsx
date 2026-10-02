@@ -6,7 +6,8 @@ import { ArticleCards } from "@/components/articles";
 import { PageHero, CTA } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
 import { publicOrigin } from "@/lib/site-origin";
-import { metadata as meta } from "@/lib/metadata";
+import { articleMetadata } from "@/lib/metadata";
+import type { ComponentPropsWithoutRef } from "react";
 
 export const dynamicParams = false;
 
@@ -21,7 +22,40 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const a = articles.find((a) => a.slug === slug);
-  return a ? meta(a.title, a.summary, "/insights/" + slug, a.draft) : {};
+  return a
+    ? articleMetadata({
+        title: a.title,
+        description: a.summary,
+        path: "/insights/" + slug,
+        draft: a.draft,
+        image: a.image,
+        datePublished: a.date,
+        dateModified: a.updated,
+        section: a.category,
+      })
+    : {};
+}
+
+function MdxImage({
+  src,
+  alt = "",
+}: ComponentPropsWithoutRef<"img">) {
+  if (typeof src !== "string") return null;
+
+  const optimisedSrc = src.includes("images.pexels.com")
+    ? src + (src.includes("?") ? "&" : "?") + "h=900&fit=crop"
+    : src;
+
+  return (
+    <Image
+      src={optimisedSrc}
+      alt={alt}
+      width={1400}
+      height={900}
+      sizes="(max-width: 850px) 100vw, 740px"
+      loading="lazy"
+    />
+  );
 }
 
 function formatDate(value: string) {
@@ -48,7 +82,16 @@ export default async function Page({
 
   return (
     <>
-      <PageHero label={a.category} title={a.title} intro={a.summary} />
+      <PageHero
+        label={a.category}
+        title={a.title}
+        intro={a.summary}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Themis Community", href: "/insights" },
+          { label: a.title },
+        ]}
+      />
 
       <div className="container article-hero-wrap">
         <figure className="article-hero-media">
@@ -75,7 +118,11 @@ export default async function Page({
         <article className="article-prose">
           <div className="article-byline">
             <p>
-              <strong>Themis Family Editorial Team</strong>
+              <strong>
+                <Link href="/insights/how-we-research">
+                  Themis Family Editorial Team
+                </Link>
+              </strong>
             </p>
             <p className="small">
               Published <time dateTime={a.date}>{formatDate(a.date)}</time> ·
@@ -97,7 +144,7 @@ export default async function Page({
             </ul>
           </section>
 
-          <Content />
+          <Content components={{ img: MdxImage }} />
 
           <section className="article-faqs" aria-labelledby="article-faq-title">
             <p className="article-tldr-label">Quick answers</p>
@@ -157,9 +204,21 @@ export default async function Page({
             image: a.image,
             datePublished: a.date,
             dateModified: a.updated,
-            author: { "@type": "Organization", name: "Themis Family" },
-            publisher: { "@type": "Organization", name: "Themis Family" },
+            author: {
+              "@type": "Organization",
+              name: "Themis Family Editorial Team",
+              url: origin + "/insights/how-we-research",
+            },
+            publisher: {
+              "@type": "Organization",
+              "@id": origin + "/#organization",
+              name: "Themis Family",
+              url: origin,
+            },
             mainEntityOfPage: origin + "/insights/" + slug,
+            articleSection: a.category,
+            inLanguage: "en-GB",
+            isPartOf: { "@id": origin + "/#website" },
           }}
         />
       )}
