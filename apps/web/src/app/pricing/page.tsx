@@ -2,7 +2,7 @@ import { PageHero, Checklist, ButtonLink, Callout } from "@/components/ui";
 import { site } from "@/lib/config";
 import { metadata as meta } from "@/lib/metadata";
 export const metadata = meta(
-  "Themis Family Pricing & Plans",
+  "Pricing & Plans",
   "Themis Family will offer one family subscription for parental controls, visible digital agreements and requests. Pricing is coming soon.",
   "/pricing",
 );
