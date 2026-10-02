@@ -43,7 +43,7 @@ export function metadata(
       locale: "en_GB",
       siteName: site.name,
       ...(publicSite ? { url: new URL(path, origin).href } : {}),
-      ...(imageUrl ? { images: [{ url: imageUrl }] } : {}),
+      ...(imageUrl ? { images: [{ url: imageUrl, alt: title }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
