@@ -183,6 +183,38 @@ export default function Page() {
               Common Sense Media and current first-party platform guidance.
             </p>
           </div>
+          <ul className="source-links">
+            <li>
+              <a href="https://www.ofcom.org.uk/media-use-and-attitudes/media-habits-children/childrens">
+                Ofcom, Children and Parents research
+              </a>
+            </li>
+            <li>
+              <a href="https://pubmed.ncbi.nlm.nih.gov/">
+                PubMed, peer-reviewed health and behavioural research
+              </a>
+            </li>
+            <li>
+              <a href="https://www.unicef.org/innocenti/reports/policy-guidance-ai-children">
+                UNICEF, Guidance on AI and Children
+              </a>
+            </li>
+            <li>
+              <a href="https://www.nspcc.org.uk/keeping-children-safe/online-safety/">
+                NSPCC, online safety guidance
+              </a>
+            </li>
+            <li>
+              <a href="https://www.iwf.org.uk/">
+                Internet Watch Foundation
+              </a>
+            </li>
+            <li>
+              <a href="https://www.pewresearch.org/internet/">
+                Pew Research Center, internet and technology research
+              </a>
+            </li>
+          </ul>
           <p>
             You can inspect the evidence directly in each guide. Start with the{" "}
             <Link href="/insights">Themis Community library</Link>.
