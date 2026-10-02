@@ -77,7 +77,10 @@ struct ChildHomeView: View {
         case .myRules:
             ShellPlaceholderView(title: "My Rules", screenID: "C-015", isTabRoot: false)
         case .submitHomework:
-            ShellPlaceholderView(title: "I’ve finished my homework", screenID: "C-003", isTabRoot: false)
+            TasksDeadlineLockView(
+                state: TasksDeadlineLockDemoData.submitTask,
+                surfaceAudience: .child
+            )
         case .requestMoreTime:
             ShellPlaceholderView(title: "Ask for more time", screenID: "Q-001", isTabRoot: false)
         case .focusSession:
