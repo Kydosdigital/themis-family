@@ -64,6 +64,8 @@ final class TasksDeadlineLockTests: XCTestCase {
     func testMultipleRestrictionsPreventFalseUnlock() {
         let state = TasksDeadlineLockDemoData.multipleRestrictions
         XCTAssertEqual(state.decision, .approved)
+        XCTAssertEqual(state.status.label, "Homework cleared")
+        XCTAssertNotEqual(state.status.kind, .overdue)
         XCTAssertEqual(state.activeRestrictions, [.bedtime])
         XCTAssertFalse(state.isEffectivelyAvailable)
         XCTAssertFalse(state.mayClaimUnlocked)

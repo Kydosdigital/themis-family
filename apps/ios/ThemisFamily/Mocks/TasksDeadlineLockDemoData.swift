@@ -197,7 +197,7 @@ enum TasksDeadlineLockDemoData {
         childName: "Sam",
         taskTitle: "Homework",
         deadlineText: "Homework approved",
-        status: .overdue,
+        status: ThemisStatus(.cleared, label: "Homework cleared"),
         headline: "Homework done. Games are still paused.",
         message: "The homework restriction is cleared, but the bedtime rule is still active.",
         submission: .recorded,
