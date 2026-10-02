@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/forms";
 import { submissionsEnabled } from "@/lib/services";
 import { metadata as meta } from "@/lib/metadata";
 export const metadata = meta(
-  "Join the Themis Family Waitlist",
+  "Join the Waitlist",
   "Join the Themis Family waitlist for launch updates on privacy-first parental controls and family digital boundaries for iPhone and iPad.",
   "/waitlist",
 );
