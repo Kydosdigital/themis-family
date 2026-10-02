@@ -27,7 +27,6 @@ import {
 } from "@/components/product";
 import { RuleDemo } from "@/components/rule-demo";
 import { Reveal } from "@/components/reveal";
-import { ArticleCards } from "@/components/articles";
 import { metadata as makeMetadata } from "@/lib/metadata";
 export const metadata = makeMetadata(
   "Parental Controls for Clear Family Digital Boundaries",
