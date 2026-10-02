@@ -29,7 +29,7 @@ enum FreePassDemoData {
     static var customDraft: FreePassDraft {
         var draft = FreePassDraft()
         draft.selectChild(id: DemoData.mayaID, name: "Maya")
-        draft.chooseCustom(targets: [.roblox], durationMinutes: 45)
+        draft.chooseCustom(targets: [FreePassTargets.roblox], durationMinutes: 45)
         return draft
     }
 

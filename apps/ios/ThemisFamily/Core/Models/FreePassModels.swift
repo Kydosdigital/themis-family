@@ -42,7 +42,7 @@ enum FreePassTargets {
         isEmergencyCommunication: true
     )
 
-    static let selectable: [FreePassTarget] = [.games, .youtube, .roblox, .minecraft, .entertainment]
+    static let selectable: [FreePassTarget] = [games, youtube, roblox, minecraft, entertainment]
 }
 
 enum FreePassPreset: String, CaseIterable, Identifiable, Sendable {
@@ -62,9 +62,9 @@ enum FreePassPreset: String, CaseIterable, Identifiable, Sendable {
 
     var targets: [FreePassTarget] {
         switch self {
-        case .games30: return [.games]
-        case .youtube20: return [.youtube]
-        case .entertainment30: return [.entertainment]
+        case .games30: return [FreePassTargets.games]
+        case .youtube20: return [FreePassTargets.youtube]
+        case .entertainment30: return [FreePassTargets.entertainment]
         }
     }
 

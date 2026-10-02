@@ -18,7 +18,7 @@ final class FreePassTests: XCTestCase {
     func testCannotConfirmWithoutExplicitDuration() {
         var draft = FreePassDraft()
         draft.selectChild(id: DemoData.mayaID, name: "Maya")
-        draft.targets = [.games]
+        draft.targets = [FreePassTargets.games]
         XCTAssertFalse(draft.canConfirm(role: .owner))
     }
 
@@ -27,7 +27,7 @@ final class FreePassTests: XCTestCase {
         draft.selectChild(id: DemoData.mayaID, name: "Maya")
         draft.apply(.games30)
 
-        XCTAssertEqual(draft.targets, [.games])
+        XCTAssertEqual(draft.targets, [FreePassTargets.games])
         XCTAssertEqual(draft.durationMinutes, 30)
         XCTAssertTrue(draft.hasExplicitScope)
         XCTAssertTrue(draft.hasExplicitDuration)
@@ -125,7 +125,7 @@ final class FreePassTests: XCTestCase {
     func testAlwaysAllowedTargetCannotEnterFreePassScope() {
         var draft = FreePassDraft()
         draft.selectChild(id: DemoData.mayaID, name: "Maya")
-        draft.chooseCustom(targets: [.phone], durationMinutes: 30)
+        draft.chooseCustom(targets: [FreePassTargets.phone], durationMinutes: 30)
 
         XCTAssertFalse(draft.hasExplicitScope)
         XCTAssertNil(draft.makeGrant(
@@ -140,7 +140,7 @@ final class FreePassTests: XCTestCase {
     func testEmergencyCommunicationCannotEnterFreePassScope() {
         var draft = FreePassDraft()
         draft.selectChild(id: DemoData.mayaID, name: "Maya")
-        draft.chooseCustom(targets: [.messages], durationMinutes: 30)
+        draft.chooseCustom(targets: [FreePassTargets.messages], durationMinutes: 30)
 
         XCTAssertTrue(FreePassTargets.messages.isEmergencyCommunication)
         XCTAssertFalse(draft.canConfirm(role: .owner))
