@@ -131,36 +131,37 @@ export default async function Page({
       <CTA />
 
       {!a.draft && origin && (
-        <>
-          <JsonLd
-            data={{
-              "@context": "https://schema.org",
-              "@type": "Article",
-              headline: a.title,
-              description: a.summary,
-              image: a.image,
-              datePublished: a.date,
-              dateModified: a.updated,
-              author: { "@type": "Organization", name: "Themis Family" },
-              publisher: { "@type": "Organization", name: "Themis Family" },
-              mainEntityOfPage: origin + "/insights/" + slug,
-            }}
-          />
-          <JsonLd
-            data={{
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: a.faqs.map((faq) => ({
-                "@type": "Question",
-                name: faq.question,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: faq.answer,
-                },
-              })),
-            }}
-          />
-        </>
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: a.title,
+            description: a.summary,
+            image: a.image,
+            datePublished: a.date,
+            dateModified: a.updated,
+            author: { "@type": "Organization", name: "Themis Family" },
+            publisher: { "@type": "Organization", name: "Themis Family" },
+            mainEntityOfPage: origin + "/insights/" + slug,
+          }}
+        />
+      )}
+
+      {!a.draft && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: a.faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          }}
+        />
       )}
     </>
   );
