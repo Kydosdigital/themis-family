@@ -3,7 +3,7 @@ import { faqGroups } from "@/lib/content";
 import { JsonLd } from "@/components/json-ld";
 import { metadata as meta } from "@/lib/metadata";
 export const metadata = meta(
-  "Themis Family FAQ: Parental Controls, Privacy & Devices",
+  "FAQ: Parental Controls, Privacy & Devices",
   "Answers about Themis Family parental controls, iPhone and iPad support, screen-time rules, privacy, requests, school access and family agreements.",
   "/faq",
 );
