@@ -21,6 +21,13 @@ const routes = [
   "/insights/child-bypassing-parental-controls",
   "/insights/is-chatgpt-for-homework-cheating",
   "/insights/found-porn-on-child-phone",
+  "/insights/how-much-screen-time-is-too-much",
+  "/insights/phone-in-bedroom-at-night",
+  "/insights/what-age-first-phone",
+  "/insights/is-my-child-ready-for-social-media",
+  "/insights/child-angry-when-video-games-stop",
+  "/insights/should-i-read-my-childs-text-messages",
+  "/insights/child-talking-to-strangers-online",
   "/press",
   "/legal/privacy-policy",
   "/legal/terms",
@@ -82,6 +89,13 @@ test("Community guides include TLDR, FAQs and structured FAQ data", async ({
     "/insights/child-bypassing-parental-controls",
     "/insights/is-chatgpt-for-homework-cheating",
     "/insights/found-porn-on-child-phone",
+    "/insights/how-much-screen-time-is-too-much",
+    "/insights/phone-in-bedroom-at-night",
+    "/insights/what-age-first-phone",
+    "/insights/is-my-child-ready-for-social-media",
+    "/insights/child-angry-when-video-games-stop",
+    "/insights/should-i-read-my-childs-text-messages",
+    "/insights/child-talking-to-strangers-online",
   ]) {
     await page.goto(route);
     await expect(page.getByText("TL;DR", { exact: true })).toBeVisible();
