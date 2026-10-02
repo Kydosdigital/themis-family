@@ -96,6 +96,8 @@ jobs:
           capture parent "P-023-canonical.png"
           capture child "C-001-child-canonical.png"
           capture teen "C-001-teen-canonical.png"
+          capture rules "R-001-rules-canonical.png"
+          capture school-access "S-001-school-access-canonical.png"
           capture_onboarding P-002 "P-002-welcome.png"
           capture_onboarding P-010 "P-010-pairing.png"
           capture_onboarding P-019 "P-019-agreement.png"
@@ -106,6 +108,8 @@ jobs:
           capture parent "P-023-canonical-accessibility.png"
           capture child "C-001-child-canonical-accessibility.png"
           capture teen "C-001-teen-canonical-accessibility.png"
+          capture rules "R-001-rules-canonical-accessibility.png"
+          capture school-access "S-001-school-access-canonical-accessibility.png"
           capture_onboarding P-019 "P-019-agreement-accessibility.png"
           capture_onboarding P-022 "P-022-activated-accessibility.png"
 
