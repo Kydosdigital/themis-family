@@ -3,14 +3,18 @@ import { PageHero, CTA, Callout } from "@/components/ui";
 import { ArticleCards } from "@/components/articles";
 import { articles, categories, topicClusters } from "@/lib/articles";
 import { metadata as meta } from "@/lib/metadata";
+import { JsonLd } from "@/components/json-ld";
+import { publicOrigin } from "@/lib/site-origin";
 
 export const metadata = meta(
-  "Themis Community",
-  "Research-backed, practical guidance for raising children with technology, from AI and screen time to social media, gaming, explicit content and digital independence.",
+  "Digital Parenting Guides & Research",
+  "Research-backed digital parenting guides on AI, screen time, social media, gaming, online safety, privacy and digital independence from Themis Community.",
   "/insights",
 );
 
 export default function Page() {
+  const origin = publicOrigin();
+
   return (
     <>
       <PageHero
@@ -97,7 +101,10 @@ export default function Page() {
         <Callout title="How we write">
           Important claims are linked to the research or guidance behind them.
           Community conversations help us understand what parents are asking,
-          but they do not replace evidence. When research is mixed, we say so.
+          but they do not replace evidence. When research is mixed, we say so.{" "}
+          <Link href="/insights/how-we-research">
+            Read our research and editorial standards.
+          </Link>
         </Callout>
 
         <section
@@ -116,6 +123,54 @@ export default function Page() {
         </section>
       </div>
       <CTA />
+
+      {origin && (
+        <>
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              name: "Themis Community",
+              description:
+                "Research-backed digital parenting guides from Themis Family.",
+              url: origin + "/insights",
+              isPartOf: { "@id": origin + "/#website" },
+              about: { "@id": origin + "/#organization" },
+              inLanguage: "en-GB",
+              mainEntity: {
+                "@type": "ItemList",
+                itemListElement: articles
+                  .filter((article) => !article.draft)
+                  .map((article, index) => ({
+                    "@type": "ListItem",
+                    position: index + 1,
+                    name: article.title,
+                    url: origin + "/insights/" + article.slug,
+                  })),
+              },
+            }}
+          />
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: origin,
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Themis Community",
+                },
+              ],
+            }}
+          />
+        </>
+      )}
     </>
   );
 }
