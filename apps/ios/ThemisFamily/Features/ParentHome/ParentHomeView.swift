@@ -34,15 +34,9 @@ struct ParentHomeView: View {
         .navigationDestination(item: $destination) { route in
             switch route.screenID {
             case "A-001":
-                TasksDeadlineLockView(
-                    state: TasksDeadlineLockDemoData.actionCentre,
-                    surfaceAudience: .parent
-                )
+                ParentTaskApprovalFlowView(initial: .actionCentre)
             case "A-002":
-                TasksDeadlineLockView(
-                    state: TasksDeadlineLockDemoData.taskReview,
-                    surfaceAudience: .parent
-                )
+                ParentTaskApprovalFlowView(initial: .review)
             default:
                 ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
             }
