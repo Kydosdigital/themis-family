@@ -83,7 +83,7 @@ export default function Page() {
           </div>
           <ol className="research-steps">
             <li>
-              <strong>Start with the parent's real question.</strong>
+              <strong>Start with the parent&apos;s real question.</strong>
               <span>
                 We define the situation first, including what the parent knows,
                 what they may be assuming and which safety questions matter.
