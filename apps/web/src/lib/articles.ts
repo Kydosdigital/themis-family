@@ -284,7 +284,7 @@ export const articles = [
     slug: "is-my-child-ready-for-social-media",
     title: "Is my child ready for social media?",
     summary:
-      "The platform age limit is not the same thing as developmental readiness. Look at self-control, privacy, peer pressure, conflict and whether your child can ask for help when something goes wrong.",
+      "Platform age limits are not the same as readiness. Look at self-control, privacy, peer pressure, conflict and whether your child can ask for help when something goes wrong.",
     category: "Social media",
     date: "2026-10-02",
     updated: "2026-10-02",
@@ -422,7 +422,7 @@ export const articles = [
     slug: "child-talking-to-strangers-online",
     title: "My child is talking to strangers online. What should I do?",
     summary:
-      "Not every unknown player or follower is dangerous. The job is to work out who the person is, what the relationship has become and whether secrecy, pressure or sexualisation is entering the conversation.",
+      "Not every unknown online contact is dangerous. Learn which signs, including secrecy, pressure and sexualisation, mean a child's online friendship needs closer attention.",
     category: "Online friendships",
     date: "2026-10-02",
     updated: "2026-10-02",
