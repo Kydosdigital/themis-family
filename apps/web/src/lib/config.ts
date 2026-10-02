@@ -80,7 +80,7 @@ export const footerGroups = [
     title: "Company",
     links: [
       ["About", "/about"],
-      ["Insights", "/insights"],
+      ["Community", "/insights"],
       ["Press", "/press"],
     ],
   },

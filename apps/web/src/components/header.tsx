@@ -75,7 +75,7 @@ export function Header() {
               </div>
             </details>
           ))}
-          <Link href="/insights">Insights</Link>
+          <Link href="/insights">Community</Link>
           <Link href="/pricing" data-event="pricing_navigation">
             Pricing
           </Link>
@@ -131,7 +131,7 @@ export function Header() {
               </div>
             ))}
             <Link href="/insights" onClick={close}>
-              Insights
+              Community
             </Link>
             <Link href="/pricing" onClick={close}>
               Pricing
