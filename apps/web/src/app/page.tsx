@@ -30,8 +30,8 @@ import { Reveal } from "@/components/reveal";
 import { ArticleCards } from "@/components/articles";
 import { metadata as makeMetadata } from "@/lib/metadata";
 export const metadata = makeMetadata(
-  "Clear digital boundaries",
-  "Set clear digital rules once, and let the phone enforce them. Meet Themis Family, coming first to iPhone and iPad.",
+  "Parental Controls for Clear Family Digital Boundaries",
+  "Themis Family helps parents set clear screen-time, homework, bedtime and gaming rules with visible family agreements, requests and privacy-first controls for iPhone and iPad.",
   "/",
 );
 export default function Home() {
