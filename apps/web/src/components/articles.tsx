@@ -5,13 +5,22 @@ import { articles } from "@/lib/articles";
 export function ArticleCards({
   exclude,
   limit,
+  slugs,
 }: {
   exclude?: string;
   limit?: number;
+  slugs?: readonly string[];
 }) {
-  const visible = articles
-    .filter((a) => a.slug !== exclude)
-    .slice(0, limit ?? articles.length);
+  const ordered = slugs
+    ? slugs.flatMap((slug) => {
+        const article = articles.find((a) => a.slug === slug);
+        return article ? [article] : [];
+      })
+    : articles;
+
+  const visible = ordered
+    .filter((a) => !a.draft && a.slug !== exclude)
+    .slice(0, limit ?? ordered.length);
 
   return (
     <div className="three-grid">

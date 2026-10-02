@@ -110,6 +110,41 @@ test("Community guides include TLDR, FAQs and structured FAQ data", async ({
   }
 });
 
+
+test("Community is organised into topic journeys with curated internal links", async ({
+  page,
+}) => {
+  await page.goto("/insights");
+  await expect(page.locator(".topic-cluster-card")).toHaveCount(4);
+
+  const clusterLinks = page.locator(".topic-cluster-card a[href^='/insights/']");
+  expect(await clusterLinks.count()).toBeGreaterThanOrEqual(15);
+
+  for (const route of [
+    "/insights/child-bypassing-parental-controls",
+    "/insights/is-chatgpt-for-homework-cheating",
+    "/insights/found-porn-on-child-phone",
+    "/insights/how-much-screen-time-is-too-much",
+    "/insights/phone-in-bedroom-at-night",
+    "/insights/what-age-first-phone",
+    "/insights/is-my-child-ready-for-social-media",
+    "/insights/child-angry-when-video-games-stop",
+    "/insights/should-i-read-my-childs-text-messages",
+    "/insights/child-talking-to-strangers-online",
+  ]) {
+    await page.goto(route);
+    await expect(
+      page.getByRole("heading", { name: "The next questions usually connect." }),
+    ).toBeVisible();
+    await expect(page.locator(".article-related .article-card")).toHaveCount(3);
+
+    const hrefs = await page
+      .locator(".article-related .article-card")
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+    expect(hrefs).not.toContain(route);
+  }
+});
+
 test("all internal links resolve", async ({ page, request }) => {
   await page.goto("/");
   const links = await page

@@ -489,3 +489,107 @@ export const categories = [
   "Scams & security",
   "Building with technology",
 ];
+
+
+export const topicClusters = [
+  {
+    id: "healthy-digital-routines",
+    title: "Healthy digital routines",
+    intro:
+      "Screen time, sleep, gaming and the family boundaries that make everyday technology easier to live with.",
+    slugs: [
+      "how-much-screen-time-is-too-much",
+      "phone-in-bedroom-at-night",
+      "child-angry-when-video-games-stop",
+      "child-bypassing-parental-controls",
+    ],
+  },
+  {
+    id: "growing-digital-independence",
+    title: "Growing digital independence",
+    intro:
+      "First phones, social media, privacy and how children earn more freedom without losing the safety net.",
+    slugs: [
+      "what-age-first-phone",
+      "is-my-child-ready-for-social-media",
+      "should-i-read-my-childs-text-messages",
+      "child-bypassing-parental-controls",
+    ],
+  },
+  {
+    id: "online-safety-difficult-discoveries",
+    title: "Online safety & difficult discoveries",
+    intro:
+      "What to do when you find something worrying, from explicit content and secret accounts to unknown contacts and grooming concerns.",
+    slugs: [
+      "found-porn-on-child-phone",
+      "child-talking-to-strangers-online",
+      "should-i-read-my-childs-text-messages",
+      "child-bypassing-parental-controls",
+    ],
+  },
+  {
+    id: "ai-school-purposeful-technology",
+    title: "AI, school & purposeful technology",
+    intro:
+      "Helping children use new technology to learn and build without handing over their judgement, privacy or responsibility to think.",
+    slugs: [
+      "is-chatgpt-for-homework-cheating",
+      "how-much-screen-time-is-too-much",
+      "what-age-first-phone",
+    ],
+  },
+] as const;
+
+export const relatedArticleSlugs: Record<string, readonly string[]> = {
+  "child-bypassing-parental-controls": [
+    "how-much-screen-time-is-too-much",
+    "what-age-first-phone",
+    "should-i-read-my-childs-text-messages",
+  ],
+  "is-chatgpt-for-homework-cheating": [
+    "how-much-screen-time-is-too-much",
+    "what-age-first-phone",
+    "should-i-read-my-childs-text-messages",
+  ],
+  "found-porn-on-child-phone": [
+    "child-talking-to-strangers-online",
+    "should-i-read-my-childs-text-messages",
+    "child-bypassing-parental-controls",
+  ],
+  "how-much-screen-time-is-too-much": [
+    "phone-in-bedroom-at-night",
+    "child-angry-when-video-games-stop",
+    "child-bypassing-parental-controls",
+  ],
+  "phone-in-bedroom-at-night": [
+    "how-much-screen-time-is-too-much",
+    "child-angry-when-video-games-stop",
+    "child-bypassing-parental-controls",
+  ],
+  "what-age-first-phone": [
+    "is-my-child-ready-for-social-media",
+    "should-i-read-my-childs-text-messages",
+    "child-talking-to-strangers-online",
+  ],
+  "is-my-child-ready-for-social-media": [
+    "what-age-first-phone",
+    "should-i-read-my-childs-text-messages",
+    "child-talking-to-strangers-online",
+  ],
+  "child-angry-when-video-games-stop": [
+    "how-much-screen-time-is-too-much",
+    "phone-in-bedroom-at-night",
+    "child-bypassing-parental-controls",
+  ],
+  "should-i-read-my-childs-text-messages": [
+    "is-my-child-ready-for-social-media",
+    "child-talking-to-strangers-online",
+    "what-age-first-phone",
+  ],
+  "child-talking-to-strangers-online": [
+    "found-porn-on-child-phone",
+    "should-i-read-my-childs-text-messages",
+    "is-my-child-ready-for-social-media",
+  ],
+};
