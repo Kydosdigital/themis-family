@@ -27,10 +27,10 @@ export function metadata(
       : undefined,
     robots: {
       index: publicSite && !draft,
-      follow: !draft,
+      follow: true,
       googleBot: {
         index: publicSite && !draft,
-        follow: !draft,
+        follow: true,
         "max-image-preview": "large",
         "max-snippet": -1,
         "max-video-preview": -1,
