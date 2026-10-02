@@ -161,6 +161,30 @@ struct TaskDeadlineLockPresentation: Equatable, Sendable {
         )
     }
 
+    func sendingManualReminder() -> TaskDeadlineLockPresentation {
+        TaskDeadlineLockPresentation(
+            screenID: screenID,
+            audience: audience,
+            childName: childName,
+            taskTitle: taskTitle,
+            deadlineText: deadlineText,
+            status: status,
+            headline: headline,
+            message: message,
+            submission: submission,
+            decision: decision,
+            deadlinePhase: deadlinePhase,
+            graceMinutesRemaining: graceMinutesRemaining,
+            deviceApplication: deviceApplication,
+            activeRestrictions: activeRestrictions,
+            reminder: TaskReminderState(
+                automaticReminderSent: reminder.automaticReminderSent,
+                manualNudgeSent: true
+            ),
+            parentNote: parentNote
+        )
+    }
+
     func expiringGrace() -> TaskDeadlineLockPresentation {
         var restrictions = activeRestrictions
         if !restrictions.contains(.homeworkDeadline) {
