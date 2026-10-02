@@ -5,7 +5,7 @@ import { metadata as meta } from "@/lib/metadata";
 import { ContactForm } from "@/components/forms";
 import { submissionsEnabled } from "@/lib/services";
 export const metadata = meta(
-  "Themis Family App for iPhone & iPad",
+  "App for iPhone & iPad",
   "Themis Family parental controls are coming to iPhone and iPad first. Get launch updates and the verified App Store link when available.",
   "/download",
 );
