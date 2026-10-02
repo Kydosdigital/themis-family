@@ -10,8 +10,6 @@ permissions:
 jobs:
   web:
     runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_SITE_URL: https://themis-family.vercel.app
     defaults:
       run:
         working-directory: apps/web
@@ -24,6 +22,10 @@ jobs:
           cache-dependency-path: apps/web/package-lock.json
       - run: npm ci
       - run: npm run verify
+      - name: Rebuild with production SEO origin
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://themis-family.vercel.app
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
