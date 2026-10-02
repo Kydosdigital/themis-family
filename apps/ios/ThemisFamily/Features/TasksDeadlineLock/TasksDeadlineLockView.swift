@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum TasksDeadlineLockAudience {
+enum TasksDeadlineLockAudience: Equatable {
     case child
     case parent
 }
@@ -174,9 +174,11 @@ struct TasksDeadlineLockView: View {
     @ViewBuilder
     private var childActions: some View {
         switch state.screenID {
-        case "C-002", "C-007", "C-008", "C-009":
+        case "C-002", "C-003", "C-007", "C-008", "C-009":
             ThemisButton(
-                title: state.submission == .submitting ? "Submitting" : "I’ve finished my homework",
+                title: state.submission == .submitting
+                    ? "Submitting"
+                    : (state.screenID == "C-003" || state.screenID == "C-009" ? "Submit for approval" : "I’ve finished my homework"),
                 systemImage: "checkmark",
                 isLoading: state.submission == .submitting,
                 action: onSubmit
@@ -211,7 +213,7 @@ struct TasksDeadlineLockView: View {
     @ViewBuilder
     private var parentActions: some View {
         switch state.screenID {
-        case "A-001":
+        case "A-001", "P-024":
             ThemisButton(title: "Review homework", systemImage: "checkmark.circle", action: onApprove)
 
         case "A-002", "P-025":
@@ -298,6 +300,15 @@ struct ApprovalApplicationStatusView: View {
     }
 }
 
+#Preview("C-003 · Submit task") {
+    NavigationStack {
+        TasksDeadlineLockView(
+            state: TasksDeadlineLockDemoData.submitTask,
+            surfaceAudience: .child
+        )
+    }
+}
+
 #Preview("C-005 · Approval grace") {
     NavigationStack {
         TasksDeadlineLockView(
@@ -325,12 +336,54 @@ struct ApprovalApplicationStatusView: View {
     }
 }
 
+#Preview("C-006 · Approved") {
+    NavigationStack {
+        TasksDeadlineLockView(
+            state: TasksDeadlineLockDemoData.approved,
+            surfaceAudience: .child
+        )
+    }
+}
+
+#Preview("C-009 · Submit while restricted") {
+    NavigationStack {
+        TasksDeadlineLockView(
+            state: TasksDeadlineLockDemoData.submitWhileRestricted,
+            surfaceAudience: .child
+        )
+    }
+}
+
 #Preview("A-001 · Action Centre") {
     NavigationStack {
         TasksDeadlineLockView(
             state: TasksDeadlineLockDemoData.actionCentre,
             surfaceAudience: .parent
         )
+    }
+}
+
+#Preview("P-024 · Parent receives action") {
+    NavigationStack {
+        TasksDeadlineLockView(
+            state: TasksDeadlineLockDemoData.parentActionReceived,
+            surfaceAudience: .parent
+        )
+    }
+}
+
+#Preview("P-025 · Task review") {
+    NavigationStack {
+        TasksDeadlineLockView(
+            state: TasksDeadlineLockDemoData.parentTaskReview,
+            surfaceAudience: .parent
+        )
+    }
+}
+
+#Preview("P-026 · Approved") {
+    NavigationStack {
+        ApprovalApplicationStatusView(state: TasksDeadlineLockDemoData.approvalRecorded)
     }
 }
 
