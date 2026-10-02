@@ -20,6 +20,25 @@ enum TasksDeadlineLockDemoData {
         parentNote: nil
     )
 
+    static let submitTask = TaskDeadlineLockPresentation(
+        screenID: "C-003",
+        audience: .child,
+        childName: "Sam",
+        taskTitle: "Homework",
+        deadlineText: "Due at 6:00 PM",
+        status: .due,
+        headline: "Ready to submit?",
+        message: "Your parent or carer will review your homework submission.",
+        submission: .notSubmitted,
+        decision: .none,
+        deadlinePhase: .beforeDeadline,
+        graceMinutesRemaining: nil,
+        deviceApplication: .notApplicable,
+        activeRestrictions: [],
+        reminder: TaskReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        parentNote: nil
+    )
+
     static let submittingOffline = TaskDeadlineLockPresentation(
         screenID: "C-003 · Offline",
         audience: .child,
@@ -77,6 +96,25 @@ enum TasksDeadlineLockDemoData {
         parentNote: nil
     )
 
+    static let approved = TaskDeadlineLockPresentation(
+        screenID: "C-006",
+        audience: .child,
+        childName: "Sam",
+        taskTitle: "Homework",
+        deadlineText: "Approved",
+        status: .approved,
+        headline: "Homework approved",
+        message: "The homework restriction is cleared. Access is available only where no other family rule still applies.",
+        submission: .recorded,
+        decision: .approved,
+        deadlinePhase: .cleared,
+        graceMinutesRemaining: nil,
+        deviceApplication: .applied,
+        activeRestrictions: [],
+        reminder: TaskReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        parentNote: nil
+    )
+
     static let overdue = TaskDeadlineLockPresentation(
         screenID: "C-007",
         audience: .child,
@@ -105,6 +143,25 @@ enum TasksDeadlineLockDemoData {
         status: .overdue,
         headline: "Games are paused",
         message: "Homework was due at 6:00 PM. Submit it when you are ready. Your configured school and essential access stays available.",
+        submission: .notSubmitted,
+        decision: .none,
+        deadlinePhase: .restricted,
+        graceMinutesRemaining: nil,
+        deviceApplication: .notApplicable,
+        activeRestrictions: [.homeworkDeadline],
+        reminder: TaskReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        parentNote: nil
+    )
+
+    static let submitWhileRestricted = TaskDeadlineLockPresentation(
+        screenID: "C-009",
+        audience: .child,
+        childName: "Sam",
+        taskTitle: "Homework",
+        deadlineText: "Submitted after 6:00 PM",
+        status: .overdue,
+        headline: "Submit for review",
+        message: "Games stay paused while your parent or carer reviews this submission.",
         submission: .notSubmitted,
         decision: .none,
         deadlinePhase: .restricted,
@@ -172,6 +229,44 @@ enum TasksDeadlineLockDemoData {
         parentNote: nil
     )
 
+    static let parentActionReceived = TaskDeadlineLockPresentation(
+        screenID: "P-024",
+        audience: .child,
+        childName: "Sam",
+        taskTitle: "Homework",
+        deadlineText: "Submitted before 6:00 PM",
+        status: .needsYou,
+        headline: "Sam sent homework for review",
+        message: "Open the task to approve it or send it back for more work.",
+        submission: .recorded,
+        decision: .awaitingApproval,
+        deadlinePhase: .grace,
+        graceMinutesRemaining: 18,
+        deviceApplication: .notApplicable,
+        activeRestrictions: [],
+        reminder: TaskReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        parentNote: nil
+    )
+
+    static let parentTaskReview = TaskDeadlineLockPresentation(
+        screenID: "P-025",
+        audience: .child,
+        childName: "Sam",
+        taskTitle: "Homework",
+        deadlineText: "Submitted before 6:00 PM",
+        status: .needsYou,
+        headline: "Review Sam’s homework",
+        message: "Sam submitted before the deadline. Approval grace has 18 min remaining.",
+        submission: .recorded,
+        decision: .awaitingApproval,
+        deadlinePhase: .grace,
+        graceMinutesRemaining: 18,
+        deviceApplication: .notApplicable,
+        activeRestrictions: [],
+        reminder: TaskReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        parentNote: nil
+    )
+
     static let taskReview = TaskDeadlineLockPresentation(
         screenID: "A-002",
         audience: .child,
@@ -191,8 +286,68 @@ enum TasksDeadlineLockDemoData {
         parentNote: nil
     )
 
-    static let approvedPendingDevice = taskReview.applyingApproval(deviceAcknowledged: false)
-    static let appliedOnDevice = taskReview.applyingApproval(deviceAcknowledged: true)
+    static let approvalRecorded = TaskDeadlineLockPresentation(
+        screenID: "P-026",
+        audience: .child,
+        childName: "Sam",
+        taskTitle: "Homework",
+        deadlineText: "Decision recorded",
+        status: .approved,
+        headline: "Approved",
+        message: "Your approval is recorded. Themis is sending the resulting change to Sam’s iPhone.",
+        submission: .recorded,
+        decision: .approved,
+        deadlinePhase: .cleared,
+        graceMinutesRemaining: nil,
+        deviceApplication: .pending,
+        activeRestrictions: [],
+        reminder: TaskReminderState(automaticReminderSent: false, manualNudgeSent: false),
+        parentNote: nil
+    )
+
+    static let approvedPendingDevice: TaskDeadlineLockPresentation = {
+        let value = parentTaskReview.applyingApproval(deviceAcknowledged: false)
+        return TaskDeadlineLockPresentation(
+            screenID: "P-027",
+            audience: value.audience,
+            childName: value.childName,
+            taskTitle: value.taskTitle,
+            deadlineText: value.deadlineText,
+            status: value.status,
+            headline: value.headline,
+            message: value.message,
+            submission: value.submission,
+            decision: value.decision,
+            deadlinePhase: value.deadlinePhase,
+            graceMinutesRemaining: value.graceMinutesRemaining,
+            deviceApplication: value.deviceApplication,
+            activeRestrictions: value.activeRestrictions,
+            reminder: value.reminder,
+            parentNote: value.parentNote
+        )
+    }()
+
+    static let appliedOnDevice: TaskDeadlineLockPresentation = {
+        let value = parentTaskReview.applyingApproval(deviceAcknowledged: true)
+        return TaskDeadlineLockPresentation(
+            screenID: "P-028",
+            audience: value.audience,
+            childName: value.childName,
+            taskTitle: value.taskTitle,
+            deadlineText: value.deadlineText,
+            status: value.status,
+            headline: value.headline,
+            message: value.message,
+            submission: value.submission,
+            decision: value.decision,
+            deadlinePhase: value.deadlinePhase,
+            graceMinutesRemaining: value.graceMinutesRemaining,
+            deviceApplication: value.deviceApplication,
+            activeRestrictions: value.activeRestrictions,
+            reminder: value.reminder,
+            parentNote: value.parentNote
+        )
+    }()
 
     static let needsWork = taskReview.rejectingDuringGrace(note: "Please finish the last question.")
 }
