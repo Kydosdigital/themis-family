@@ -204,33 +204,7 @@ export default function Page() {
               about: { "@id": origin + "/#organization" },
               inLanguage: "en-GB",
             }}
-          />
-          <JsonLd
-            data={{
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              itemListElement: [
-                {
-                  "@type": "ListItem",
-                  position: 1,
-                  name: "Home",
-                  item: origin,
-                },
-                {
-                  "@type": "ListItem",
-                  position: 2,
-                  name: "Themis Community",
-                  item: origin + "/insights",
-                },
-                {
-                  "@type": "ListItem",
-                  position: 3,
-                  name: "How we research",
-                },
-              ],
-            }}
-          />
-        </>
+          />        </>
       )}
     </>
   );
