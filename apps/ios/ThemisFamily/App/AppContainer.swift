@@ -9,6 +9,14 @@ final class AppContainer: ObservableObject {
         case onboarding = "Onboarding"
         case rules = "Rules"
         case schoolAccess = "School Access"
+        case taskDetail = "Task Detail"
+        case approvalGrace = "Approval Grace"
+        case gamesPaused = "Games Paused"
+        case multipleRestrictions = "Multiple Restrictions"
+        case actionCentre = "Action Centre"
+        case taskReview = "Task Review"
+        case approvalPending = "Approval Pending"
+        case approvalApplied = "Approval Applied"
 
         var id: String { rawValue }
     }
@@ -60,6 +68,14 @@ final class AppContainer: ObservableObject {
         case "onboarding": return .onboarding
         case "rules": return .rules
         case "school-access": return .schoolAccess
+        case "task-detail": return .taskDetail
+        case "approval-grace": return .approvalGrace
+        case "games-paused": return .gamesPaused
+        case "multiple-restrictions": return .multipleRestrictions
+        case "action-centre": return .actionCentre
+        case "task-review": return .taskReview
+        case "approval-pending": return .approvalPending
+        case "approval-applied": return .approvalApplied
         default: return nil
         }
     }
