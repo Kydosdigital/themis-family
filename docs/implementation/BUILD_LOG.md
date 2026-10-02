@@ -248,3 +248,37 @@ Verification:
 - PR #11 merged to main as `249b029b77b383531c1144241fe1253c87a70818`.
 
 Not changed: production Family Controls enforcement, backend wiring, OQ-30 Phone/Messages/Maps assumptions or later UI slices.
+
+## 2026-10-02: UI-06 Tasks + Deadline Lock
+
+Status: COMPLETE; verified and squash-merged through PR #12.
+
+Source of truth: dedicated UI-06 implementation prompt, approved task/approval specification, rule engine, roles/permissions, offline behaviour, final Claude Design package, Design System and Engineering Handoff.
+
+Work:
+- Implemented C-002 through C-011, P-024 through P-028 and A-001 through A-003 for the canonical Sarah/Sam Homework Deadline Lock flow.
+- Added deterministic task presentation/state transitions for available, submitted, 30-minute Approval Grace, overdue/restricted, waiting while restricted, approved, device-application pending/applied and multiple active restrictions.
+- Preserved Parent Approval for generic Homework, task-owner-only submission, Owner/Guardian approval routing, first-valid-decision modelling, one automatic 15-minute reminder and one independent child nudge.
+- Preserved Approved vs Applied as separate states and effective-enforcement recomputation so clearing Homework never falsely claims Roblox or games are unlocked while another rule still applies.
+- Wired real Child submission and Parent Action Centre/review entry paths while leaving UI-07 request flows as placeholders.
+- Added deterministic launch roots and tests for the required UI-06 states, including C-004, C-007, C-010 and A-003.
+- Extended the existing Release Simulator coverage for representative UI-06 states while retaining Parent, Child, Teen, Rules, School Access and Onboarding regressions.
+
+Review corrections before merge:
+- Corrected C-011 so approved Homework displays "Homework cleared" rather than the contradictory "Overdue" badge while bedtime remains active.
+- Added explicit regression coverage for task-owner-only submission, Owner + Guardian notification routing, approval during grace avoiding Deadline Lock, Approved vs Applied, Always Allowed precedence and no false global unlock.
+- Confirmed the previously reported blank standard C-005 capture was transient; the final exact-head artifact renders both standard and accessibility C-005 correctly.
+
+Verification:
+- Final exact head `043533dfbe832c87fea6cf59486be945866a0798` passed push and PR workflow checks.
+- GitHub iOS build/tests run `36976017414` passed the real Xcode build and full XCTest.
+- GitHub visual-review run `36976012358` passed and produced exact-head artifact `11213649974`.
+- All 26 screenshots in the exact artifact were present; UI-06 standard/accessibility screens and regression targets were manually inspected.
+- C-011 showed the corrected cleared status, C-005 rendered at both sizes, P-027/P-028 preserved approval-versus-device-application truth, and regressions remained visually coherent.
+- PR #12 squash-merged to main as `b7998fd7e193a34d32bbae74c3a0dbb8bf20302c`.
+
+Process improvement carried forward:
+- `.github/workflows/ios-ci.yml` and `ios-visual-review.yml` currently lack same-branch concurrency cancellation, so superseded feature-head macOS runs can create a queue backlog. UI-07 should add safe `cancel-in-progress` concurrency before normal iterative source work, while preserving the final exact-head build/test and visual-review gates.
+
+Not changed: production Supabase/backend wiring, Family Controls enforcement, real-device timing/capability gates, unresolved Apple/OQ items, or UI-07 and later product behaviour.
+

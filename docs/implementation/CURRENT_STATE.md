@@ -2,18 +2,18 @@
 
 Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: UI-05 Rules & School Access is merged and verified. UI-06 Tasks + Deadline Lock is next.
-Active slice: UI-06 Tasks + Deadline Lock - NEXT, NOT STARTED
-Allowed scope: UI-06 only: C-002 through C-011, P-024 through P-028 and A-001 through A-003, plus supporting presentation models, deterministic mocks/tests and visual-review states.
+Current objective: UI-06 Tasks + Deadline Lock is merged and verified. UI-07 Requests is next.
+Active slice: UI-07 Requests - NEXT, NOT STARTED
+Allowed scope: UI-07 only: Q-001 through Q-014 and A-004 through A-011, plus supporting presentation models, deterministic mocks/tests and visual-review states.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
-Completed slice prompt: docs/implementation/CLAUDE_CODE_UI05_RULES_SCHOOL_ACCESS_PROMPT.md
-Last verification: UI-05 final head b2ba1c7712c0cc193666c5c104ab1170f07c49a0 passed workflow checks, real Xcode build, full XCTest, and Release Simulator visual review. Rules and School Access were captured at standard and accessibility text sizes, with Parent/Child/Teen/Onboarding regressions preserved.
-UI-05 review: Rules and School Access remain mock/presentation-driven, preserve effective-enforcement semantics, 30-minute Deadline Lock grace, absolute Always Allowed, emergency calling floor, platform-agnostic School Access, Apple-owned picker boundaries and OQ-30 capability gates.
-UI-05 merge: PR #11 merged to main as 249b029b77b383531c1144241fe1253c87a70818.
-UI-06 branch: not created yet at this reconciliation checkpoint.
-Next action: Create the dedicated UI-06 Tasks + Deadline Lock branch from current main, prepare the implementation prompt from approved requirements/design, implement only UI-06, and verify with real Xcode/XCTest plus Release Simulator review.
+Completed slice prompt: docs/implementation/CLAUDE_CODE_UI06_TASKS_DEADLINE_LOCK_PROMPT.md
+Last verification: UI-06 final head 043533dfbe832c87fea6cf59486be945866a0798 passed workflow checks, real Xcode build, full XCTest, and Release Simulator visual review. Exact-head screenshots were manually reviewed, including C-005 standard/accessibility, C-011 after the cleared-status correction, Parent approval/application states, and Parent/Child/Teen/Rules/School Access/Onboarding regressions.
+UI-06 review: task submission, fixed 30-minute Approval Grace, overdue/restricted handling, one automatic reminder plus one independent child nudge, Owner/Guardian approval routing, Approved vs Applied, task-owner-only submission, Always Allowed precedence, and multiple-restriction no-false-unlock semantics are represented deterministically without claiming production backend or Apple enforcement.
+UI-06 merge: PR #12 squash-merged to main as b7998fd7e193a34d32bbae74c3a0dbb8bf20302c.
+UI-07 branch: not created yet at this reconciliation checkpoint.
+Next action: Prepare the dedicated UI-07 Requests slice from current main. Before normal iterative UI-07 source pushes, add safe same-branch cancel-in-progress concurrency to the existing expensive iOS CI and visual-review workflows so superseded feature-head macOS runs stop consuming the queue. Then implement Q-001 through Q-014 and A-004 through A-011 only, preserving the approved request semantics and full exact-head verification gates.
 
 ## Current readiness
 
@@ -23,7 +23,7 @@ Next action: Create the dedicated UI-06 Tasks + Deadline Lock branch from curren
 - Design System: APPROVED
 - Final prototype: APPROVED
 - Engineering Handoff: APPROVED
-- SwiftUI UI implementation: IN PROGRESS, 5 of 15 slices complete
+- SwiftUI UI implementation: IN PROGRESS, 6 of 15 slices complete
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
@@ -66,6 +66,15 @@ UI-05 Rules & School Access:
 - Release Simulator captured Rules and School Access at standard/accessibility sizes plus regression targets
 - merged through PR #11 as 249b029b77b383531c1144241fe1253c87a70818
 
+UI-06 Tasks + Deadline Lock:
+- C-002 through C-011, P-024 through P-028 and A-001 through A-003
+- task submission, waiting, fixed Approval Grace, overdue/restricted, parent review/rejection, approval/application and multiple-restriction presentation
+- task-owner-only submission and Owner/Guardian approval routing represented deterministically
+- Approved vs Applied remains explicit, with no false unlock while another restriction remains
+- exact-head Xcode build and full XCTest passed
+- Release Simulator captured UI-06 canonical/accessibility states plus Parent/Child/Teen/Rules/School Access/Onboarding regressions
+- merged through PR #12 as b7998fd7e193a34d32bbae74c3a0dbb8bf20302c
+
 ## Production gates
 
 Remain unresolved:
@@ -96,10 +105,12 @@ Airtable is not a replacement for the approved requirements or GitHub implementa
 
 ## Next implementation slice
 
-UI-06 Tasks + Deadline Lock:
-- C-002 through C-011
-- P-024 through P-028
-- A-001 through A-003
-- task submission, parent approval/rejection, Deadline Lock grace/overdue/application and multiple-restriction handling
-- preserve effective-enforcement semantics and never false-unlock while another restriction applies
-- start from the verified UI-05 merged main
+UI-07 Requests:
+- Q-001 through Q-014
+- A-004 through A-011
+- extra-time/access requests, clarification, adult decision, partial approval, decline, expiry and cancellation
+- preserve one automatic 15-minute reminder and one independent child nudge
+- preserve exactly one clarification question plus one reply
+- preserve first-valid-adult-decision-wins and Approved vs Applied where relevant
+- begin with safe same-branch cancel-in-progress concurrency for expensive macOS workflows, without weakening final exact-head verification
+- start only from the verified UI-06 merged main
