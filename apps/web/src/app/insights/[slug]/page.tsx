@@ -7,7 +7,7 @@ import { PageHero, CTA } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
 import { publicOrigin } from "@/lib/site-origin";
 import { articleMetadata } from "@/lib/metadata";
-import type { ImgHTMLAttributes } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 
 export const dynamicParams = false;
 
@@ -36,8 +36,26 @@ export async function generateMetadata({
     : {};
 }
 
-function MdxImage(props: ImgHTMLAttributes<HTMLImageElement>) {
-  return <img {...props} loading="lazy" decoding="async" />;
+function MdxImage({
+  src,
+  alt = "",
+}: ComponentPropsWithoutRef<"img">) {
+  if (typeof src !== "string") return null;
+
+  const optimisedSrc = src.includes("images.pexels.com")
+    ? src + (src.includes("?") ? "&" : "?") + "h=900&fit=crop"
+    : src;
+
+  return (
+    <Image
+      src={optimisedSrc}
+      alt={alt}
+      width={1400}
+      height={900}
+      sizes="(max-width: 850px) 100vw, 740px"
+      loading="lazy"
+    />
+  );
 }
 
 function formatDate(value: string) {
