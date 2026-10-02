@@ -18,6 +18,7 @@ const routes = [
   "/download",
   "/waitlist",
   "/insights",
+  "/insights/how-we-research",
   "/insights/child-bypassing-parental-controls",
   "/insights/is-chatgpt-for-homework-cheating",
   "/insights/found-porn-on-child-phone",
@@ -145,6 +146,62 @@ test("Community is organised into topic journeys with curated internal links", a
   }
 });
 
+
+test("indexable pages have unique descriptive titles and descriptions", async ({
+  page,
+}) => {
+  const indexable = routes.filter((route) => !route.startsWith("/legal/"));
+  const titles = new Map<string, string>();
+
+  for (const route of indexable) {
+    await page.goto(route);
+    const title = await page.title();
+    const description = await page
+      .locator('meta[name="description"]')
+      .getAttribute("content");
+
+    expect(title.length, route + " title").toBeGreaterThan(20);
+    expect(title.length, route + " title").toBeLessThan(75);
+    expect(description?.length ?? 0, route + " description").toBeGreaterThan(60);
+    expect(description?.length ?? 0, route + " description").toBeLessThan(190);
+    expect(titles.has(title), "Duplicate title: " + title).toBe(false);
+    titles.set(title, route);
+  }
+});
+
+test("Community articles expose trust and hierarchy signals", async ({ page }) => {
+  await page.goto("/insights/what-age-first-phone");
+
+  await expect(
+    page.getByRole("link", { name: "Themis Family Editorial Team" }),
+  ).toHaveAttribute("href", "/insights/how-we-research");
+
+  const crumbs = page.locator(".breadcrumb a, .breadcrumb-part > span:last-child");
+  await expect(crumbs).toHaveCount(3);
+
+  const inlineImages = page.locator(".article-prose img");
+  expect(await inlineImages.count()).toBeGreaterThanOrEqual(2);
+  for (const image of await inlineImages.all()) {
+    await expect(image).toHaveAttribute("loading", "lazy");
+    await expect(image).toHaveAttribute("decoding", "async");
+  }
+
+  const jsonLd = await page
+    .locator('script[type="application/ld+json"]')
+    .allTextContents();
+  expect(jsonLd.some((value) => value.includes('"Article"'))).toBe(true);
+  expect(jsonLd.some((value) => value.includes('"BreadcrumbList"'))).toBe(true);
+});
+
+test("research methodology is publicly linked from Community", async ({ page }) => {
+  await page.goto("/insights");
+  await expect(
+    page.getByRole("link", { name: "Read our research and editorial standards." }),
+  ).toHaveAttribute("href", "/insights/how-we-research");
+  await page.goto("/insights/how-we-research");
+  await expect(page.getByRole("heading", { name: "We show our work." })).toBeVisible();
+});
+
 test("all internal links resolve", async ({ page, request }) => {
   await page.goto("/");
   const links = await page
@@ -265,11 +322,17 @@ test("320px, tablet and large desktop", async ({ page }) => {
     ).toBe(true);
   }
 });
-test("draft metadata and unknown routes", async ({ page }) => {
-  await page.goto("/legal/terms");
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-    "content",
-    /noindex/,
-  );
+test("pre-launch legal pages are crawlable but noindex", async ({ page }) => {
+  for (const route of [
+    "/legal/privacy-policy",
+    "/legal/terms",
+    "/legal/cookies",
+  ]) {
+    await page.goto(route);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /noindex/,
+    );
+  }
   expect((await page.goto("/not-a-real-page"))?.status()).toBe(404);
 });
