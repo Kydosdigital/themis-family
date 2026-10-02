@@ -335,6 +335,7 @@ enum RequestsDemoData {
     static let waitingForReply: RequestPresentation = {
         var value = parentDetail.askingClarification("How much longer do you actually need?")
         value.screenID = "A-009"
+        value.status = ThemisStatus(.waiting, label: "Waiting for reply")
         return value
     }()
 
@@ -350,7 +351,7 @@ enum RequestsDemoData {
         reason: "I’m finishing a conversation with my friends.",
         status: .resolved,
         headline: "Already resolved",
-        message: "Priya’s approval was recorded first. This request cannot be decided again.",
+        message: "Another carer’s approval was recorded first. This request cannot be decided again.",
         lifecycle: .approved,
         deviceApplication: .pending,
         reminder: RequestReminderState(automaticReminderSent: false, manualNudgeSent: false),

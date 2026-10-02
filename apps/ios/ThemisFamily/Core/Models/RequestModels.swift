@@ -138,7 +138,7 @@ struct RequestPresentation: Equatable, Sendable {
         var copy = self
         copy.lifecycle = .awaitingClarificationReply
         copy.status = .needsYourReply
-        copy.headline = "Waiting for (childName)’s reply"
+        copy.headline = "Waiting for \(childName)’s reply"
         copy.message = "The request stays pending. You can still decide without waiting for a reply."
         copy.clarification.question = question
         return copy
@@ -186,10 +186,10 @@ struct RequestPresentation: Equatable, Sendable {
             copy.message = "The request is closed. No temporary access was granted."
         } else if deviceAcknowledged {
             copy.message = remainingRestrictions.isEmpty
-                ? "The approved change is active on (childName)’s device."
+                ? "The approved change is active on \(childName)’s device."
                 : "This request was applied, but another family rule still limits this target."
         } else {
-            copy.message = "The decision is recorded. Waiting for (childName)’s device to confirm the change."
+            copy.message = "The decision is recorded. Waiting for \(childName)’s device to confirm the change."
         }
         return copy
     }

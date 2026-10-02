@@ -55,6 +55,23 @@ final class RequestsTests: XCTestCase {
         XCTAssertEqual(replied.askingClarification("Second question"), replied)
     }
 
+    func testParentWaitingStateUsesChildNameAndParentPerspectiveStatus() {
+        let waiting = RequestsDemoData.waitingForReply
+        XCTAssertEqual(waiting.headline, "Waiting for Maya’s reply")
+        XCTAssertEqual(waiting.status.label, "Waiting for reply")
+        XCTAssertFalse(waiting.headline.contains("(childName)"))
+    }
+
+    func testInteractiveApprovalCopyInterpolatesChildName() {
+        let pending = RequestsDemoData.parentDetail.applyingDecision(.approve, grantedMinutes: 15, deviceAcknowledged: false)
+        XCTAssertTrue(pending.message.contains("Maya’s device"))
+        XCTAssertFalse(pending.message.contains("(childName)"))
+
+        let applied = RequestsDemoData.parentDetail.applyingDecision(.approve, grantedMinutes: 15, deviceAcknowledged: true)
+        XCTAssertTrue(applied.message.contains("Maya’s device"))
+        XCTAssertFalse(applied.message.contains("(childName)"))
+    }
+
     func testClarificationDoesNotBlockAdultDecision() {
         let waiting = RequestsDemoData.waitingForReply
         let decided = waiting.applyingDecision(.approve, grantedMinutes: 15, deviceAcknowledged: false)
