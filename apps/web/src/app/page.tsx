@@ -26,7 +26,8 @@ import {
   ProtectionStates,
 } from "@/components/product";
 import { RuleDemo } from "@/components/rule-demo";
-import { Reveal } from "@/components/reveal";\nimport { ArticleCards } from "@/components/articles";
+import { Reveal } from "@/components/reveal";
+import { ArticleCards } from "@/components/articles";
 import { metadata as makeMetadata } from "@/lib/metadata";
 export const metadata = makeMetadata(
   "Clear digital boundaries",
