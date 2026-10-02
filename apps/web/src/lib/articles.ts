@@ -141,8 +141,7 @@ export const articles = [
       },
     ],
     draft: false,
-  },,
-
+  },
   {
     slug: "how-much-screen-time-is-too-much",
     title: "How much screen time is too much for my child?",
