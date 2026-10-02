@@ -83,7 +83,7 @@ export function PageHero({
   children?: ReactNode;
   breadcrumbs?: { label: string; href?: string }[];
 }) {
-  const crumbs =
+  const crumbs: { label: string; href?: string }[] =
     breadcrumbs ??
     [
       { label: "Home", href: "/" },
