@@ -2,18 +2,19 @@
 
 Status: COMPLETE
 Mode: UI_IMPLEMENTATION
-Current objective: UI-06 Tasks + Deadline Lock is merged and verified. UI-07 Requests is next.
-Active slice: UI-07 Requests - NEXT, NOT STARTED
-Allowed scope: UI-07 only: Q-001 through Q-014 and A-004 through A-011, plus supporting presentation models, deterministic mocks/tests and visual-review states.
+Current objective: UI-07 Requests is merged and verified. UI-08 Free Pass is next.
+Active slice: UI-08 Free Pass - NEXT, NOT STARTED
+Allowed scope: UI-08 only: F-001 through F-010, plus supporting presentation models, deterministic mocks/tests and visual-review states.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
-Completed slice prompt: docs/implementation/CLAUDE_CODE_UI06_TASKS_DEADLINE_LOCK_PROMPT.md
-Last verification: UI-06 final head 043533dfbe832c87fea6cf59486be945866a0798 passed workflow checks, real Xcode build, full XCTest, and Release Simulator visual review. Exact-head screenshots were manually reviewed, including C-005 standard/accessibility, C-011 after the cleared-status correction, Parent approval/application states, and Parent/Child/Teen/Rules/School Access/Onboarding regressions.
-UI-06 review: task submission, fixed 30-minute Approval Grace, overdue/restricted handling, one automatic reminder plus one independent child nudge, Owner/Guardian approval routing, Approved vs Applied, task-owner-only submission, Always Allowed precedence, and multiple-restriction no-false-unlock semantics are represented deterministically without claiming production backend or Apple enforcement.
-UI-06 merge: PR #12 squash-merged to main as b7998fd7e193a34d32bbae74c3a0dbb8bf20302c.
-UI-07 branch: not created yet at this reconciliation checkpoint.
-Next action: Prepare the dedicated UI-07 Requests slice from current main. Before normal iterative UI-07 source pushes, add safe same-branch cancel-in-progress concurrency to the existing expensive iOS CI and visual-review workflows so superseded feature-head macOS runs stop consuming the queue. Then implement Q-001 through Q-014 and A-004 through A-011 only, preserving the approved request semantics and full exact-head verification gates.
+Completed slice prompt: docs/implementation/CLAUDE_CODE_UI07_REQUESTS_PROMPT.md
+Last verification: UI-07 final head dac2edf6e38c56c7e9d232725d7facb6dd2f4c45 passed workflow checks, real Xcode build, full XCTest, and Release Simulator visual review. Exact-head artifact 11217770039 contained all 39 expected screenshots and was manually reviewed, including corrected A-009 parent waiting state, A-010 already-resolved copy, A-011 Approved vs Applying, partial approval, request entry and accessibility states plus existing regressions.
+UI-07 review: structured requests preserve specific target/context, offline Sending truth, one automatic 15-minute reminder, one independent child nudge, exactly one clarification question plus one reply, first-valid-adult-decision-wins, partial approval, context-based expiry, cancellation while pending, Approved vs Applied and no false availability while another restriction remains.
+UI-07 merge: PR #13 squash-merged to main as d2712f50062732ba82ef689170f05c1ce1093ec8.
+Workflow improvement: expensive iOS CI and visual-review workflows now use same-branch cancel-in-progress concurrency; superseded PR and push macOS runs were observed cancelling successfully during UI-07.
+UI-08 branch: not created yet at this reconciliation checkpoint.
+Next action: Prepare the dedicated UI-08 Free Pass slice from current main and implement F-001 through F-010 only. Preserve explicit scope, duration, current override preview, disclosure of a scheduled rule beginning during the pass, and Revocation sent vs Access revoked. Keep final exact-head Xcode/XCTest and visual-review gates.
 
 ## Current readiness
 
@@ -23,7 +24,7 @@ Next action: Prepare the dedicated UI-07 Requests slice from current main. Befor
 - Design System: APPROVED
 - Final prototype: APPROVED
 - Engineering Handoff: APPROVED
-- SwiftUI UI implementation: IN PROGRESS, 6 of 15 slices complete
+- SwiftUI UI implementation: IN PROGRESS, 7 of 15 slices complete
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
@@ -75,6 +76,15 @@ UI-06 Tasks + Deadline Lock:
 - Release Simulator captured UI-06 canonical/accessibility states plus Parent/Child/Teen/Rules/School Access/Onboarding regressions
 - merged through PR #12 as b7998fd7e193a34d32bbae74c3a0dbb8bf20302c
 
+UI-07 Requests:
+- Q-001 through Q-014 and A-004 through A-011
+- extra-time/access request creation, offline Sending, Pending, manual reminder, bounded clarification, approve/partial/decline, expiry, cancellation, already-resolved and Approved vs Applied presentation
+- request-owner submission, Owner/Guardian routing and first-valid-adult-decision-wins represented deterministically
+- exact-head Xcode build and full XCTest passed
+- Release Simulator artifact contained all 39 expected UI-07 and regression screenshots; manual review passed after correcting A-009 interpolation/status and A-010 copy
+- same-branch macOS workflow cancellation proven for both PR Xcode and push visual-review runs
+- merged through PR #13 as d2712f50062732ba82ef689170f05c1ce1093ec8
+
 ## Production gates
 
 Remain unresolved:
@@ -105,12 +115,13 @@ Airtable is not a replacement for the approved requirements or GitHub implementa
 
 ## Next implementation slice
 
-UI-07 Requests:
-- Q-001 through Q-014
-- A-004 through A-011
-- extra-time/access requests, clarification, adult decision, partial approval, decline, expiry and cancellation
-- preserve one automatic 15-minute reminder and one independent child nudge
-- preserve exactly one clarification question plus one reply
-- preserve first-valid-adult-decision-wins and Approved vs Applied where relevant
-- begin with safe same-branch cancel-in-progress concurrency for expensive macOS workflows, without weakening final exact-head verification
-- start only from the verified UI-06 merged main
+UI-08 Free Pass:
+- F-001 through F-010
+- explicit child/target scope, never an implicit blanket default
+- explicit duration and local expiry
+- current override preview before confirmation
+- disclose any scheduled rule that begins during the pass
+- preserve sending/application truth
+- distinguish Revocation sent from Access revoked
+- preserve effective-enforcement semantics when a pass ends or another rule still applies
+- start only from the verified UI-07 merged main

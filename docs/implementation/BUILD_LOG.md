@@ -282,3 +282,39 @@ Process improvement carried forward:
 
 Not changed: production Supabase/backend wiring, Family Controls enforcement, real-device timing/capability gates, unresolved Apple/OQ items, or UI-07 and later product behaviour.
 
+## 2026-10-02: UI-07 Requests
+
+Status: COMPLETE; verified and squash-merged through PR #13.
+
+Source of truth: dedicated UI-07 implementation contract, approved Requests and Exceptions specification, roles/permissions, acceptance criteria, final Claude Design package, Design System and Engineering Handoff.
+
+Work:
+- Implemented Q-001 through Q-014 and A-004 through A-011 as a typed request lifecycle.
+- Added explicit target/context, requested and granted duration, optional authenticated-app reason, Pending/Sending, reminder, clarification, approve/partial/decline, expiry, cancellation, already-resolved and device-application presentation.
+- Replaced the Child/Teen Q-001 placeholder with a real request composer and added the Requests tab history/status surface.
+- Wired Parent Home request items to A-004 request detail and adult decision flow.
+- Preserved one automatic 15-minute reminder plus one independent child nudge, exactly one clarification prompt plus one reply, and first-valid-adult-decision-wins.
+- Preserved context-based request expiry with a four-hour maximum backstop and prevented stale approval from reviving expired requests.
+- Preserved Approved vs Applied and no-false-availability semantics where device acknowledgement or another restriction still matters.
+- Reused the same request lifecycle for schoolwork temporary-access examples rather than creating a second request engine.
+- Added deterministic review roots and RequestsTests for the approved invariants.
+- Added same-branch `cancel-in-progress` concurrency to expensive iOS CI and visual-review workflows.
+
+Review corrections before merge:
+- Added explicit deterministic Q-007, A-005, A-006 and A-007 states rather than leaving their behaviour only implicit.
+- Removed internal screen IDs from user-visible request navigation titles and removed an unnecessary nested Requests navigation stack.
+- Manual screenshot review caught literal `(childName)` copy in the A-009 waiting state and interactive approval strings; fixed interpolation and added regression tests.
+- Corrected A-009 parent-facing status from "Needs your reply" to "Waiting for reply".
+- Replaced an invented guardian name in A-010 with neutral "another carer" copy.
+
+Verification:
+- Final exact head `dac2edf6e38c56c7e9d232725d7facb6dd2f4c45` passed push and PR workflow checks.
+- GitHub iOS build/tests run `36983786221` passed the real Xcode build and full XCTest.
+- GitHub visual-review run `36983782271` passed and produced exact-head artifact `11217770039`.
+- Artifact contained all 39 expected screenshots.
+- Manual review confirmed A-009 "Waiting for Maya’s reply", A-010 already-resolved copy, A-011 Approved vs Applying, Q-011 requested-versus-granted clarity, Q-008 bounded clarification, Q-001 request entry, accessibility layouts and earlier slice regressions.
+- Superseded macOS workflow runs were observed cancelling successfully after the concurrency hardening.
+- PR #13 squash-merged to main as `d2712f50062732ba82ef689170f05c1ce1093ec8`.
+
+Not changed: production backend request persistence/notifications, real Apple enforcement, production temporary-grant application, real-device timing/capability gates, or UI-08 and later product behaviour.
+
