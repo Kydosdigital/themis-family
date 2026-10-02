@@ -16,9 +16,7 @@ import {
   ProtectionStates,
   AgreementStory,
 } from "@/components/product";
-import { JsonLd } from "@/components/json-ld";
 import { site } from "@/lib/config";
-import { publicOrigin } from "@/lib/site-origin";
 const seo: Record<string, { title: string; description: string }> = {
   "for-parents": {
     title: "Parental Controls for Families Without Constant Policing",
@@ -95,7 +93,6 @@ export default async function ContentPage({
   const { slug } = await params;
   const p = pages[slug];
   if (!p) notFound();
-  const origin = publicOrigin();
   return (
     <>
       <PageHero label={p.label} title={p.title} intro={p.intro} />
@@ -175,27 +172,6 @@ export default async function ContentPage({
         )}
       </div>
       <CTA />
-      {origin && (
-        <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              {
-                "@type": "ListItem",
-                position: 1,
-                name: "Home",
-                item: origin,
-              },
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: p.label,
-              },
-            ],
-          }}
-        />
-      )}
     </>
   );
 }
