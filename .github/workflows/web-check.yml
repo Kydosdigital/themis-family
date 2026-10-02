@@ -25,7 +25,7 @@ jobs:
       - name: Rebuild with production SEO origin
         run: npm run build
         env:
-          NEXT_PUBLIC_SITE_URL: https://themis-family.vercel.app
+          SEO_SITE_URL: https://themis-family.vercel.app
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
