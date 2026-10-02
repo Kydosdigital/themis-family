@@ -38,16 +38,32 @@ struct FreePassFlowView: View {
     @State private var presentation: FreePassPresentation
 
     init(initialStep: FreePassFlowStep = .entry) {
-        let canonical = initialStep == .entry || initialStep == .child
-            ? FreePassDraft()
-            : FreePassDemoData.canonicalDraft
+        let hasSelectedChild = ![FreePassFlowStep.entry, .child].contains(initialStep)
+        let initialTargets: Set<FreePassTarget>
+        let initialDuration: Int?
+        let initialPreset: FreePassPreset?
+
+        switch initialStep {
+        case .entry, .child, .scope:
+            initialTargets = []
+            initialDuration = nil
+            initialPreset = nil
+        case .duration:
+            initialTargets = [FreePassTargets.games]
+            initialDuration = nil
+            initialPreset = nil
+        case .preview, .confirm, .active, .revoke, .revocationSent, .revoked:
+            initialTargets = [FreePassTargets.games]
+            initialDuration = 30
+            initialPreset = .games30
+        }
 
         _step = State(initialValue: initialStep)
-        _selectedPreset = State(initialValue: initialStep == .entry || initialStep == .child ? nil : .games30)
-        _selectedChildID = State(initialValue: canonical.childID)
-        _selectedChildName = State(initialValue: canonical.childName)
-        _selectedTargets = State(initialValue: Set(canonical.targets))
-        _durationMinutes = State(initialValue: canonical.durationMinutes)
+        _selectedPreset = State(initialValue: initialPreset)
+        _selectedChildID = State(initialValue: hasSelectedChild ? DemoData.mayaID : nil)
+        _selectedChildName = State(initialValue: hasSelectedChild ? "Maya" : nil)
+        _selectedTargets = State(initialValue: initialTargets)
+        _durationMinutes = State(initialValue: initialDuration)
 
         switch initialStep {
         case .revocationSent:
@@ -250,7 +266,7 @@ struct FreePassFlowView: View {
                 VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
                     Text("Temporarily overridden")
                         .themisFont(.headline)
-                    ForEach(FreePassDemoData.active.overriddenRules) { rule in
+                    ForEach(currentOverrideRules) { rule in
                         disclosureRow(rule, status: .overridden)
                     }
                 }
@@ -260,7 +276,7 @@ struct FreePassFlowView: View {
                 VStack(alignment: .leading, spacing: ThemisSpacing.inline12) {
                     Text("Starts during this pass")
                         .themisFont(.headline)
-                    ForEach(FreePassDemoData.active.scheduledRules) { rule in
+                    ForEach(scheduledRuleDisclosures) { rule in
                         disclosureRow(rule, status: ThemisStatus(.due, label: "Starts later"))
                     }
                     Text("A rule that starts later is disclosed, not silently overridden.")
@@ -300,8 +316,8 @@ struct FreePassFlowView: View {
                     role: .owner,
                     startsAt: FreePassDemoData.start,
                     endLabel: durationMinutes == 30 ? "8:45 PM" : "\(durationMinutes ?? 0) min after activation",
-                    overriddenRules: [FreePassDemoData.bedtime],
-                    scheduledRules: [FreePassDemoData.studyWindDown]
+                    overriddenRules: currentOverrideRules,
+                    scheduledRules: scheduledRuleDisclosures
                 ) {
                     presentation = grant
                     step = .active
@@ -374,6 +390,30 @@ struct FreePassFlowView: View {
             .map(\.name)
             .sorted()
             .joined(separator: ", ")
+    }
+
+    private var currentOverrideRules: [FreePassRuleDisclosure] {
+        [
+            FreePassRuleDisclosure(
+                id: "rule.bedtime.selected-scope",
+                ruleName: "Bedtime",
+                detail: "\(scopeText) is currently limited by the bedtime schedule.",
+                isActiveNow: true,
+                beginsDuringPass: false
+            )
+        ]
+    }
+
+    private var scheduledRuleDisclosures: [FreePassRuleDisclosure] {
+        [
+            FreePassRuleDisclosure(
+                id: "rule.study-wind-down.selected-scope",
+                ruleName: "Study wind-down",
+                detail: "Starts at 8:30 PM. \(scopeText) may pause again then. This Free Pass does not silently override a new scheduled restriction.",
+                isActiveNow: false,
+                beginsDuringPass: true
+            )
+        ]
     }
 
     private func stateCard(_ state: FreePassPresentation) -> some View {
