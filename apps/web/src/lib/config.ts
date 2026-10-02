@@ -111,6 +111,6 @@ export const publicPaths = [
   "/waitlist",
   "/about",
   "/insights",
+  "/insights/how-we-research",
   "/press",
-  "/legal/cookies",
 ];
