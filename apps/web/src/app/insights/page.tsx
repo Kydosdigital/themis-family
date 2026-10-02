@@ -149,27 +149,7 @@ export default function Page() {
                   })),
               },
             }}
-          />
-          <JsonLd
-            data={{
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              itemListElement: [
-                {
-                  "@type": "ListItem",
-                  position: 1,
-                  name: "Home",
-                  item: origin,
-                },
-                {
-                  "@type": "ListItem",
-                  position: 2,
-                  name: "Themis Community",
-                },
-              ],
-            }}
-          />
-        </>
+          />        </>
       )}
     </>
   );
