@@ -47,7 +47,14 @@ export default function RootLayout({
                 "@type": "Organization",
                 "@id": origin + "/#organization",
                 name: site.name,
+                alternateName: "Themis",
                 url: origin,
+                description:
+                  "Themis Family helps families create clearer digital boundaries with visible agreements, requests and privacy-first parental controls.",
+                logo: {
+                  "@type": "ImageObject",
+                  url: origin + "/icon.svg",
+                },
                 ...(site.socials.length ? { sameAs: site.socials.map((s) => s.href) } : {}),
               }}
             />
@@ -58,6 +65,7 @@ export default function RootLayout({
                 "@id": origin + "/#website",
                 url: origin,
                 name: site.name,
+                alternateName: "Themis",
                 inLanguage: "en-GB",
                 publisher: { "@id": origin + "/#organization" },
               }}
