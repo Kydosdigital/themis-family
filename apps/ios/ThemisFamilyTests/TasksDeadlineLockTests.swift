@@ -97,6 +97,38 @@ final class TasksDeadlineLockTests: XCTestCase {
         XCTAssertFalse(applied.mayClaimUnlocked)
     }
 
+    func testAutomaticReminderIntervalIsFifteenMinutes() {
+        XCTAssertEqual(TaskReminderState.automaticReminderMinutes, 15)
+    }
+
+    func testOwnerAndGuardianCanDecideButChildAndTeenCannot() {
+        XCTAssertTrue(TaskApproverRole.owner.canDecide)
+        XCTAssertTrue(TaskApproverRole.guardian.canDecide)
+        XCTAssertFalse(TaskApproverRole.child.canDecide)
+        XCTAssertFalse(TaskApproverRole.teen.canDecide)
+    }
+
+    func testFirstValidAdultDecisionWins() {
+        var ledger = TaskDecisionLedger()
+        XCTAssertEqual(
+            ledger.record(.approve, by: .guardian),
+            .recorded(.approve, by: .guardian)
+        )
+        XCTAssertEqual(
+            ledger.record(.needsWork, by: .owner),
+            .alreadyResolved(.approve, by: .guardian)
+        )
+        XCTAssertEqual(ledger.decision, .approve)
+        XCTAssertEqual(ledger.decidedBy, .guardian)
+    }
+
+    func testUnauthorisedDecisionDoesNotResolveTask() {
+        var ledger = TaskDecisionLedger()
+        XCTAssertEqual(ledger.record(.approve, by: .child), .notAuthorised)
+        XCTAssertNil(ledger.decision)
+        XCTAssertNil(ledger.decidedBy)
+    }
+
     func testManualNudgeAndAutomaticReminderAreIndependent() {
         let neither = TaskReminderState(automaticReminderSent: false, manualNudgeSent: false)
         let automaticOnly = TaskReminderState(automaticReminderSent: true, manualNudgeSent: false)
