@@ -228,3 +228,23 @@ Verification:
 - PR #10 squash-merged to main as `3573bef823c00a5453e119116dd5a437051de830`.
 
 Not changed: production Supabase, Family Controls entitlement, Apple enforcement assumptions, unresolved OQ-30 behaviour, UI-05 or later slices.
+
+
+## 2026-10-02: UI-05 Rules & School Access
+
+Status: COMPLETE; merged through PR #11 after exact-head Xcode/XCTest and Release Simulator review.
+
+Work:
+- Implemented R-001 through R-015 and S-001 through S-005 presentation for Scheduled Rule, Deadline Lock, Earn First, Always Allowed and School Access.
+- Preserved effective-enforcement semantics, the approved 30-minute Deadline Lock grace, absolute Always Allowed precedence, emergency calling floor, platform-agnostic School Access and Apple-owned picker boundaries.
+- Added deterministic Rules and School Access review roots without changing the normal Parent Rules-tab path.
+- Extended visual review to capture Rules and School Access at standard and accessibility text sizes while retaining Parent, Child, Teen and Onboarding regression captures.
+
+Verification:
+- Final exact head `b2ba1c7712c0cc193666c5c104ab1170f07c49a0` passed workflow checks.
+- Real macOS/Xcode build and full XCTest passed.
+- Release Simulator visual-review run `36968064993` passed and produced the expanded review artifact.
+- Rules and School Access standard/accessibility captures were manually inspected and found clean; large-text states remain scrollable and status labels remain readable.
+- PR #11 merged to main as `249b029b77b383531c1144241fe1253c87a70818`.
+
+Not changed: production Family Controls enforcement, backend wiring, OQ-30 Phone/Messages/Maps assumptions or later UI slices.
