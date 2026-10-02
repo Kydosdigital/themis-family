@@ -73,18 +73,30 @@ export function PageHero({
   title,
   intro,
   children,
+  breadcrumbs,
 }: {
   label: string;
   title: string;
   intro: string;
   children?: ReactNode;
+  breadcrumbs?: { label: string; href?: string }[];
 }) {
+  const crumbs =
+    breadcrumbs ??
+    [
+      { label: "Home", href: "/" },
+      { label },
+    ];
+
   return (
     <section className="page-hero container">
       <nav aria-label="Breadcrumb" className="breadcrumb">
-        <Link href="/">Home</Link>
-        <span aria-hidden="true">/</span>
-        <span>{label}</span>
+        {crumbs.map((crumb, index) => (
+          <span className="breadcrumb-part" key={crumb.label}>
+            {index > 0 && <span aria-hidden="true">/</span>}
+            {crumb.href ? <Link href={crumb.href}>{crumb.label}</Link> : <span>{crumb.label}</span>}
+          </span>
+        ))}
       </nav>
       <Eyebrow>{label}</Eyebrow>
       <h1>{title}</h1>
