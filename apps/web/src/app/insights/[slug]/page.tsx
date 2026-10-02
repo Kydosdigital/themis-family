@@ -84,7 +84,31 @@ export default async function Page({
               Evidence checked against the sources linked in this guide.
             </p>
           </div>
+
+          <section className="article-tldr" aria-labelledby="article-tldr-title">
+            <p className="article-tldr-label">TL;DR</p>
+            <h2 id="article-tldr-title">The short version.</h2>
+            <ul>
+              {a.tldr.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
           <Content />
+
+          <section className="article-faqs" aria-labelledby="article-faq-title">
+            <p className="article-tldr-label">Quick answers</p>
+            <h2 id="article-faq-title">Frequently asked questions.</h2>
+            <div className="article-faq-list">
+              {a.faqs.map((faq) => (
+                <details key={faq.question}>
+                  <summary>{faq.question}</summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
         </article>
 
         <aside className="article-principle" aria-label="Themis editorial principle">
@@ -119,6 +143,23 @@ export default async function Page({
             author: { "@type": "Organization", name: "Themis Family" },
             publisher: { "@type": "Organization", name: "Themis Family" },
             mainEntityOfPage: origin + "/insights/" + slug,
+          }}
+        />
+      )}
+
+      {!a.draft && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: a.faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
           }}
         />
       )}
