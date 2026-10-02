@@ -5,7 +5,7 @@ import { submissionsEnabled } from "@/lib/services";
 import { site } from "@/lib/config";
 import { metadata as meta } from "@/lib/metadata";
 export const metadata = meta(
-  "Themis Family Support: Setup, Rules & Privacy",
+  "Support: Setup, Rules & Privacy",
   "Get Themis Family help with setup, device pairing, screen-time rules, privacy, school access, requests and protection status.",
   "/support",
 );
