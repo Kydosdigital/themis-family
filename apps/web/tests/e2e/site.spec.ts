@@ -147,7 +147,7 @@ test("Community is organised into topic journeys with curated internal links", a
 });
 
 
-test("indexable pages have unique descriptive titles and descriptions", async ({
+test("indexable pages have unique search metadata and canonicals", async ({
   page,
 }) => {
   const indexable = routes.filter((route) => !route.startsWith("/legal/"));
@@ -159,6 +159,12 @@ test("indexable pages have unique descriptive titles and descriptions", async ({
     const description = await page
       .locator('meta[name="description"]')
       .getAttribute("content");
+    const canonical = await page
+      .locator('link[rel="canonical"]')
+      .getAttribute("href");
+    const robots = await page
+      .locator('meta[name="robots"]')
+      .getAttribute("content");
 
     expect(title.length, route + " title").toBeGreaterThan(20);
     expect(title.length, route + " title").toBeLessThan(75);
@@ -166,6 +172,14 @@ test("indexable pages have unique descriptive titles and descriptions", async ({
     expect(description?.length ?? 0, route + " description").toBeLessThan(190);
     expect(titles.has(title), "Duplicate title: " + title).toBe(false);
     titles.set(title, route);
+
+    expect(canonical, route + " canonical").toBeTruthy();
+    const canonicalUrl = new URL(canonical!);
+    expect(canonicalUrl.origin).toBe("https://themis-family.vercel.app");
+    expect(canonicalUrl.pathname).toBe(route);
+
+    expect(robots, route + " robots").toContain("index");
+    expect(robots, route + " robots").toContain("follow");
   }
 });
 
@@ -200,6 +214,50 @@ test("research methodology is publicly linked from Community", async ({ page }) 
   ).toHaveAttribute("href", "/insights/how-we-research");
   await page.goto("/insights/how-we-research");
   await expect(page.getByRole("heading", { name: "We show our work." })).toBeVisible();
+});
+
+
+test("robots and sitemap expose only indexable canonical URLs", async ({ request }) => {
+  const robots = await request.get("/robots.txt");
+  expect(robots.status()).toBe(200);
+  const robotsText = await robots.text();
+  expect(robotsText).toContain("Allow: /");
+  expect(robotsText).toContain("Disallow: /api/");
+  expect(robotsText).not.toContain("/legal/privacy-policy");
+  expect(robotsText).toContain(
+    "Sitemap: https://themis-family.vercel.app/sitemap.xml",
+  );
+
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.status()).toBe(200);
+  const xml = await sitemap.text();
+  expect(xml).toContain(
+    "https://themis-family.vercel.app/insights/how-we-research",
+  );
+  expect(xml).toContain(
+    "https://themis-family.vercel.app/insights/what-age-first-phone",
+  );
+  expect(xml).not.toContain("/legal/privacy-policy");
+  expect(xml).not.toContain("/legal/terms");
+  expect(xml).not.toContain("/legal/cookies");
+});
+
+test("retired Community URLs permanently redirect to current destinations", async ({
+  request,
+}) => {
+  const redirects: Record<string, string> = {
+    "/insights/a-clearer-homework-agreement":
+      "/insights/child-bypassing-parental-controls",
+    "/insights/room-for-an-exception": "/rules",
+    "/insights/privacy-is-part-of-the-conversation":
+      "/insights/should-i-read-my-childs-text-messages",
+  };
+
+  for (const [source, destination] of Object.entries(redirects)) {
+    const response = await request.get(source, { maxRedirects: 0 });
+    expect(response.status(), source).toBe(308);
+    expect(response.headers().location).toBe(destination);
+  }
 });
 
 test("all internal links resolve", async ({ page, request }) => {
