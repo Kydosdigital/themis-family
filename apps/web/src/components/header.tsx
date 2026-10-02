@@ -131,7 +131,7 @@ export function Header() {
               </div>
             ))}
             <Link href="/insights" onClick={close}>
-              Insights
+              Community
             </Link>
             <Link href="/pricing" onClick={close}>
               Pricing
