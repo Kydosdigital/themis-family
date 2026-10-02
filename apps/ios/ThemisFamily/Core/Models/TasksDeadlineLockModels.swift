@@ -33,6 +33,8 @@ enum TaskRestrictionReason: String, CaseIterable, Hashable, Sendable {
 }
 
 struct TaskReminderState: Equatable, Sendable {
+    static let automaticReminderMinutes = 15
+
     var automaticReminderSent: Bool
     var manualNudgeSent: Bool
 
@@ -79,9 +81,9 @@ struct TaskDeadlineLockPresentation: Equatable, Sendable {
             headline: deviceAcknowledged ? "Applied on device" : "Approved",
             message: deviceAcknowledged
                 ? (remainingRestrictions.isEmpty
-                    ? "The homework restriction is cleared on \\(childName)’s iPhone."
+                    ? "The homework restriction is cleared on \(childName)’s iPhone."
                     : "Homework is cleared. Another family rule still keeps some access paused.")
-                : "Approval is recorded. Waiting for \\(childName)’s iPhone to confirm the change.",
+                : "Approval is recorded. Waiting for \(childName)’s iPhone to confirm the change.",
             submission: .recorded,
             decision: .approved,
             deadlinePhase: remainingRestrictions.contains(.homeworkDeadline) ? .restricted : .cleared,
@@ -106,7 +108,7 @@ struct TaskDeadlineLockPresentation: Equatable, Sendable {
             deadlineText: deadlineText,
             status: .overdue,
             headline: "Needs more work",
-            message: "The homework Deadline Lock is active now. \\(childName) can submit again when ready.",
+            message: "The homework Deadline Lock is active now. \(childName) can submit again when ready.",
             submission: .recorded,
             decision: .needsWork,
             deadlinePhase: .restricted,
