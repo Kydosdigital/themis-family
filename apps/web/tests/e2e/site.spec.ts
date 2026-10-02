@@ -74,6 +74,28 @@ for (const route of routes)
       fullPage: true,
     });
   });
+
+test("Community guides include TLDR, FAQs and structured FAQ data", async ({
+  page,
+}) => {
+  for (const route of [
+    "/insights/child-bypassing-parental-controls",
+    "/insights/is-chatgpt-for-homework-cheating",
+    "/insights/found-porn-on-child-phone",
+  ]) {
+    await page.goto(route);
+    await expect(page.getByText("TL;DR", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Frequently asked questions." }),
+    ).toBeVisible();
+    await expect(page.locator(".article-faq-list details")).toHaveCount(4);
+    const jsonLd = await page
+      .locator('script[type="application/ld+json"]')
+      .allTextContents();
+    expect(jsonLd.some((value) => value.includes('"FAQPage"'))).toBe(true);
+  }
+});
+
 test("all internal links resolve", async ({ page, request }) => {
   await page.goto("/");
   const links = await page
