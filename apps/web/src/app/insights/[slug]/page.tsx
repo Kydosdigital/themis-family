@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { articles, articleContent } from "@/lib/articles";
+import { articles, articleContent, relatedArticleSlugs } from "@/lib/articles";
 import { ArticleCards } from "@/components/articles";
 import { PageHero, CTA } from "@/components/ui";
 import { JsonLd } from "@/components/json-ld";
@@ -43,6 +44,7 @@ export default async function Page({
 
   const { default: Content } = await articleContent(slug);
   const origin = publicOrigin();
+  const related = relatedArticleSlugs[slug] ?? [];
 
   return (
     <>
@@ -122,9 +124,24 @@ export default async function Page({
       </div>
 
       <div className="container">
-        <section className="section">
-          <h2 style={{ marginBottom: 35 }}>Keep reading.</h2>
-          <ArticleCards exclude={slug} />
+        <section
+          className="section article-related"
+          aria-labelledby="article-related-heading"
+        >
+          <p className="article-tldr-label">Continue this topic</p>
+          <div className="article-related-heading">
+            <div>
+              <h2 id="article-related-heading">The next questions usually connect.</h2>
+              <p>
+                These guides pick up the parts of this issue parents most often
+                need to think about next.
+              </p>
+            </div>
+            <Link className="text-link" href="/insights">
+              Browse all Community guides ↗
+            </Link>
+          </div>
+          <ArticleCards slugs={related} exclude={slug} limit={3} />
         </section>
       </div>
 
