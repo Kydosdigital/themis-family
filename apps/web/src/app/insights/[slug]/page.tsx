@@ -205,34 +205,6 @@ export default async function Page({
         />
       )}
 
-      {!a.draft && origin && (
-        <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              {
-                "@type": "ListItem",
-                position: 1,
-                name: "Home",
-                item: origin,
-              },
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: "Themis Community",
-                item: origin + "/insights",
-              },
-              {
-                "@type": "ListItem",
-                position: 3,
-                name: a.title,
-              },
-            ],
-          }}
-        />
-      )}
-
       {!a.draft && (
         <JsonLd
           data={{
