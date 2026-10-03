@@ -41,6 +41,15 @@ final class AppContainer: ObservableObject {
         case freePassRevoke = "Free Pass Revoke"
         case freePassRevocationSent = "Free Pass Revocation Sent"
         case freePassRevoked = "Free Pass Revoked"
+        case childDetail = "Child Detail"
+        case protectionProtected = "Protection Protected"
+        case protectionSyncPending = "Protection Sync Pending"
+        case protectionOffline = "Protection Device Offline"
+        case protectionAttention = "Protection Needs Attention"
+        case protectionUnavailable = "Protection Unavailable"
+        case protectionRecovery = "Protection Recovery"
+        case protectionPermissionRevoked = "Protection Permission Revoked"
+        case protectionRecovered = "Protection Recovered"
 
         var id: String { rawValue }
     }
@@ -124,6 +133,15 @@ final class AppContainer: ObservableObject {
         case "free-pass-revoke": return .freePassRevoke
         case "free-pass-revocation-sent": return .freePassRevocationSent
         case "free-pass-revoked": return .freePassRevoked
+        case "child-detail": return .childDetail
+        case "protection-protected": return .protectionProtected
+        case "protection-sync-pending": return .protectionSyncPending
+        case "protection-offline": return .protectionOffline
+        case "protection-attention": return .protectionAttention
+        case "protection-unavailable": return .protectionUnavailable
+        case "protection-recovery": return .protectionRecovery
+        case "protection-permission-revoked": return .protectionPermissionRevoked
+        case "protection-recovered": return .protectionRecovered
         default: return nil
         }
     }
