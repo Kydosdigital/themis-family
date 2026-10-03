@@ -1,20 +1,20 @@
 # Themis Family Implementation State
 
-Status: COMPLETE
+Status: IN_PROGRESS
 Mode: UI_IMPLEMENTATION
-Current objective: UI-07 Requests is merged and verified. UI-08 Free Pass is next.
-Active slice: UI-08 Free Pass - NEXT, NOT STARTED
-Allowed scope: UI-08 only: F-001 through F-010, plus supporting presentation models, deterministic mocks/tests and visual-review states.
+Current objective: UI-08 Free Pass is merged and verified. UI-09 Protection is now the active sequential slice.
+Active slice: UI-09 Protection - STARTING
+Allowed scope: UI-09 only: P-029 child detail, the P-030 five-state protection family, P-031 recovery, permission-revoked presentation, supporting presentation models, deterministic mocks/tests and visual-review states.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
 Implementation review: docs/implementation/ENGINEERING_HANDOFF_FINAL_REVIEW.md
-Completed slice prompt: docs/implementation/CLAUDE_CODE_UI07_REQUESTS_PROMPT.md
-Last verification: UI-07 final head dac2edf6e38c56c7e9d232725d7facb6dd2f4c45 passed workflow checks, real Xcode build, full XCTest, and Release Simulator visual review. Exact-head artifact 11217770039 contained all 39 expected screenshots and was manually reviewed, including corrected A-009 parent waiting state, A-010 already-resolved copy, A-011 Approved vs Applying, partial approval, request entry and accessibility states plus existing regressions.
-UI-07 review: structured requests preserve specific target/context, offline Sending truth, one automatic 15-minute reminder, one independent child nudge, exactly one clarification question plus one reply, first-valid-adult-decision-wins, partial approval, context-based expiry, cancellation while pending, Approved vs Applied and no false availability while another restriction remains.
-UI-07 merge: PR #13 squash-merged to main as d2712f50062732ba82ef689170f05c1ce1093ec8.
+Completed slice prompt: docs/implementation/CLAUDE_CODE_UI08_FREE_PASS_PROMPT.md
+Last verification: UI-08 final head 05db4fcc83920b3c57c0a5107aabfec592f8e38e passed real Xcode build, full XCTest and Release Simulator visual review. Artifact 11227053593 contained F-001 through F-010 plus accessibility states and was manually reviewed cleanly.
+UI-08 review: explicit child/scope/duration is preserved; active override and scheduled-rule disclosure are clear; expiry remains device-local; Revocation sent is distinct from Access revoked; Always Allowed and emergency communication are not Free Pass targets.
+UI-08 merge: PR #16 squash-merged to main as 007f3d867d80aac2475020d5098b92307be7d3e6.
 Workflow improvement: expensive iOS CI and visual-review workflows now use same-branch cancel-in-progress concurrency; superseded PR and push macOS runs were observed cancelling successfully during UI-07.
-UI-08 branch: not created yet at this reconciliation checkpoint.
-Next action: Prepare the dedicated UI-08 Free Pass slice from current main and implement F-001 through F-010 only. Preserve explicit scope, duration, current override preview, disclosure of a scheduled rule beginning during the pass, and Revocation sent vs Access revoked. Keep final exact-head Xcode/XCTest and visual-review gates.
+UI-09 branch: to be created from reconciled main.
+Next action: Create the dedicated UI-09 Protection branch from reconciled main, implement P-029/P-030/P-031 families and permission-revoked states only, then run exact-head Xcode/XCTest and visual review before merge.
 
 ## Current readiness
 
@@ -24,7 +24,7 @@ Next action: Prepare the dedicated UI-08 Free Pass slice from current main and i
 - Design System: APPROVED
 - Final prototype: APPROVED
 - Engineering Handoff: APPROVED
-- SwiftUI UI implementation: IN PROGRESS, 7 of 15 slices complete
+- SwiftUI UI implementation: IN PROGRESS, 8 of 15 slices complete
 - Production Apple enforcement: NO, spike-gated
 - Public launch: NO
 
@@ -115,13 +115,13 @@ Airtable is not a replacement for the approved requirements or GitHub implementa
 
 ## Next implementation slice
 
-UI-08 Free Pass:
-- F-001 through F-010
-- explicit child/target scope, never an implicit blanket default
-- explicit duration and local expiry
-- current override preview before confirmation
-- disclose any scheduled rule that begins during the pass
-- preserve sending/application truth
-- distinguish Revocation sent from Access revoked
-- preserve effective-enforcement semantics when a pass ends or another rule still applies
-- start only from the verified UI-07 merged main
+UI-09 Protection:
+- P-029 Child detail
+- P-030 Protected / Sync Pending / Device Offline / Needs Attention / Protection Unavailable
+- P-031 Fix protection recovery
+- permission-revoked presentation states
+- always show honest status and Last verified where designed
+- never show stale state as Protected
+- do not invent an OQ-19 staleness threshold
+- preserve current production Apple/backend gates
+- start only from the verified UI-08 merged main
