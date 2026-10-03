@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Analytics } from "@/components/analytics";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { site } from "@/lib/config";
 import { publicOrigin } from "@/lib/site-origin";
 import { JsonLd } from "@/components/json-ld";
@@ -39,6 +40,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <Analytics />
+        <VercelAnalytics />
         {origin && (
           <>
             <JsonLd
