@@ -78,7 +78,13 @@ struct ChildProtectionDetailView: View {
     }
 }
 
-private struct ChildDetailSummaryRow: Identifiable {\n    let id: String\n    let title: String\n    let subtitle: String\n}\n\nstruct ChildDetailView: View {
+private struct ChildDetailSummaryRow: Identifiable {
+    let id: String
+    let title: String
+    let subtitle: String
+}
+
+struct ChildDetailView: View {
     var openProtection: () -> Void = {}
 
     var body: some View {
@@ -98,12 +104,18 @@ private struct ChildDetailSummaryRow: Identifiable {\n    let id: String\n    le
                 }
                 .buttonStyle(.plain)
 
-                ThemisGroupedSection("Current agreements", data: ["Homework due 6:00 PM", "Social apps pause 10:00 PM"]) { item in
-                    ThemisRow(title: item, subtitle: item.hasPrefix("Homework") ? "School days" : "Every night")
+                ThemisGroupedSection("Current agreements", data: [
+                    ChildDetailSummaryRow(id: "homework", title: "Homework due 6:00 PM", subtitle: "School days"),
+                    ChildDetailSummaryRow(id: "social", title: "Social apps pause 10:00 PM", subtitle: "Every night")
+                ]) { item in
+                    ThemisRow(title: item.title, subtitle: item.subtitle)
                 }
 
-                ThemisGroupedSection("Needs you", data: ["Homework review", "Extra time request"]) { item in
-                    ThemisRow(title: item, subtitle: item == "Homework review" ? "Waiting for Sarah" : "Pending")
+                ThemisGroupedSection("Needs you", data: [
+                    ChildDetailSummaryRow(id: "review", title: "Homework review", subtitle: "Waiting for Sarah"),
+                    ChildDetailSummaryRow(id: "extra-time", title: "Extra time request", subtitle: "Pending")
+                ]) { item in
+                    ThemisRow(title: item.title, subtitle: item.subtitle)
                 }
             }
             .padding(ThemisSpacing.screen)
