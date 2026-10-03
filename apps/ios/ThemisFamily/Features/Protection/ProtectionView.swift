@@ -78,7 +78,7 @@ struct ChildProtectionDetailView: View {
     }
 }
 
-struct ChildDetailView: View {
+private struct ChildDetailSummaryRow: Identifiable {\n    let id: String\n    let title: String\n    let subtitle: String\n}\n\nstruct ChildDetailView: View {
     var openProtection: () -> Void = {}
 
     var body: some View {
