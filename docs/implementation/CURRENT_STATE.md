@@ -1,9 +1,9 @@
 # Themis Family Implementation State
 
-Status: IN_PROGRESS
+Status: COMPLETE
 Mode: UI_IMPLEMENTATION
 Current objective: UI-08 Free Pass is merged and verified. UI-09 Protection is now the active sequential slice.
-Active slice: UI-09 Protection - STARTING
+Active slice: UI-09 Protection - NEXT, BRANCH PREPARED
 Allowed scope: UI-09 only: P-029 child detail, the P-030 five-state protection family, P-031 recovery, permission-revoked presentation, supporting presentation models, deterministic mocks/tests and visual-review states.
 Behaviour source of truth: approved requirements baseline.
 Visual/interaction source of truth: final Claude Design prototype, final Design System, and Engineering Handoff.
@@ -13,7 +13,7 @@ Last verification: UI-08 final head 05db4fcc83920b3c57c0a5107aabfec592f8e38e pas
 UI-08 review: explicit child/scope/duration is preserved; active override and scheduled-rule disclosure are clear; expiry remains device-local; Revocation sent is distinct from Access revoked; Always Allowed and emergency communication are not Free Pass targets.
 UI-08 merge: PR #16 squash-merged to main as 007f3d867d80aac2475020d5098b92307be7d3e6.
 Workflow improvement: expensive iOS CI and visual-review workflows now use same-branch cancel-in-progress concurrency; superseded PR and push macOS runs were observed cancelling successfully during UI-07.
-UI-09 branch: to be created from reconciled main.
+UI-09 branch: feat/ui-09-protection, prepared from reconciled main before implementation begins.
 Next action: Create the dedicated UI-09 Protection branch from reconciled main, implement P-029/P-030/P-031 families and permission-revoked states only, then run exact-head Xcode/XCTest and visual review before merge.
 
 ## Current readiness
