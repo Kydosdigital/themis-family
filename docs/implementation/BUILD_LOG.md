@@ -318,3 +318,30 @@ Verification:
 
 Not changed: production backend request persistence/notifications, real Apple enforcement, production temporary-grant application, real-device timing/capability gates, or UI-08 and later product behaviour.
 
+
+
+## 2026-10-03: UI-08 Free Pass
+
+Status: COMPLETE; exact-head verified, manually reviewed and merged.
+
+Work:
+- Implemented F-001 through F-010 as an explicit Free Pass flow for Parent/Guardian.
+- Preserved explicit child, scope and duration selection with no silent blanket default.
+- Added current-rule override preview and disclosure when a scheduled restriction begins during the pass.
+- Added active pass scope/end-time presentation and early revoke.
+- Preserved device-application truth: "Revocation sent" remains distinct from "Access revoked".
+- Kept Always Allowed and emergency communication outside Free Pass override scope.
+- Added deterministic mocks, tests and visual-review roots without claiming production Apple enforcement or backend delivery.
+
+Verification:
+- Final feature head: `05db4fcc83920b3c57c0a5107aabfec592f8e38e`.
+- iOS build and full XCTest: run `37008093676`, success.
+- Claude workflow checks: run `37008093611`, success.
+- Release Simulator visual review: run `37008088999`, success.
+- Visual artifact `11227053593` contained F-001 through F-010, accessibility states and regressions.
+- Manual screenshot review passed, including no-default setup, override/scheduled-rule disclosure, active state, revoke confirmation, "Revocation sent", "Access revoked" and large-text scrolling.
+- PR #16 squash-merged to main as `007f3d867d80aac2475020d5098b92307be7d3e6`.
+
+Next:
+- UI-09 Protection: P-029, P-030 five-state family, P-031 recovery and permission-revoked states.
+- Keep protection status evidence honest, show Last verified where designed, and do not invent an OQ-19 staleness threshold.
