@@ -112,6 +112,36 @@ struct RootView: View {
         case .requestApprovalPending:
             NavigationStack { RequestStateView(state: RequestsDemoData.approvedPendingDevice, surfaceAudience: .parent) }
                 .demoControls()
+        case .freePassEntry:
+            NavigationStack { FreePassFlowView(initialStep: .entry) }
+                .demoControls()
+        case .freePassChild:
+            NavigationStack { FreePassFlowView(initialStep: .child) }
+                .demoControls()
+        case .freePassScope:
+            NavigationStack { FreePassFlowView(initialStep: .scope) }
+                .demoControls()
+        case .freePassDuration:
+            NavigationStack { FreePassFlowView(initialStep: .duration) }
+                .demoControls()
+        case .freePassPreview:
+            NavigationStack { FreePassFlowView(initialStep: .preview) }
+                .demoControls()
+        case .freePassConfirm:
+            NavigationStack { FreePassFlowView(initialStep: .confirm) }
+                .demoControls()
+        case .freePassActive:
+            NavigationStack { FreePassFlowView(initialStep: .active) }
+                .demoControls()
+        case .freePassRevoke:
+            NavigationStack { FreePassFlowView(initialStep: .revoke) }
+                .demoControls()
+        case .freePassRevocationSent:
+            NavigationStack { FreePassFlowView(initialStep: .revocationSent) }
+                .demoControls()
+        case .freePassRevoked:
+            NavigationStack { FreePassFlowView(initialStep: .revoked) }
+                .demoControls()
         case .onboarding:
             OnboardingView(
                 initialStep: container.onboardingInitialStep ?? .launch,
