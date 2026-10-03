@@ -41,6 +41,20 @@ struct ParentHomeView: View {
                 ParentRequestFlowView(initial: .detail)
             case "F-001":
                 FreePassFlowView()
+            case "P-029":
+                ChildDetailView {
+                    destination = ParentHomeRoute(screenID: "P-030 · Protected", title: "Sam’s protection")
+                }
+            case "P-030 · Protected":
+                ProtectionFlowView(initial: ProtectionDemoData.protected)
+            case "P-030 · Sync":
+                ProtectionFlowView(initial: ProtectionDemoData.syncPending)
+            case "P-030 · Offline":
+                ProtectionFlowView(initial: ProtectionDemoData.deviceOffline)
+            case "P-030 · Attention":
+                ProtectionFlowView(initial: ProtectionDemoData.needsAttention)
+            case "P-030 · Unavailable":
+                ProtectionFlowView(initial: ProtectionDemoData.unavailable)
             default:
                 ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
             }
