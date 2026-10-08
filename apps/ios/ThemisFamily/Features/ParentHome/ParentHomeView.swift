@@ -46,15 +46,15 @@ struct ParentHomeView: View {
                     destination = ParentHomeRoute(screenID: "P-030 · Protected", title: "Sam’s protection")
                 }
             case "P-030 · Protected":
-                ProtectionFlowView(initial: ProtectionDemoData.protected)
+                protectionDestination(route, status: .protected)
             case "P-030 · Sync":
-                ProtectionFlowView(initial: ProtectionDemoData.syncPending)
+                protectionDestination(route, status: .syncPending)
             case "P-030 · Offline":
-                ProtectionFlowView(initial: ProtectionDemoData.deviceOffline)
+                protectionDestination(route, status: .deviceOffline)
             case "P-030 · Attention":
-                ProtectionFlowView(initial: ProtectionDemoData.needsAttention)
+                protectionDestination(route, status: .needsAttention)
             case "P-030 · Unavailable":
-                ProtectionFlowView(initial: ProtectionDemoData.unavailable)
+                protectionDestination(route, status: .protectionUnavailable)
             default:
                 ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
             }
@@ -62,6 +62,12 @@ struct ParentHomeView: View {
         .task(id: scenario) {
             await viewModel.load(scenario: scenario)
         }
+    }
+
+    private func protectionDestination(_ route: ParentHomeRoute, status: ProtectionStatus) -> some View {
+        let childName = route.childName ?? "Sam"
+        let presentation = ProtectionDemoData.forChild(ProtectionDemoData.state(for: status), name: childName)
+        return ProtectionFlowView(initial: presentation, childName: childName)
     }
 
     private func open(_ route: ParentHomeRoute) {
