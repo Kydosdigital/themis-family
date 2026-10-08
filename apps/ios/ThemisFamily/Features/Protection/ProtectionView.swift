@@ -80,8 +80,10 @@ struct ChildProtectionDetailView: View {
                 .padding()
                 .background(.background, in: RoundedRectangle(cornerRadius: 20))
 
-                if presentation.status == .syncPending || presentation.status == .deviceOffline {
-                    InlineBanner(.info, "Existing rules stay on the child device using its last confirmed local plan. This status does not mean restrictions were cleared.")
+                if presentation.status == .syncPending {
+                    InlineBanner(.info, "The last confirmed local plan may continue while valid. New changes are waiting for device confirmation; this status does not mean restrictions were cleared.")
+                } else if presentation.status == .deviceOffline {
+                    InlineBanner(.info, "The last-synced protection plan may continue while valid, but Themis cannot confirm the current device state. Offline does not mean restrictions were cleared.")
                 }
 
                 if presentation.recoveryAvailable {
@@ -159,14 +161,14 @@ struct ProtectionRecoveryView: View {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
                 PageHeader(title: step == 0 ? "Fix protection" : "Check protection", subtitle: "\(childName)’s iPhone")
                 if step == 0 {
-                    Text("Themis needs Screen Time permission on \(childName)’s iPhone before protection can be confirmed.")
-                    Text("Continue to the system permission flow. Themis will only show Protected after the device confirms protection again.")
+                    Text("Open Themis on \(childName)’s iPhone and follow the Apple permission steps.")
+                    Text("Once those steps are complete, return here. Themis will only show Protected after the device confirms protection again.")
                         .foregroundStyle(.secondary)
-                    Button("Continue to system settings") { step = 1 }
+                    Button("Continue") { step = 1 }
                         .buttonStyle(.borderedProminent)
                 } else {
                     InlineBanner(.info, "Waiting for confirmation from \(childName)’s iPhone")
-                    Text("Returning from system settings does not by itself mean protection is active.")
+                    Text("Returning here does not by itself mean protection is active.")
                         .foregroundStyle(.secondary)
                     #if DEBUG
                     // Only debug demo builds may simulate a device acknowledgement.
