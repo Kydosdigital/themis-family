@@ -8,7 +8,16 @@ struct ProtectionPresentation: Equatable, Sendable {
     let recoveryAvailable: Bool
 
     var statusText: String { status.title }
-    var evidenceText: String { "Last verified: " + evidence.text.replacingOccurrences(of: "Verified ", with: "") }
+    var evidenceText: String {
+        switch evidence {
+        case .verified:
+            return "Last verified: " + evidence.text.replacingOccurrences(of: "Verified ", with: "")
+        case .noticed:
+            return "Issue noticed: " + evidence.text.replacingOccurrences(of: "Noticed ", with: "")
+        case .notActiveYet:
+            return "Protection not active yet"
+        }
+    }
 
     var isProtected: Bool {
         guard status == .protected else { return false }
