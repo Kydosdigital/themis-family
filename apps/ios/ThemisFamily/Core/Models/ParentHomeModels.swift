@@ -209,6 +209,8 @@ enum ParentQuickAction: String, CaseIterable, Identifiable, Sendable {
 struct ParentHomeRoute: Hashable, Sendable {
     let screenID: String
     let title: String
+    /// Child identity for protection routes; never infer identity from display copy.
+    var childName: String? = nil
 
     static let actionCentre = ParentHomeRoute(screenID: "A-001", title: "Action Centre")
 }
