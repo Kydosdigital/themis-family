@@ -85,6 +85,29 @@ final class ProtectionTests: XCTestCase {
         XCTAssertFalse(ProtectionDemoData.needsAttention.evidenceText.contains("Last verified"))
     }
 
+
+    func testMayaProtectionRouteKeepsHerDeviceIdentity() {
+        let maya = ParentHomeDemoData.canonical().children.first { $0.firstName == "Maya" }
+        XCTAssertEqual(maya?.destination?.childName, "Maya")
+
+        let pending = ProtectionDemoData.forChild(ProtectionDemoData.syncPending, name: "Maya")
+        XCTAssertEqual(pending.status, .syncPending)
+        XCTAssertEqual(pending.evidence, .verified(minutesAgo: 14))
+        XCTAssertFalse(pending.explanation.contains("Sam’s iPhone"))
+
+        let offline = ProtectionDemoData.forChild(ProtectionDemoData.deviceOffline, name: "Maya")
+        XCTAssertEqual(offline.status, .deviceOffline)
+        XCTAssertTrue(offline.explanation.contains("Maya’s iPhone"))
+        XCTAssertFalse(offline.explanation.contains("Sam’s iPhone"))
+    }
+
+    func testChildSpecificRecoveryPreservesVerificationEvidence() {
+        let recovered = ProtectionDemoData.forChild(ProtectionDemoData.recovered, name: "Maya")
+        XCTAssertTrue(recovered.isProtected)
+        XCTAssertEqual(recovered.evidence, .verified(minutesAgo: 0))
+        XCTAssertTrue(recovered.explanation.contains("Maya’s iPhone"))
+    }
+
     func testNoVerificationEvidenceDoesNotInventLastVerified() {
         let presentation = ProtectionPresentation(
             status: .protectionUnavailable,
