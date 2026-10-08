@@ -35,6 +35,18 @@ enum ProtectionDemoData {
     static let permissionRevoked = ProtectionPresentation(status: .protectionUnavailable, evidence: .noticed(minutesAgo: 0), explanation: "Screen Time permission is no longer available. Re-authorise protection to continue.", restrictionsRemainInEffect: false, recoveryAvailable: true)
     static let recovered = ProtectionPresentation(status: .protected, evidence: .verified(minutesAgo: 0), explanation: "Protection has been confirmed again on Sam’s iPhone.", restrictionsRemainInEffect: true, recoveryAvailable: false)
 
+    /// Child-specific review copy must never attribute Maya's device to Sam.
+    static func forChild(_ presentation: ProtectionPresentation, name: String) -> ProtectionPresentation {
+        guard name != "Sam" else { return presentation }
+        return ProtectionPresentation(
+            status: presentation.status,
+            evidence: presentation.evidence,
+            explanation: presentation.explanation.replacingOccurrences(of: "Sam’s iPhone", with: "\(name)’s iPhone"),
+            restrictionsRemainInEffect: presentation.restrictionsRemainInEffect,
+            recoveryAvailable: presentation.recoveryAvailable
+        )
+    }
+
     static func state(for status: ProtectionStatus) -> ProtectionPresentation {
         switch status {
         case .protected: return protected
@@ -48,12 +60,13 @@ enum ProtectionDemoData {
 
 struct ChildProtectionDetailView: View {
     let presentation: ProtectionPresentation
+    var childName: String = "Sam"
     var onFix: () -> Void = {}
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
-                PageHeader(title: "Sam’s protection", subtitle: "iPhone")
+                PageHeader(title: "\(childName)’s protection", subtitle: "iPhone")
 
                 VStack(alignment: .leading, spacing: ThemisSpacing.inline8) {
                     Label(presentation.statusText, systemImage: presentation.status.symbolName)
@@ -138,24 +151,28 @@ struct ChildDetailView: View {
 
 struct ProtectionRecoveryView: View {
     @State private var step = 0
+    var childName: String = "Sam"
     var onRecovered: () -> Void = {}
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: ThemisSpacing.block) {
-                PageHeader(title: step == 0 ? "Fix protection" : "Check protection", subtitle: "Sam’s iPhone")
+                PageHeader(title: step == 0 ? "Fix protection" : "Check protection", subtitle: "\(childName)’s iPhone")
                 if step == 0 {
-                    Text("Themis needs Screen Time permission on Sam’s iPhone before protection can be confirmed.")
+                    Text("Themis needs Screen Time permission on \(childName)’s iPhone before protection can be confirmed.")
                     Text("Continue to the system permission flow. Themis will only show Protected after the device confirms protection again.")
                         .foregroundStyle(.secondary)
                     Button("Continue to system settings") { step = 1 }
                         .buttonStyle(.borderedProminent)
                 } else {
-                    InlineBanner(.info, "Waiting for confirmation from Sam’s iPhone")
+                    InlineBanner(.info, "Waiting for confirmation from \(childName)’s iPhone")
                     Text("Returning from system settings does not by itself mean protection is active.")
                         .foregroundStyle(.secondary)
+                    #if DEBUG
+                    // Only debug demo builds may simulate a device acknowledgement.
                     Button("Simulate confirmed recovery", action: onRecovered)
                         .buttonStyle(.borderedProminent)
+                    #endif
                 }
             }
             .padding(ThemisSpacing.screen)
@@ -169,19 +186,21 @@ struct ProtectionRecoveryView: View {
 
 struct ProtectionFlowView: View {
     let initial: ProtectionPresentation
+    let childName: String
     @State private var route: Int = 0
     @State private var presentation: ProtectionPresentation
 
-    init(initial: ProtectionPresentation) {
+    init(initial: ProtectionPresentation, childName: String = "Sam") {
         self.initial = initial
+        self.childName = childName
         _presentation = State(initialValue: initial)
     }
 
     var body: some View {
-        ChildProtectionDetailView(presentation: presentation) { route = 1 }
+        ChildProtectionDetailView(presentation: presentation, childName: childName) { route = 1 }
             .navigationDestination(isPresented: Binding(get: { route == 1 }, set: { if !$0 { route = 0 } })) {
-                ProtectionRecoveryView {
-                    presentation = ProtectionDemoData.recovered
+                ProtectionRecoveryView(childName: childName) {
+                    presentation = ProtectionDemoData.forChild(ProtectionDemoData.recovered, name: childName)
                     route = 0
                 }
             }
