@@ -78,4 +78,21 @@ final class ProtectionTests: XCTestCase {
             XCTAssertEqual(ProtectionDemoData.state(for: status).status, status)
         }
     }
+
+    func testIssueNoticeIsNotMislabeledAsVerified() {
+        XCTAssertEqual(ProtectionDemoData.needsAttention.evidenceText, "Issue noticed: 10 min ago")
+        XCTAssertEqual(ProtectionDemoData.permissionRevoked.evidenceText, "Issue noticed: just now")
+        XCTAssertFalse(ProtectionDemoData.needsAttention.evidenceText.contains("Last verified"))
+    }
+
+    func testNoVerificationEvidenceDoesNotInventLastVerified() {
+        let presentation = ProtectionPresentation(
+            status: .protectionUnavailable,
+            evidence: .notActiveYet,
+            explanation: "Not yet active",
+            restrictionsRemainInEffect: false,
+            recoveryAvailable: true
+        )
+        XCTAssertEqual(presentation.evidenceText, "Protection not active yet")
+    }
 }
