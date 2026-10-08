@@ -178,7 +178,7 @@ enum ParentHomeDemoData {
         case .needsAttention: suffix = "Attention"
         case .protectionUnavailable: suffix = "Unavailable"
         }
-        return ParentHomeRoute(screenID: "P-030 · \(suffix)", title: "\(child)’s protection")
+        return ParentHomeRoute(screenID: "P-030 · \(suffix)", title: "\(child)’s protection", childName: child)
     }
 
     private static let homeworkDue = AgreementSummary(
