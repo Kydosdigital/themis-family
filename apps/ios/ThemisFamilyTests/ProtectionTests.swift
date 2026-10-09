@@ -2,6 +2,36 @@ import XCTest
 @testable import ThemisFamily
 
 final class ProtectionTests: XCTestCase {
+    func testUnverifiedProtectedDisplayDegradesAndOffersRecovery() {
+        for evidence in [ProtectionEvidence.noticed(minutesAgo: 3), .notActiveYet] {
+            let presentation = ProtectionPresentation(
+                status: .protected,
+                evidence: evidence,
+                explanation: "Protection was confirmed",
+                restrictionsRemainInEffect: true,
+                recoveryAvailable: false
+            )
+            XCTAssertFalse(presentation.isProtected)
+            XCTAssertEqual(presentation.displayStatus, .needsAttention)
+            XCTAssertEqual(presentation.statusText, ProtectionStatus.needsAttention.title)
+            XCTAssertEqual(presentation.displayStatus.symbolName, ProtectionStatus.needsAttention.symbolName)
+            XCTAssertEqual(presentation.displayExplanation, "Protection needs your attention before it can be confirmed again.")
+            XCTAssertTrue(presentation.displayRecoveryAvailable)
+            XCTAssertFalse(presentation.evidenceText.contains("Last verified"))
+        }
+    }
+
+    func testVerifiedProtectedPreservesConfirmedDisplayWithoutRecovery() {
+        let presentation = ProtectionDemoData.protected
+        XCTAssertTrue(presentation.isProtected)
+        XCTAssertEqual(presentation.displayStatus, .protected)
+        XCTAssertEqual(presentation.statusText, ProtectionStatus.protected.title)
+        XCTAssertEqual(presentation.displayStatus.symbolName, ProtectionStatus.protected.symbolName)
+        XCTAssertEqual(presentation.displayExplanation, presentation.explanation)
+        XCTAssertFalse(presentation.displayRecoveryAvailable)
+        XCTAssertEqual(presentation.evidenceText, "Last verified: 2 min ago")
+    }
+
     func testProtectedRequiresVerifiedEvidence() {
         let confirmed = ProtectionPresentation(
             status: .protected,
