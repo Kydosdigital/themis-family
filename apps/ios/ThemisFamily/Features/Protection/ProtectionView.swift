@@ -7,7 +7,19 @@ struct ProtectionPresentation: Equatable, Sendable {
     let restrictionsRemainInEffect: Bool
     let recoveryAvailable: Bool
 
-    var statusText: String { status.title }
+    // A raw Protected state without verified evidence must never render as confirmed.
+    var displayStatus: ProtectionStatus {
+        status == .protected && !isProtected ? .needsAttention : status
+    }
+    var statusText: String { displayStatus.title }
+    var displayExplanation: String {
+        status == .protected && !isProtected
+            ? "Protection needs your attention before it can be confirmed again."
+            : explanation
+    }
+    var displayRecoveryAvailable: Bool {
+        recoveryAvailable || (status == .protected && !isProtected)
+    }
     var evidenceText: String {
         switch evidence {
         case .verified:
@@ -69,9 +81,9 @@ struct ChildProtectionDetailView: View {
                 PageHeader(title: "\(childName)’s protection", subtitle: "iPhone")
 
                 VStack(alignment: .leading, spacing: ThemisSpacing.inline8) {
-                    Label(presentation.statusText, systemImage: presentation.status.symbolName)
+                    Label(presentation.statusText, systemImage: presentation.displayStatus.symbolName)
                         .font(.title2.weight(.semibold))
-                    Text(presentation.explanation)
+                    Text(presentation.displayExplanation)
                         .foregroundStyle(.secondary)
                     Text(presentation.evidenceText)
                         .font(.footnote)
@@ -86,7 +98,7 @@ struct ChildProtectionDetailView: View {
                     InlineBanner(.info, "The last-synced protection plan may continue while valid, but Themis cannot confirm the current device state. Offline does not mean restrictions were cleared.")
                 }
 
-                if presentation.recoveryAvailable {
+                if presentation.displayRecoveryAvailable {
                     Button("Fix this", action: onFix)
                         .buttonStyle(.borderedProminent)
                         .accessibilityHint("Opens protection recovery")
