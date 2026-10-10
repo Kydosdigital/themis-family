@@ -132,7 +132,30 @@ struct ChildStatusSummary: Identifiable, Equatable, Sendable {
     /// "Sam · Child".
     var title: String { "\(firstName) · \(segment.rawValue)" }
 
-    var status: ThemisStatus { protection.status }
+    /// A Protected badge requires affirmative verification evidence. An unverified
+    /// report is actionable, but cannot be presented as confirmed protection.
+    var status: ThemisStatus {
+        if case .protection(.protected) = protection {
+            guard case .verified = evidence else { return .needsAttention }
+        }
+        return protection.status
+    }
+
+    /// Keep the row's destination consistent with the evidence-guarded badge.
+    /// This is presentation-only and does not infer a staleness threshold.
+    var effectiveDestination: ParentHomeRoute? {
+        guard let destination else { return nil }
+        if case .protection(.protected) = protection {
+            guard case .verified = evidence else {
+                return ParentHomeRoute(
+                    screenID: "P-030 · Attention",
+                    title: "\(firstName)’s protection",
+                    childName: firstName
+                )
+            }
+        }
+        return destination
+    }
 
     /// "Verified 2 min ago". Protection status is never shown without its evidence.
     var evidenceText: String { evidence.text }
