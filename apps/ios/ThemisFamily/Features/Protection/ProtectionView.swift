@@ -47,6 +47,18 @@ enum ProtectionDemoData {
     static let permissionRevoked = ProtectionPresentation(status: .protectionUnavailable, evidence: .noticed(minutesAgo: 0), explanation: "Screen Time permission is no longer available. Re-authorise protection to continue.", restrictionsRemainInEffect: false, recoveryAvailable: true)
     static let recovered = ProtectionPresentation(status: .protected, evidence: .verified(minutesAgo: 0), explanation: "Protection has been confirmed again on Sam’s iPhone.", restrictionsRemainInEffect: true, recoveryAvailable: false)
 
+    /// Keep source evidence instead of replacing it with deterministic template timestamps.
+    static func state(for status: ProtectionStatus, evidence: ProtectionEvidence) -> ProtectionPresentation {
+        let template = state(for: status)
+        return ProtectionPresentation(
+            status: template.status,
+            evidence: evidence,
+            explanation: template.explanation,
+            restrictionsRemainInEffect: evidence == .notActiveYet ? false : template.restrictionsRemainInEffect,
+            recoveryAvailable: template.recoveryAvailable
+        )
+    }
+
     /// Child-specific review copy must never attribute Maya's device to Sam.
     static func forChild(_ presentation: ProtectionPresentation, name: String) -> ProtectionPresentation {
         guard name != "Sam" else { return presentation }
