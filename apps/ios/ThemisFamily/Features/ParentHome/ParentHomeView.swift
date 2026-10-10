@@ -66,7 +66,13 @@ struct ParentHomeView: View {
 
     private func protectionDestination(_ route: ParentHomeRoute, status: ProtectionStatus) -> some View {
         let childName = route.childName ?? "Sam"
-        let presentation = ProtectionDemoData.forChild(ProtectionDemoData.state(for: status), name: childName)
+        let template = ProtectionDemoData.state(for: status)
+        // Retain the selected child's evidence rather than inventing a demo timestamp.
+        let evidence = viewModel.state?.children.first(where: { $0.firstName == childName })?.evidence
+            ?? template.evidence
+        let presentation = ProtectionDemoData.forChild(
+            ProtectionDemoData.state(for: status, evidence: evidence), name: childName
+        )
         return ProtectionFlowView(initial: presentation, childName: childName)
     }
 
