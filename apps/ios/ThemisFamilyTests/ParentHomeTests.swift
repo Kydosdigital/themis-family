@@ -117,6 +117,28 @@ final class ParentHomeStateTests: XCTestCase {
         }
     }
 
+    func testProtectedWithoutVerifiedEvidenceShowsNeedsAttentionAndRoutesToRecovery() throws {
+        for evidence in [ProtectionEvidence.noticed(minutesAgo: 10), .notActiveYet] {
+            let state = ParentHomeDemoData.canonical(samProtection: .protected, samEvidence: evidence)
+            let sam = try XCTUnwrap(state.children.first { $0.firstName == "Sam" })
+            XCTAssertEqual(sam.protection, .protection(.protected))
+            XCTAssertEqual(sam.status, .needsAttention)
+            XCTAssertEqual(sam.effectiveDestination?.screenID, "P-030 · Attention")
+            XCTAssertEqual(sam.effectiveDestination?.childName, "Sam")
+        }
+    }
+
+    func testProtectedWithVerifiedEvidenceRetainsChildDetailRoute() throws {
+        let state = ParentHomeDemoData.canonical(
+            samProtection: .protected,
+            samEvidence: .verified(minutesAgo: 2)
+        )
+        let sam = try XCTUnwrap(state.children.first { $0.firstName == "Sam" })
+        XCTAssertEqual(sam.status, .protected)
+        XCTAssertEqual(sam.effectiveDestination?.screenID, "P-029")
+        XCTAssertEqual(sam.evidenceText, "Verified 2 min ago")
+    }
+
     func testEvidenceWording() {
         XCTAssertEqual(ProtectionEvidence.verified(minutesAgo: 0).text, "Verified just now")
         XCTAssertEqual(ProtectionEvidence.verified(minutesAgo: 2).text, "Verified 2 min ago")

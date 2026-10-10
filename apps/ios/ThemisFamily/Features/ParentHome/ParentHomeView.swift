@@ -41,6 +41,20 @@ struct ParentHomeView: View {
                 ParentRequestFlowView(initial: .detail)
             case "F-001":
                 FreePassFlowView()
+            case "P-029":
+                ChildDetailView {
+                    destination = ParentHomeRoute(screenID: "P-030 · Protected", title: "Sam’s protection")
+                }
+            case "P-030 · Protected":
+                protectionDestination(route, status: .protected)
+            case "P-030 · Sync":
+                protectionDestination(route, status: .syncPending)
+            case "P-030 · Offline":
+                protectionDestination(route, status: .deviceOffline)
+            case "P-030 · Attention":
+                protectionDestination(route, status: .needsAttention)
+            case "P-030 · Unavailable":
+                protectionDestination(route, status: .protectionUnavailable)
             default:
                 ShellPlaceholderView(title: route.title, screenID: route.screenID, isTabRoot: false)
             }
@@ -48,6 +62,18 @@ struct ParentHomeView: View {
         .task(id: scenario) {
             await viewModel.load(scenario: scenario)
         }
+    }
+
+    private func protectionDestination(_ route: ParentHomeRoute, status: ProtectionStatus) -> some View {
+        let childName = route.childName ?? "Sam"
+        let template = ProtectionDemoData.state(for: status)
+        // Retain the selected child's evidence rather than inventing a demo timestamp.
+        let evidence = viewModel.state?.children.first(where: { $0.firstName == childName })?.evidence
+            ?? template.evidence
+        let presentation = ProtectionDemoData.forChild(
+            ProtectionDemoData.state(for: status, evidence: evidence), name: childName
+        )
+        return ProtectionFlowView(initial: presentation, childName: childName)
     }
 
     private func open(_ route: ParentHomeRoute) {
@@ -105,7 +131,7 @@ struct ParentHomeContentView: View {
             attention
         case .children:
             ThemisGroupedSection("Children", data: state.children) { child in
-                rowButton(destination: child.destination) {
+                rowButton(destination: child.effectiveDestination) {
                     ChildStatusRow(child: child)
                 }
             }

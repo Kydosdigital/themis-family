@@ -142,6 +142,33 @@ struct RootView: View {
         case .freePassRevoked:
             NavigationStack { FreePassFlowView(initialStep: .revoked) }
                 .demoControls()
+        case .childDetail:
+            NavigationStack { ChildDetailView() }
+                .demoControls()
+        case .protectionProtected:
+            NavigationStack { ProtectionFlowView(initial: ProtectionDemoData.protected) }
+                .demoControls()
+        case .protectionSyncPending:
+            NavigationStack { ProtectionFlowView(initial: ProtectionDemoData.syncPending) }
+                .demoControls()
+        case .protectionOffline:
+            NavigationStack { ProtectionFlowView(initial: ProtectionDemoData.deviceOffline) }
+                .demoControls()
+        case .protectionAttention:
+            NavigationStack { ProtectionFlowView(initial: ProtectionDemoData.needsAttention) }
+                .demoControls()
+        case .protectionUnavailable:
+            NavigationStack { ProtectionFlowView(initial: ProtectionDemoData.unavailable) }
+                .demoControls()
+        case .protectionRecovery:
+            NavigationStack { ProtectionRecoveryView() }
+                .demoControls()
+        case .protectionPermissionRevoked:
+            NavigationStack { ProtectionFlowView(initial: ProtectionDemoData.permissionRevoked) }
+                .demoControls()
+        case .protectionRecovered:
+            NavigationStack { ProtectionFlowView(initial: ProtectionDemoData.recovered) }
+                .demoControls()
         case .onboarding:
             OnboardingView(
                 initialStep: container.onboardingInitialStep ?? .launch,
