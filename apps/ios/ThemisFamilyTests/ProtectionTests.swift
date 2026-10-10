@@ -116,6 +116,26 @@ final class ProtectionTests: XCTestCase {
     }
 
 
+    func testRoutedAttentionPreservesOriginalUnverifiedEvidence() {
+        let noticed = ProtectionDemoData.state(for: .needsAttention, evidence: .noticed(minutesAgo: 37))
+        XCTAssertEqual(noticed.evidence, .noticed(minutesAgo: 37))
+        XCTAssertEqual(noticed.evidenceText, "Issue noticed: 37 min ago")
+        XCTAssertEqual(noticed.displayStatus, .needsAttention)
+        XCTAssertTrue(noticed.displayRecoveryAvailable)
+
+        let notActive = ProtectionDemoData.state(for: .needsAttention, evidence: .notActiveYet)
+        XCTAssertEqual(notActive.evidence, .notActiveYet)
+        XCTAssertEqual(notActive.evidenceText, "Protection not active yet")
+        XCTAssertFalse(notActive.restrictionsRemainInEffect)
+        XCTAssertEqual(notActive.displayStatus, .needsAttention)
+        XCTAssertTrue(notActive.displayRecoveryAvailable)
+
+        let maya = ProtectionDemoData.forChild(notActive, name: "Maya")
+        XCTAssertEqual(maya.evidence, .notActiveYet)
+        XCTAssertFalse(maya.restrictionsRemainInEffect)
+        XCTAssertFalse(maya.explanation.contains("Sam’s iPhone"))
+    }
+
     func testMayaProtectionRouteKeepsHerDeviceIdentity() {
         let maya = ParentHomeDemoData.canonical().children.first { $0.firstName == "Maya" }
         XCTAssertEqual(maya?.destination?.childName, "Maya")
