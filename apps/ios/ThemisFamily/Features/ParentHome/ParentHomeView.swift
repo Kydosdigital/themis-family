@@ -125,7 +125,7 @@ struct ParentHomeContentView: View {
             attention
         case .children:
             ThemisGroupedSection("Children", data: state.children) { child in
-                rowButton(destination: child.destination) {
+                rowButton(destination: child.effectiveDestination) {
                     ChildStatusRow(child: child)
                 }
             }
