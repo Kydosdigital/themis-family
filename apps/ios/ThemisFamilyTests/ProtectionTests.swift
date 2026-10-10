@@ -148,4 +148,31 @@ final class ProtectionTests: XCTestCase {
         )
         XCTAssertEqual(presentation.evidenceText, "Protection not active yet")
     }
+
+    // Every required Protection review root must remain launchable by the
+    // deterministic Release Simulator harness, independent of app navigation.
+    @MainActor
+    func testProtectionReviewLaunchArgumentsCoverAllNineCanonicalStates() {
+        let cases: [(String, AppContainer.Perspective)] = [
+            ("child-detail", .childDetail),
+            ("protection-protected", .protectionProtected),
+            ("protection-sync-pending", .protectionSyncPending),
+            ("protection-offline", .protectionOffline),
+            ("protection-attention", .protectionAttention),
+            ("protection-unavailable", .protectionUnavailable),
+            ("protection-recovery", .protectionRecovery),
+            ("protection-permission-revoked", .protectionPermissionRevoked),
+            ("protection-recovered", .protectionRecovered)
+        ]
+        XCTAssertEqual(cases.count, 9)
+        for (flag, expected) in cases {
+            let actual = AppContainer.visualReviewPerspective(
+                from: ["ThemisFamily", "--visual-review-perspective", flag]
+            )
+            XCTAssertEqual(actual, expected, "Review launch argument \(flag) must resolve correctly")
+        }
+        XCTAssertNil(AppContainer.visualReviewPerspective(
+            from: ["ThemisFamily", "--visual-review-perspective", "unknown-protection"]
+        ))
+    }
 }
